@@ -24,3 +24,7 @@ Add jchempaint jars to local Maven repo
 			</jar>
 	ant dist-all
 	../mp2Dbuilder/installCDKIntoMaven
+	
+	
+Hints if Eclipse doesn't work the way you expect, here's the usual suspects of Eclipse: 
+	clean, close&open project, restart using -clean flag... 
