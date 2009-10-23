@@ -20,9 +20,9 @@ Add jchempaint jars to local Maven repo
 	edit build.xml to generate source jar files when building:
 		inside ant target "compile-module", append the following BEFORE "<!-- clean up afterwards -->":
 			<jar jarfile="${dist}/jar/cdk-${module}-sources.jar">
-				<fileset dir="${build.src}/${module}">
-					<include name="**/*.java" />
-				</fileset>
-			</jar>
+        		<fileset dir="${build.src}/${module}">
+        			<include name="**/*.java" />
+               </fileset>
+            </jar>
 	ant dist-all
 	../mp2Dbuilder/installCDKIntoMaven
