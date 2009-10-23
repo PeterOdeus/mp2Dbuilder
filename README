@@ -1,7 +1,5 @@
 Setup instructions:
 
-...
-
 Make sure Maven2 Eclipse plugin is installed:
 	Eclipse update site: http://m2eclipse.sonatype.org/update/
 		Choose the following optional stuff (just to make sure):
