@@ -1,1 +1,26 @@
-Hi
+Setup:
+
+Make sure Maven2 Eclipse plugin is installed:
+	Eclipse update site: http://m2eclipse.sonatype.org/update/
+		Choose the following optional stuff (just to make sure):
+			Central Repository index
+			Integration for WTP
+			POM Editor
+			POM XML Editor
+
+
+Add jchempaint jars to local Maven repo
+
+	cd mp2Dbuilder/.. (jchempaint directory is assumed to be placed parallel with this project)
+	git clone http://pele.farmbio.uu.se/git/jchempaint-primary.git/
+	cd jchempaint-primary
+	git checkout -b bc-2.1.x origin/bioclipse-2.1.x
+	edit build.xml to generate source jar files when building:
+		inside ant target "compile-module", append the following BEFORE "<!-- clean up afterwards -->":
+			<jar jarfile="${dist}/jar/cdk-${module}-sources.jar">
+				<fileset dir="${build.src}/${module}">
+					<include name="**/*.java" />
+				</fileset>
+			</jar>
+	ant dist-all
+	../mp2Dbuilder/installCDKIntoMaven
