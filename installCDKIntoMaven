@@ -1,5 +1,5 @@
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-core.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-core.jar \
   -DgroupId=org.openscience.cdk \
   -DartifactId=cdk-core \
   -Dversion=bioclipse-2.1.x \
@@ -7,7 +7,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-core-sources.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-core-sources.jar \
   -DgroupId=org.openscience.cdk  \
   -DartifactId=cdk-core \
   -Dversion=bioclipse-2.1.x \
@@ -16,7 +16,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-interfaces.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-interfaces.jar \
   -DgroupId=org.openscience.cdk \
   -DartifactId=cdk-interfaces \
   -Dversion=bioclipse-2.1.x \
@@ -24,7 +24,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-interfaces-sources.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-interfaces-sources.jar \
   -DgroupId=org.openscience.cdk  \
   -DartifactId=cdk-interfaces \
   -Dversion=bioclipse-2.1.x \
@@ -33,7 +33,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-io.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-io.jar \
   -DgroupId=org.openscience.cdk \
   -DartifactId=cdk-io \
   -Dversion=bioclipse-2.1.x \
@@ -41,7 +41,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-io-sources.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-io-sources.jar \
   -DgroupId=org.openscience.cdk  \
   -DartifactId=cdk-io \
   -Dversion=bioclipse-2.1.x \
@@ -50,7 +50,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-nonotify.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-nonotify.jar \
   -DgroupId=org.openscience.cdk \
   -DartifactId=cdk-nonotify \
   -Dversion=bioclipse-2.1.x \
@@ -58,7 +58,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-nonotify-sources.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-nonotify-sources.jar \
   -DgroupId=org.openscience.cdk  \
   -DartifactId=cdk-nonotify \
   -Dversion=bioclipse-2.1.x \
@@ -67,7 +67,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-data.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-data.jar \
   -DgroupId=org.openscience.cdk \
   -DartifactId=cdk-data \
   -Dversion=bioclipse-2.1.x \
@@ -75,7 +75,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-data-sources.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-data-sources.jar \
   -DgroupId=org.openscience.cdk  \
   -DartifactId=cdk-data \
   -Dversion=bioclipse-2.1.x \
@@ -84,7 +84,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-standard.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-standard.jar \
   -DgroupId=org.openscience.cdk \
   -DartifactId=cdk-standard \
   -Dversion=bioclipse-2.1.x \
@@ -92,7 +92,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-standard-sources.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-standard-sources.jar \
   -DgroupId=org.openscience.cdk  \
   -DartifactId=cdk-standard \
   -Dversion=bioclipse-2.1.x \
@@ -101,7 +101,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-atomtype.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-atomtype.jar \
   -DgroupId=org.openscience.cdk \
   -DartifactId=cdk-atomtype \
   -Dversion=bioclipse-2.1.x \
@@ -109,7 +109,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-atomtype-sources.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-atomtype-sources.jar \
   -DgroupId=org.openscience.cdk  \
   -DartifactId=cdk-atomtype \
   -Dversion=bioclipse-2.1.x \
@@ -118,7 +118,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-render.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-render.jar \
   -DgroupId=org.openscience.cdk \
   -DartifactId=cdk-render \
   -Dversion=bioclipse-2.1.x \
@@ -126,7 +126,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-render-sources.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-render-sources.jar \
   -DgroupId=org.openscience.cdk  \
   -DartifactId=cdk-render \
   -Dversion=bioclipse-2.1.x \
@@ -135,7 +135,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-renderbasic.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-renderbasic.jar \
   -DgroupId=org.openscience.cdk \
   -DartifactId=cdk-renderbasic \
   -Dversion=bioclipse-2.1.x \
@@ -143,7 +143,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-renderbasic-sources.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-renderbasic-sources.jar \
   -DgroupId=org.openscience.cdk  \
   -DartifactId=cdk-renderbasic \
   -Dversion=bioclipse-2.1.x \
@@ -152,7 +152,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-renderextra.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-renderextra.jar \
   -DgroupId=org.openscience.cdk \
   -DartifactId=cdk-renderextra \
   -Dversion=bioclipse-2.1.x \
@@ -160,7 +160,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-renderextra-sources.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-renderextra-sources.jar \
   -DgroupId=org.openscience.cdk  \
   -DartifactId=cdk-renderextra \
   -Dversion=bioclipse-2.1.x \
@@ -169,7 +169,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-renderawt.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-renderawt.jar \
   -DgroupId=org.openscience.cdk \
   -DartifactId=cdk-renderawt \
   -Dversion=bioclipse-2.1.x \
@@ -177,7 +177,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-renderawt-sources.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-renderawt-sources.jar \
   -DgroupId=org.openscience.cdk  \
   -DartifactId=cdk-renderawt \
   -Dversion=bioclipse-2.1.x \
@@ -186,7 +186,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-sdg.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-sdg.jar \
   -DgroupId=org.openscience.cdk \
   -DartifactId=cdk-sdg \
   -Dversion=bioclipse-2.1.x \
@@ -194,7 +194,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-sdg-sources.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-sdg-sources.jar \
   -DgroupId=org.openscience.cdk  \
   -DartifactId=cdk-sdg \
   -Dversion=bioclipse-2.1.x \
@@ -203,7 +203,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-extra.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-extra.jar \
   -DgroupId=org.openscience.cdk \
   -DartifactId=cdk-extra \
   -Dversion=bioclipse-2.1.x \
@@ -211,7 +211,7 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
-  -Dfile=/home/podeus/az/git/jchempaint-primary/dist/jar/cdk-extra-sources.jar \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-extra-sources.jar \
   -DgroupId=org.openscience.cdk  \
   -DartifactId=cdk-extra \
   -Dversion=bioclipse-2.1.x \
