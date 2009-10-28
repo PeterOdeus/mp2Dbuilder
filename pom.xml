@@ -21,6 +21,11 @@
   	</dependency>
   	<dependency>
   		<groupId>org.openscience.cdk</groupId>
+		<artifactId>cdk-ioformats</artifactId>
+		<version>bioclipse-2.1.x</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.openscience.cdk</groupId>
 		<artifactId>cdk-nonotify</artifactId>
 		<version>bioclipse-2.1.x</version>
   	</dependency>

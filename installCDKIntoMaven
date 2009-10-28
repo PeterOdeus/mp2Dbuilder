@@ -33,6 +33,23 @@ mvn install:install-file \
   -DgeneratePom=true
 
 mvn install:install-file \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-ioformats.jar \
+  -DgroupId=org.openscience.cdk \
+  -DartifactId=cdk-ioformats \
+  -Dversion=bioclipse-2.1.x \
+  -Dpackaging=jar \
+  -DgeneratePom=true
+
+mvn install:install-file \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-ioformats-sources.jar \
+  -DgroupId=org.openscience.cdk  \
+  -DartifactId=cdk-ioformats \
+  -Dversion=bioclipse-2.1.x \
+  -Dpackaging=jar \
+  -Dclassifier=sources \
+  -DgeneratePom=true
+
+mvn install:install-file \
   -Dfile=../jchempaint-primary/dist/jar/cdk-io.jar \
   -DgroupId=org.openscience.cdk \
   -DartifactId=cdk-io \

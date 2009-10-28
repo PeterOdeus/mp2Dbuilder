@@ -6,15 +6,11 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
-import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -29,6 +25,7 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.io.MDLRXNReader;
+import org.openscience.cdk.io.ReaccsMDLRXNReader;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.nonotify.NNReactionSet;
@@ -56,7 +53,7 @@ public class InitialTest {
 		String filename = "data/mdl/firstRiReg.rdf";
 		logger.info("Testing: " + filename);
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
-		MDLRXNReader reader = new MDLRXNReader(ins);
+		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
 		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 		Assert.assertNotNull(reactionSet);
 
@@ -81,16 +78,49 @@ public class InitialTest {
 
 	}
 
-	@Test public void testMCS() throws Exception {
+	@Test public void testMCSSingle() throws Exception {
 		String filename = "data/mdl/firstRiReg.rdf";
 		logger.info("Testing: " + filename);
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
-		MDLRXNReader reader = new MDLRXNReader(ins);
+		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
 		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 		IMolecule reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
 		IMolecule product = reactionSet.getReaction(0).getProducts().getMolecule(0);
 		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
-		int i = 0;
+		Assert.assertEquals(1, mcsList.size());
+	}
+	
+	@Test public void testMultipleMCS() throws Exception {
+		String filename = "data/mdl/24thRiReg.rdf";
+		logger.info("Testing: " + filename);
+		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
+		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
+		IReactionSet reactionSet = null;
+		reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+		IMolecule reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+		IMolecule product = reactionSet.getReaction(0).getProducts().getMolecule(0);
+		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
+		Assert.assertEquals(2, mcsList.size());
+	}
+	
+	@Test public void testMultipleRiRegs() throws Exception {
+		String filename = "data/mdl/First50DB2005AllFields.rdf";
+		logger.info("Testing: " + filename);
+		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
+		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
+		IReactionSet reactionSet = null;
+		for(int i=0;i<=49;i++){
+			try{
+				reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+				IMolecule reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+				IMolecule product = reactionSet.getReaction(0).getProducts().getMolecule(0);
+			}catch(NullPointerException npe){
+				System.out.println(i);
+			}catch(java.lang.AssertionError err){
+				System.out.println(i);
+				throw err;
+			}
+		}
 	}
 
 	static boolean shouldExit = false;
@@ -99,7 +129,7 @@ public class InitialTest {
 		String filename = "data/mdl/firstRiReg.rdf";
 		logger.info("Testing: " + filename);
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
-		MDLRXNReader reader = new MDLRXNReader(ins);
+		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
 		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 		IMolecule reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
 		FingerprintGenerator generator = new FingerprintGenerator();
