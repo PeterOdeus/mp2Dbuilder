@@ -15,6 +15,7 @@ import org.openscience.cdk.tools.LoggingTool;
 public class ReaccsMDLRXNReader extends MDLRXNReader {
 
 	private LoggingTool logger = null;
+	private String riregNo = "";
 
 	public ReaccsMDLRXNReader(Reader in, Mode mode) {
 		super(in, mode);
@@ -24,6 +25,10 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 	public ReaccsMDLRXNReader(InputStream input) {
 		super(input, Mode.RELAXED);
 		logger = new LoggingTool(this);
+	}
+	
+	public void setInitialRiregNo(int riregNo){
+		this.riregNo = " " + riregNo;
 	}
 
 	/**
@@ -71,12 +76,13 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 
 	private void readUntilRXN() throws CDKException {
 		try {
-			logger.debug("Looking for string \"$RIREG\"");
+			logger.debug("Looking for string \"$RIREG\"" + this.riregNo);
 			String line = null;
 			do{
 				line = input.readLine();
 				logger.debug(line);
-			}while(line.indexOf("$RIREG") < 0);
+			}while(line.indexOf("$RIREG" + this.riregNo) < 0);
+			this.riregNo = "";
 		}
 		catch (Exception exception) {
 			logger.debug(exception);
