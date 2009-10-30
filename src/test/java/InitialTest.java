@@ -19,6 +19,9 @@ import metaprint2d.analyzer.FingerprintGenerator;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mp2dbuilder.renderer.generators.MCSOverlayAtomGenerator;
+import org.mp2dbuilder.renderer.generators.ReactionCentreGenerator;
+import org.mp2dbuilder.renderer.visitor.BugfixAWTDrawVisitor;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -30,10 +33,8 @@ import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.renderer.Renderer;
 import org.openscience.cdk.renderer.font.AWTFontManager;
-import org.openscience.cdk.renderer.generators.BasicAtomGenerator;
-import org.openscience.cdk.renderer.generators.BasicBondGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
-import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
+import org.openscience.cdk.renderer.generators.RingGenerator;
 import org.openscience.cdk.tools.LoggingTool;
 
 
@@ -231,7 +232,7 @@ public class InitialTest {
 	
 	public void render(IAtomContainer reactant, IAtomContainer product, IAtomContainer mcs){
 		try {
-			ImagePanel panel = new ImagePanel(getImage(reactant, false), getImage(product, false), getImage(mcs, false));
+			ImagePanel panel = new ImagePanel(getImage(reactant, mcs), getImage(product, mcs), getImage(mcs, mcs));
 
 			JFrame frame = new JFrame("Reactant - Product");
 			frame.addWindowListener(new WindowAdapter()
@@ -258,7 +259,7 @@ public class InitialTest {
 		}
 	}
 
-	private Image getImage(IAtomContainer atomContainer, boolean isMCS) throws Exception {
+	private Image getImage(IAtomContainer atomContainer, IAtomContainer mcsContainer) throws Exception {
 		int WIDTH = 500;
 		int HEIGHT = 500;
 
@@ -281,24 +282,30 @@ public class InitialTest {
 
 		// generators make the image elements
 		List<IGenerator> generators = new ArrayList<IGenerator>();
-		generators.add(new BasicBondGenerator());
-		generators.add(new BasicAtomGenerator());
+		
+		//generators.add(new BasicAtomGenerator());
+		
+		generators.add(new MCSOverlayAtomGenerator(mcsContainer));
+		generators.add(new RingGenerator());
+		generators.add(new ReactionCentreGenerator());
+		
+		//generators.add(new AtomNumberGenerator());
 
 		// the renderer needs to have a toolkit-specific font manager 
 		Renderer renderer = new Renderer(generators, new AWTFontManager());
 
+		//renderer.getRenderer2DModel().setDrawNumbers(true);
+		//renderer.getRenderer2DModel().setIsCompact(true);
 		// the call to 'setup' only needs to be done on the first paint
 		renderer.setup(molecule, drawArea);
 
 		// paint the background
 		Graphics2D g2 = (Graphics2D)image.getGraphics();
-		if(isMCS == false){
-			g2.setColor(Color.WHITE);
-			g2.fillRect(0, 0, WIDTH, HEIGHT);
-		}
+		g2.setColor(Color.WHITE);
+		g2.fillRect(0, 0, WIDTH, HEIGHT);
 
 		// the paint method also needs a toolkit-specific renderer
-		renderer.paintMolecule(molecule, new AWTDrawVisitor(g2), new Rectangle(0,0,500,500),true);
+		renderer.paintMolecule(molecule, new BugfixAWTDrawVisitor(g2), new Rectangle(0,0,500,500),true);
 
 		return image;
 	}
