@@ -21,7 +21,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mp2dbuilder.renderer.generators.MCSOverlayAtomGenerator;
 import org.mp2dbuilder.renderer.generators.ReactionCentreGenerator;
-import org.mp2dbuilder.renderer.visitor.BugfixAWTDrawVisitor;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -35,6 +34,7 @@ import org.openscience.cdk.renderer.Renderer;
 import org.openscience.cdk.renderer.font.AWTFontManager;
 import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
+import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
 import org.openscience.cdk.tools.LoggingTool;
 
 
@@ -287,7 +287,7 @@ public class InitialTest {
 		
 		generators.add(new MCSOverlayAtomGenerator(mcsContainer));
 		generators.add(new RingGenerator());
-		generators.add(new ReactionCentreGenerator());
+		generators.add(new ReactionCentreGenerator(mcsContainer));
 		
 		//generators.add(new AtomNumberGenerator());
 
@@ -305,7 +305,7 @@ public class InitialTest {
 		g2.fillRect(0, 0, WIDTH, HEIGHT);
 
 		// the paint method also needs a toolkit-specific renderer
-		renderer.paintMolecule(molecule, new BugfixAWTDrawVisitor(g2), new Rectangle(0,0,500,500),true);
+		renderer.paintMolecule(molecule, new AWTDrawVisitor(g2), new Rectangle(0,0,500,500),true);
 
 		return image;
 	}
