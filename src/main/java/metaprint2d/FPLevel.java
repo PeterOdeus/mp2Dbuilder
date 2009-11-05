@@ -2,8 +2,11 @@ package metaprint2d;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /*     */   public class FPLevel
 /*     */   {
@@ -11,6 +14,17 @@ import java.util.WeakHashMap;
 /*     */     private byte[] bytes;
 /*     */     private int hashCode;
 /*     */ 
+				public FPLevel(SortedMap<String,AtomicInteger> aSortedMap)
+/*     */     {
+/* 372 */       this.bytes = new byte[aSortedMap.size()];
+				Iterator<AtomicInteger> iter = aSortedMap.values().iterator();
+				int i = 0;
+				while(iter.hasNext()){
+					this.bytes[i] = iter.next().byteValue();
+					i++;
+				}
+/*     */     }
+
 /*     */     public FPLevel(byte[] bytes)
 /*     */     {
 /* 372 */       this.bytes = new byte[bytes.length];

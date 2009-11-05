@@ -45,7 +45,12 @@ public class MCSOverlayAtomGenerator extends ExtendedAtomGenerator {
 		Stack<Position> unused = getUnusedPositions(ac, atom);
 
 		Position position = getNextPosition(unused);
-		IAtom mcsAtom = getMCSAtomById(atom.getID());
+		String id = atom.getID();
+		if(id == null){
+			boolean idIsNull = true;
+			//TODO is this a problem?
+		}
+		IAtom mcsAtom = getMCSAtomById(id);
 		if(mcsAtom != null){
 			String number = String.valueOf(this.mcsContainer.getAtomNumber(mcsAtom) + 1 );
 			textGroup.addChild(number, position);
@@ -56,8 +61,13 @@ public class MCSOverlayAtomGenerator extends ExtendedAtomGenerator {
 
 	private IAtom getMCSAtomById(String id){
 		IAtom matchedAtom = null;
+		String currId = null;
 		for(int i = 0; i < this.mcsContainer.getAtomCount(); i++){
-			if(this.mcsContainer.getAtom(i).getID().equals(id)){
+			currId = this.mcsContainer.getAtom(i).getID();
+			if(currId == null){
+				boolean currIdIsNull = true;
+				//TODO is this a problem?
+			}else if(currId.equals(id)){
 				matchedAtom = this.mcsContainer.getAtom(i);
 				break;
 			}

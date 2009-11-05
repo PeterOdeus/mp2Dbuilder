@@ -1,5 +1,6 @@
 package org.openscience.cdk.io;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
@@ -16,6 +17,7 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 
 	private LoggingTool logger = null;
 	private String riregNo = "";
+	private long fileLengthLong;
 
 	public ReaccsMDLRXNReader(Reader in, Mode mode) {
 		super(in, mode);
@@ -40,7 +42,7 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 	 * @return                                     The IChemObject read
 	 * @exception  CDKException
 	 */
-	public IChemObject read(IChemObject object) throws CDKException {
+	public IChemObject read(IChemObject object) throws ReaccsFileEndedException, CDKException {
 		if (object instanceof IReactionSet) {
 			readUntilRXN();
 			Method m = null;
@@ -74,15 +76,21 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 		}
 	}
 
-	private void readUntilRXN() throws CDKException {
+	private void readUntilRXN() throws CDKException, ReaccsFileEndedException {
 		try {
 			logger.debug("Looking for string \"$RIREG\"" + this.riregNo);
 			String line = null;
 			do{
 				line = input.readLine();
+				if(line == null){
+					throw new ReaccsFileEndedException("eof");
+				}
 				logger.debug(line);
 			}while(line.indexOf("$RIREG" + this.riregNo) < 0);
 			this.riregNo = "";
+		}
+		catch(ReaccsFileEndedException e){
+			throw e;
 		}
 		catch (Exception exception) {
 			logger.debug(exception);
@@ -91,6 +99,17 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 					+ " of Reaccs .rdf RXN file", exception);
 		}
 
+	}
+
+	public void activateReset(long fileLengthLong) throws IOException {
+		this.fileLengthLong = fileLengthLong;
+		input.mark((int)this.fileLengthLong);
+	}
+
+	public void reset() throws IOException {
+		if(this.fileLengthLong > 0){
+			input.reset();
+		}
 	}
 
 }

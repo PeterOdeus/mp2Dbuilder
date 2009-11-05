@@ -1,41 +1,31 @@
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Rectangle;
+package prototyping;
+
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.net.URL;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 import metaprint2d.analyzer.FingerprintGenerator;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mp2dbuilder.renderer.generators.MCSOverlayAtomGenerator;
-import org.mp2dbuilder.renderer.generators.ReactionCentreGenerator;
-import org.openscience.cdk.AtomContainer;
+import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IAtomType;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.io.ReaccsMDLRXNReader;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
-import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.nonotify.NNReactionSet;
-import org.openscience.cdk.renderer.Renderer;
-import org.openscience.cdk.renderer.font.AWTFontManager;
-import org.openscience.cdk.renderer.generators.IGenerator;
-import org.openscience.cdk.renderer.generators.RingGenerator;
-import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
 import org.openscience.cdk.tools.LoggingTool;
+import org.openscience.cdk.tools.manipulator.AtomTypeManipulator;
 
 
 public class InitialTest {
@@ -181,9 +171,23 @@ public class InitialTest {
 //		}
 	}
 	
+	@Test public void testFileLength() throws Exception{
+		String filename = "data/mdl/First500DB2005AllFields.rdf";
+		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
+		URL url = this.getClass().getClassLoader().getResource(filename);
+		File file = new File(url.toURI());
+		long fileLengthLong = file.length();
+		boolean isLessThanInt = fileLengthLong < Integer.MAX_VALUE;
+		Assert.assertEquals(true, isLessThanInt);
+	}
+	
 	@Test public void testSpecificRiReg() throws Exception {
 		String filename = "data/mdl/First50DB2005AllFields.rdf";
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
+		URL url = this.getClass().getClassLoader().getResource(filename);
+		File file = new File(url.toURI());
+		long fileLengthLong = file.length();
+		int fileLengthInt = (int)fileLengthLong;
 		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
 		reader.setInitialRiregNo(24);
 		IReactionSet reactionSet = null;
@@ -193,6 +197,31 @@ public class InitialTest {
 		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
 		Assert.assertEquals(2, mcsList.size());
 	}
+	
+	@Test public void testSpecificRiRegAndPrevious() throws Exception {
+		String filename = "data/mdl/First500DB2005AllFields.rdf";
+		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
+		URL url = this.getClass().getClassLoader().getResource(filename);
+		File file = new File(url.toURI());
+		long fileLengthLong = file.length();
+		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
+		reader.activateReset(fileLengthLong);
+		reader.setInitialRiregNo(24);
+		IReactionSet reactionSet = null;
+		reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+		IMolecule reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+		IMolecule product = reactionSet.getReaction(0).getProducts().getMolecule(0);
+		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
+		Assert.assertEquals(16, mcsList.get(0).getAtomCount());
+		reader.reset();
+		reader.setInitialRiregNo(23);
+		reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+		reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+		product = reactionSet.getReaction(0).getProducts().getMolecule(0);
+		mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
+		Assert.assertEquals(14, mcsList.get(0).getAtomCount());
+	}
+	
 	
 	@Test public void testSpecificRiRegAndNext() throws Exception {
 		String filename = "data/mdl/First50DB2005AllFields.rdf";
@@ -214,27 +243,59 @@ public class InitialTest {
 
 	static boolean shouldExit = false;
 
-	@Test public void testFingerprint() throws Exception {
+	@Test public void testSybylAtomType() throws Exception {
 		String filename = "data/mdl/firstRiReg.rdf";
 		logger.info("Testing: " + filename);
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
 		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
 		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
-		IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
-		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
-		FingerprintGenerator generator = new FingerprintGenerator();
-		//List<Fingerprint> fingerprintList = generator.generateFingerprints(reactant);
-
-		render(reactant, product, (AtomContainer)mcsList.get(0));
+		FingerprintGenerator fpGenerator = new FingerprintGenerator();
+	    fpGenerator.generateFingerprints(reactant);
+	    for(IAtom atom: reactant.atoms()){
+	    	logger.debug(atom.getID() + ":" + ((IAtomType)atom).getAtomTypeName());
+	    	//Map<String Atomtype("C.sp3","Br"), Integer >
+	    }
+	    
+	    
+	}
+	
+	private void percieveAtomTypesAndConfigureAtoms(IAtomContainer container) throws Exception {
+    	SybylAtomTypeMatcher matcher = SybylAtomTypeMatcher.getInstance(container.getBuilder());
+        Iterator<IAtom> atoms = container.atoms().iterator();
+        while (atoms.hasNext()) {
+        	IAtom atom = atoms.next();
+        	atom.setAtomTypeName(null);
+        	IAtomType matched = matcher.findMatchingAtomType(container, atom);
+        	if (matched != null) AtomTypeManipulator.configure(atom, matched);
+        }
+	}
+	
+	@Test public void testGUI() throws Exception {
+		String filename = "data/mdl/First50DB2005AllFields.rdf";
+		logger.info("Testing: " + filename);
+		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
+		URL url = this.getClass().getClassLoader().getResource(filename);
+		File file = new File(url.toURI());
+		long fileLengthLong = file.length();
+		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
+		reader.activateReset(fileLengthLong);
+//		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+//		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
+//		IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
+//		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
+		render(reader);
 		
 	}
 	
-	public void render(IAtomContainer reactant, IAtomContainer product, IAtomContainer mcs){
+	public void render(ReaccsMDLRXNReader reader){
 		try {
-			ImagePanel panel = new ImagePanel(getImage(reactant, mcs), getImage(product, mcs), getImage(mcs, mcs));
+//			ImagePanel panel = new ImagePanel(
+//					getImage(reactant, mcs, true), 
+//					getImage(product, mcs, false), 
+//					getImage(mcs, mcs, false));
 
-			JFrame frame = new JFrame("Reactant - Product");
+			JFrame frame = new JFrame("Reactant - Product - MCS");
 			frame.addWindowListener(new WindowAdapter()
 			{
 				public void windowClosing(WindowEvent paramWindowEvent)
@@ -242,7 +303,8 @@ public class InitialTest {
 					shouldExit = true;
 				}
 			});
-			frame.getContentPane().add(panel);
+			
+			frame.getContentPane().add(new ToolBarDemo(reader));
 			frame.pack();
 			frame.setVisible(true);
 		} catch (Exception e) {
@@ -259,82 +321,7 @@ public class InitialTest {
 		}
 	}
 
-	private Image getImage(IAtomContainer atomContainer, IAtomContainer mcsContainer) throws Exception {
-		int WIDTH = 500;
-		int HEIGHT = 500;
-
-		// the draw area and the image should be the same size
-		Rectangle drawArea = new Rectangle(WIDTH, HEIGHT);
-		Image image = new BufferedImage(
-				WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-
-		// any molecule will do
-		//IMolecule theMolecule = MoleculeFactory.make123Triazole();
-		
-		StructureDiagramGenerator sdg = new StructureDiagramGenerator();
-		IMolecule molecule = atomContainer.getBuilder().newMolecule(atomContainer);
-		sdg.setMolecule(molecule);
-		try {
-			sdg.generateCoordinates();
-		} catch (Exception e) { }
-		molecule = sdg.getMolecule();
-		
-
-		// generators make the image elements
-		List<IGenerator> generators = new ArrayList<IGenerator>();
-		
-		//generators.add(new BasicAtomGenerator());
-		
-		generators.add(new MCSOverlayAtomGenerator(mcsContainer));
-		generators.add(new RingGenerator());
-		generators.add(new ReactionCentreGenerator(mcsContainer));
-		
-		//generators.add(new AtomNumberGenerator());
-
-		// the renderer needs to have a toolkit-specific font manager 
-		Renderer renderer = new Renderer(generators, new AWTFontManager());
-
-		//renderer.getRenderer2DModel().setDrawNumbers(true);
-		//renderer.getRenderer2DModel().setIsCompact(true);
-		// the call to 'setup' only needs to be done on the first paint
-		renderer.setup(molecule, drawArea);
-
-		// paint the background
-		Graphics2D g2 = (Graphics2D)image.getGraphics();
-		g2.setColor(Color.WHITE);
-		g2.fillRect(0, 0, WIDTH, HEIGHT);
-
-		// the paint method also needs a toolkit-specific renderer
-		renderer.paintMolecule(molecule, new AWTDrawVisitor(g2), new Rectangle(0,0,500,500),true);
-
-		return image;
-	}
+	
 }
 
-class ImagePanel extends JPanel {
 
-	private Image img;
-	private Image img2;
-	private Image mcsImg;
-
-	public ImagePanel(Image img, Image img2, Image mcsImg) {
-		this.img = img;
-		this.img2 = img2;
-		this.mcsImg = mcsImg;
-		Dimension size = new Dimension(img.getWidth(null)*3, img.getHeight(null));
-		setPreferredSize(size);
-		setMinimumSize(size);
-		setMaximumSize(size);
-		setSize(size);
-		setLayout(null);
-	}
-
-	public void paintComponent(Graphics g) {
-		g.drawImage(img, 0, 0, null);
-		g.drawImage(img2, img.getWidth(null), 0, null);
-		if(mcsImg != null){
-			g.drawImage(mcsImg, (int)Math.round(img.getWidth(null)*2), 0, null);
-		}
-	}
-
-}
