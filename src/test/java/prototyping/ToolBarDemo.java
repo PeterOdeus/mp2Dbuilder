@@ -96,13 +96,13 @@ public class ToolBarDemo extends JPanel
 			IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
 			List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
 			IAtomContainer mcs = getFirstMCSHavingMostAtoms(mcsList);
-			i1 = getImage(reactant, mcs, true);
-			i2 = getImage(product, mcs, false);
-			i3 = getImage(mcs, mcs, false);
+			i1 = getImage(reactant, mcs, true, product);
+			i2 = getImage(product, mcs, false, null);
+			i3 = getImage(mcs, mcs, false,null);
     	} catch(ReaccsFileEndedException e){
-    		i1 = getImage(null,null,false);
-    		i2 = getImage(null,null,false);
-    		i3 = getImage(null,null,false);
+    		i1 = getImage(null,null,false,null);
+    		i2 = getImage(null,null,false,null);
+    		i3 = getImage(null,null,false,null);
     	}
 		if(imagePanel == null){
 			imagePanel = new ImagePanel(i1,i2,i3);
@@ -127,7 +127,8 @@ public class ToolBarDemo extends JPanel
     
     private Image getImage(IAtomContainer atomContainer, 
 			IAtomContainer mcsContainer,
-			boolean renderReactionCentre) throws CDKException {
+			boolean renderReactionCentre,
+			IAtomContainer productContainer) throws CDKException {
 		int WIDTH = 400;
 		int HEIGHT = 500;
 
@@ -159,7 +160,7 @@ public class ToolBarDemo extends JPanel
 		generators.add(new MCSOverlayAtomGenerator(mcsContainer));
 		generators.add(new RingGenerator());
 		if(renderReactionCentre == true){
-			generators.add(new ReactionCentreGenerator(mcsContainer));
+			generators.add(new ReactionCentreGenerator(mcsContainer, productContainer));
 		}
 		
 		//generators.add(new AtomNumberGenerator());

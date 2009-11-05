@@ -20,9 +20,11 @@ import org.openscience.cdk.renderer.generators.IGeneratorParameter;
 public class ReactionCentreGenerator implements IGenerator {
 
 	private IAtomContainer mcsContainer;
+	private IAtomContainer productContainer;
 
-	public ReactionCentreGenerator(IAtomContainer mcsContainer){
+	public ReactionCentreGenerator(IAtomContainer mcsContainer, IAtomContainer productContainer){
 		this.mcsContainer = mcsContainer;
+		this.productContainer = productContainer;
 	}
 	
 	public IRenderingElement generate(IAtomContainer ac, RendererModel model) {
@@ -34,6 +36,7 @@ public class ReactionCentreGenerator implements IGenerator {
 			isReactionCentre = false;
 			reactionCentreCandidate = getAtomById(mcsAtom.getID(), ac);
 			if(reactionCentreCandidate != null){
+				//Iterate reactant
 				for(IBond bond: ac.bonds()){
 					IAtom [] connectedAtoms = bond.getConnectedAtoms(reactionCentreCandidate);
 					if(connectedAtoms != null){
@@ -42,6 +45,20 @@ public class ReactionCentreGenerator implements IGenerator {
 							String id = reactionCentreOuterCandidate.getID();
 							if(id == null || (id != null && getAtomById(id, this.mcsContainer) == null)){
 								reactionCentreAtoms.add(reactionCentreOuterCandidate);
+								isReactionCentre = true;
+							}	
+						}
+					}
+				}
+				
+				IAtom productAtom = getAtomById(mcsAtom.getID(), productContainer);
+				for(IBond bond: productContainer.bonds()){
+					IAtom [] connectedAtoms = bond.getConnectedAtoms(productAtom);
+					if(connectedAtoms != null){
+						for(int i = 0; i < connectedAtoms.length; i++){
+							IAtom productCandidate = connectedAtoms[i];
+							String id = productCandidate.getID();
+							if(id == null || (id != null && getAtomById(id, this.mcsContainer) == null)){
 								isReactionCentre = true;
 							}	
 						}
