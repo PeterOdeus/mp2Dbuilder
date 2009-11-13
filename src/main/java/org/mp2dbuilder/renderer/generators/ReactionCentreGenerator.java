@@ -26,47 +26,12 @@ public class ReactionCentreGenerator implements IGenerator {
 		this.mcsContainer = mcsContainer;
 		this.productContainer = productContainer;
 	}
-	
+	@SuppressWarnings("unused")
 	public IRenderingElement generate(IAtomContainer ac, RendererModel model) {
 		Set<IAtom> reactionCentreAtoms = new HashSet<IAtom>();
-		IAtom reactionCentreCandidate = null;
-		IAtom reactionCentreOuterCandidate = null;
-		boolean isReactionCentre;
-		for(IAtom mcsAtom: this.mcsContainer.atoms()){
-			isReactionCentre = false;
-			reactionCentreCandidate = getAtomById(mcsAtom.getID(), ac);
-			if(reactionCentreCandidate != null){
-				//Iterate reactant
-				for(IBond bond: ac.bonds()){
-					IAtom [] connectedAtoms = bond.getConnectedAtoms(reactionCentreCandidate);
-					if(connectedAtoms != null){
-						for(int i = 0; i < connectedAtoms.length; i++){
-							reactionCentreOuterCandidate = connectedAtoms[i];
-							String id = reactionCentreOuterCandidate.getID();
-							if(id == null || (id != null && getAtomById(id, this.mcsContainer) == null)){
-								reactionCentreAtoms.add(reactionCentreOuterCandidate);
-								isReactionCentre = true;
-							}	
-						}
-					}
-				}
-				
-				IAtom productAtom = getAtomById(mcsAtom.getID(), productContainer);
-				for(IBond bond: productContainer.bonds()){
-					IAtom [] connectedAtoms = bond.getConnectedAtoms(productAtom);
-					if(connectedAtoms != null){
-						for(int i = 0; i < connectedAtoms.length; i++){
-							IAtom productCandidate = connectedAtoms[i];
-							String id = productCandidate.getID();
-							if(id == null || (id != null && getAtomById(id, this.mcsContainer) == null)){
-								isReactionCentre = true;
-							}	
-						}
-					}
-				}
-				if(isReactionCentre == true){
-					reactionCentreAtoms.add(reactionCentreCandidate);
-				}
+		for(IAtom atom: ac.atoms()){
+			if(atom.getProperty(MetaboliteHandler.REACTION_CENTRE_FIELD_NAME) != null){
+				reactionCentreAtoms.add(atom);
 			}
 		}
 		ElementGroup group = new ElementGroup();
@@ -77,17 +42,6 @@ public class ReactionCentreGenerator implements IGenerator {
 			group.add(textGroup);
 		}
 		return group;
-	}
-	
-	private IAtom getAtomById(String id, IAtomContainer ac){
-		IAtom matchedAtom = null;
-		for(int i = 0; i < ac.getAtomCount(); i++){
-			if(ac.getAtom(i).getID() != null && ac.getAtom(i).getID().equals(id)){
-				matchedAtom = ac.getAtom(i);
-				break;
-			}
-		}
-		return matchedAtom;
 	}
 
 	public List<IGeneratorParameter> getParameters() {

@@ -17,7 +17,6 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +28,7 @@ import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
 import org.mp2dbuilder.renderer.generators.MCSOverlayAtomGenerator;
+import org.mp2dbuilder.renderer.generators.MetaboliteHandler;
 import org.mp2dbuilder.renderer.generators.ReactionCentreGenerator;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -56,8 +56,10 @@ public class ToolBarDemo extends JPanel
     private ReaccsMDLRXNReader reader;
     private ImagePanel imagePanel;
     private int currentRireg = 1;
+    
+    private MetaboliteHandler metaboliteHandler = new MetaboliteHandler();
 
-    public ToolBarDemo(ReaccsMDLRXNReader reader) throws CDKException {
+    public ToolBarDemo(ReaccsMDLRXNReader reader) throws Exception {
         super(new BorderLayout());
         this.reader = reader;
         reader.setInitialRiregNo(currentRireg);
@@ -71,7 +73,7 @@ public class ToolBarDemo extends JPanel
         add(imagePanel, BorderLayout.CENTER);
     }
     
-    private void setRireg(int targetRireg) throws IOException, CDKException{
+    private void setRireg(int targetRireg) throws Exception{
     	if(targetRireg <= currentRireg){
     		reader.reset();
     	}
@@ -85,7 +87,7 @@ public class ToolBarDemo extends JPanel
     	this.repaint();
     }
     
-    private void generateImage() throws CDKException{
+    private void generateImage() throws Exception{
     	Image i1 = null;
     	Image i2 = null;
     	Image i3 = null;
@@ -95,7 +97,9 @@ public class ToolBarDemo extends JPanel
 			IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
 			IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
 			List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
-			IAtomContainer mcs = getFirstMCSHavingMostAtoms(mcsList);
+			IAtomContainer mcs = metaboliteHandler.getFirstMCSHavingMostAtoms(mcsList);
+			metaboliteHandler.setReactionCentres(reactant, product, mcs);
+			
 			i1 = getImage(reactant, mcs, true, product);
 			i2 = getImage(product, mcs, false, null);
 			i3 = getImage(mcs, mcs, false,null);
@@ -110,19 +114,6 @@ public class ToolBarDemo extends JPanel
 			imagePanel.setImages(i1	,i2,i3);
 					
 		}
-    }
-    
-    private IAtomContainer getFirstMCSHavingMostAtoms(List<IAtomContainer> mcsList){
-    	IAtomContainer chosenAtomContainer = null;
-		int maxCount = 0;
-		for(IAtomContainer atoms: mcsList){
-			System.out.println(atoms.getAtomCount());
-			if(atoms.getAtomCount() > maxCount){
-				maxCount = atoms.getAtomCount();
-				chosenAtomContainer = atoms;
-			}
-		}
-		return chosenAtomContainer;
     }
     
     private Image getImage(IAtomContainer atomContainer, 

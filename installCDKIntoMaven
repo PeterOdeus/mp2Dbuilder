@@ -236,3 +236,20 @@ mvn install:install-file \
   -Dclassifier=sources \
   -DgeneratePom=true
 
+mvn install:install-file \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-isomorphism.jar \
+  -DgroupId=org.openscience.cdk \
+  -DartifactId=cdk-isomorphism \
+  -Dversion=bioclipse-2.1.x \
+  -Dpackaging=jar \
+  -DgeneratePom=true
+
+mvn install:install-file \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-isomorphism-sources.jar \
+  -DgroupId=org.openscience.cdk  \
+  -DartifactId=cdk-isomorphism \
+  -Dversion=bioclipse-2.1.x \
+  -Dpackaging=jar \
+  -Dclassifier=sources \
+  -DgeneratePom=true
+

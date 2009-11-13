@@ -268,7 +268,7 @@
 /*     */         }
 /*     */       }
 /*     */     }
-/* 323 */     return s.toString();//IFingerprinter
+/* 323 */     return s.toString();
 /*     */   }
 /*     */ 
 /*     */   public static Fingerprint parseCompressedString(String string) {

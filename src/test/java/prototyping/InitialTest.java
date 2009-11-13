@@ -5,32 +5,43 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JFrame;
 
+import metaprint2d.Constants;
+import metaprint2d.Fingerprint;
 import metaprint2d.analyzer.FingerprintGenerator;
+import metaprint2d.analyzer.data.AtomData;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mp2dbuilder.renderer.generators.MetaboliteHandler;
 import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
+import org.openscience.cdk.config.AtomTypeFactory;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomType;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.io.ReaccsMDLRXNReader;
+import org.openscience.cdk.isomorphism.AtomMappingTools;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.tools.LoggingTool;
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator;
 
-
+@SuppressWarnings("unused")
 public class InitialTest {
 
-	private static LoggingTool logger;
+	private static LoggingTool logger = new LoggingTool(InitialTest.class);
 
 	@BeforeClass public static void setup() {
 		logger = new LoggingTool(InitialTest.class);
@@ -79,6 +90,134 @@ public class InitialTest {
 		Assert.assertEquals(1, mcsList.size());
 	}
 	
+	private List<IAtomContainer> getAtomContainersForReaction(int reactionId) throws Exception{
+		IAtomContainer reactant = null;
+		IAtomContainer product = null; 
+		IAtomContainer mcs = null;
+		String filename = "data/mdl/First50DB2005AllFields.rdf";
+		logger.info("Testing: " + filename);
+		InputStream ins = null;
+		List<IAtomContainer> returnList = null;
+		try{
+			ins = this.getClass().getClassLoader().getResourceAsStream(filename);
+			ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
+			reader.setInitialRiregNo(reactionId);
+			IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+			reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+			product = reactionSet.getReaction(0).getProducts().getMolecule(0);
+			//appendCommonIds(reactant, product);
+			List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
+			mcs = mcsList.get(0);
+			returnList = new ArrayList<IAtomContainer>();
+			returnList.add(reactant);
+			returnList.add(product);
+			returnList.add(mcs);
+		}finally{
+			if(ins != null){
+				ins.close();
+			}
+		}
+		return returnList;		
+	}
+	
+	@SuppressWarnings("unchecked")
+	private List<? extends Object> getCommonIdAtomContainersForReaction(int reactionId) throws Exception{
+		List returnList = getAtomContainersForReaction(reactionId);
+		IAtomContainer reactant = (IAtomContainer)returnList.get(0);
+		IAtomContainer product = (IAtomContainer)returnList.get(1);
+		IAtomContainer mcs = (IAtomContainer)returnList.get(2);
+		Map<Integer,Integer> mappedReactantAtoms = new HashMap<Integer,Integer>();
+		AtomMappingTools.mapAtomsOfAlignedStructures(reactant, mcs, mappedReactantAtoms);
+		Map<Integer,Integer> mappedProductAtoms = new HashMap<Integer,Integer>();
+		AtomMappingTools.mapAtomsOfAlignedStructures(product, mcs, mappedProductAtoms);
+		
+		returnList.add(mappedReactantAtoms);
+		returnList.add(mappedProductAtoms);
+		
+		MetaboliteHandler metaboliteHandler = new MetaboliteHandler();
+		
+		Collection<Integer> reactantIds = mappedReactantAtoms.values();
+		Collection<Integer> productIds = mappedProductAtoms.values();
+		Collection<Integer> mcsIds = new HashSet();
+		mcsIds.addAll(reactantIds);
+		mcsIds.addAll(productIds);
+		for(int id: mcsIds){
+			mcs.getAtom(id).setProperty(MetaboliteHandler.COMMON_ID_FIELD_NAME, Integer.toString(id));
+		}
+		metaboliteHandler.setIds(MetaboliteHandler.COMMON_ID_FIELD_NAME, reactant, mappedReactantAtoms);
+		metaboliteHandler.setIds(MetaboliteHandler.COMMON_ID_FIELD_NAME, product, mappedProductAtoms);
+		return returnList;
+	}
+	
+	@Test public void testCommonIdEquality() throws Exception {
+		for(int i = 1; i < 2; i++){
+			doTestCommonIdEquality(i);
+		}
+	}
+	
+	private void doTestCommonIdEquality(int reactionIndex) throws Exception {
+		List<? extends Object> returnList = getCommonIdAtomContainersForReaction(reactionIndex);
+		IAtomContainer reactant = (IAtomContainer)returnList.get(0);
+		IAtomContainer product = (IAtomContainer)returnList.get(1);
+		IAtomContainer mcs = (IAtomContainer)returnList.get(2);
+		Map<Integer,Integer> mappedReactantAtoms = (Map<Integer,Integer>)returnList.get(3);
+		Map<Integer,Integer> mappedProductAtoms = (Map<Integer,Integer>)returnList.get(4);
+		StringBuffer sb = new StringBuffer();
+		sb.append("\nidx\tmcc\treac\tproduct\n");
+		int i = -1;
+		for(IAtom mcsAtom: mcs.atoms()){
+			i++;
+			sb.append(i + "\t" + mcsAtom.getSymbol())
+			.append("\t" + reactant.getAtom(i).getSymbol() + "\t" + product.getAtom(i).getSymbol() + "\n");
+		}
+		for(;i < product.getAtomCount();i++){
+			try{
+				sb.append(i + "\t \t" + reactant.getAtom(i).getSymbol() + "\t" + product.getAtom(i).getSymbol() + "\n");
+			}catch(NullPointerException npe){
+				for(;i < product.getAtomCount();i++){
+					sb.append(i + "\t \t \t" + product.getAtom(i).getSymbol() + "\n");
+				}
+				break;
+			}
+			for(;i < reactant.getAtomCount();i++){
+				sb.append(i + "\t \t" + reactant.getAtom(i).getSymbol() + "\n");
+			}
+		}		
+		logger.debug(sb.toString());
+		logger.debug("mappedReactantAtoms\n" + mappedReactantAtoms);
+		logger.debug("mappedProductAtoms\n" + mappedProductAtoms);
+		IAtom atom1; IAtom atom2;
+		for(int index: mappedReactantAtoms.keySet()){
+				atom1 = reactant.getAtom(index);
+				atom2 = mcs.getAtom(mappedReactantAtoms.get(index));
+			try{
+				Assert.assertTrue(
+						atom1.getProperty(MetaboliteHandler.COMMON_ID_FIELD_NAME)
+						.equals(atom2.getProperty(MetaboliteHandler.COMMON_ID_FIELD_NAME)));
+				Assert.assertTrue(atom1.getSymbol().equals(atom2.getSymbol()));
+			}catch(AssertionError err){
+				String msg = "failed to match id for reactant.getAtom(" + index + ")";
+				logger.debug(msg);
+				throw new AssertionError(err.toString() + ". " + msg);
+			}
+		}
+		for(int index: mappedProductAtoms.keySet()){
+			atom1 = product.getAtom(index);
+			atom2 = mcs.getAtom(mappedProductAtoms.get(index));
+			try{
+				Assert.assertTrue(
+						atom1.getProperty(MetaboliteHandler.COMMON_ID_FIELD_NAME)
+						.equals(atom2.getProperty(MetaboliteHandler.COMMON_ID_FIELD_NAME)));
+				Assert.assertTrue(atom1.getSymbol().equals(atom2.getSymbol()));
+			}catch(AssertionError err){
+				String msg = "failed to match id for product.getAtom(" + index + ")";
+				logger.debug(msg);
+				throw new AssertionError(err.toString() + ". " + msg);
+			}
+		}
+	}
+	
+	
 	@Test public void testMultipleMCS() throws Exception {
 		String filename = "data/mdl/24thRiReg.rdf";
 		logger.info("Testing: " + filename);
@@ -110,6 +249,20 @@ public class InitialTest {
 				throw err;
 			}
 		}
+	}
+	
+	@Test public void testAbsentAtomId() throws Exception {
+		String filename = "data/mdl/First50DB2005AllFields.rdf";
+		logger.info("Testing: " + filename);
+		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
+		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
+		reader.setInitialRiregNo(2);
+		IReactionSet reactionSet = null;
+		reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+		IMolecule reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+		IMolecule product = reactionSet.getReaction(0).getProducts().getMolecule(0);
+		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
+		Assert.assertNull(mcsList.get(0).getAtom(10).getID());
 	}
 	
 	@Test public void testExtractSingleMCS() throws Exception {
@@ -240,10 +393,44 @@ public class InitialTest {
 		mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
 		Assert.assertEquals(1, mcsList.size());
 	}
+	/**
+	 * tests whether the old (metaprint2d) sybyl atom types are all part of current 
+	 * CDK version of sybyl atom types
+	 * */
+	@Test public void testVerifyCDKSybylAtomTypesContainsAllOldSybylAtomTypes() throws Exception{
+		String filename = "data/mdl/firstRiReg.rdf";
+		logger.info("Testing: " + filename);
+		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
+		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
+		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+		IMolecule reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+		
+		//Get current sybyl atom types
+		InputStream stream = this.getClass().getClassLoader().getResourceAsStream("org/openscience/cdk/dict/data/sybyl-atom-types.owl");
+		AtomTypeFactory factory = AtomTypeFactory.getInstance(stream, "owl", reactant.getBuilder());
+		IAtomType atomTypes [] = factory.getAllAtomTypes();
+		List <String> newAtomTypeNames = new ArrayList<String>();
+		for(IAtomType atomType: atomTypes){
+			newAtomTypeNames.add(atomType.getAtomTypeName().toUpperCase());
+		}
+		//Get old sybyl atom types
+		List <String> oldSybylAtomTypes = Constants.ATOM_TYPE_LIST;
+		
+		for(String oldAtomTypeName: oldSybylAtomTypes){
+			try{
+				Assert.assertEquals(true, newAtomTypeNames.contains(oldAtomTypeName.toUpperCase()));
+			}catch(java.lang.AssertionError err){
+				throw new java.lang.AssertionError(err.toString() + ". " + 
+						oldAtomTypeName + " is not in new list of sybyl atom types:\n" +
+						newAtomTypeNames.toString());
+			}
+		}
+		
+	}
 
 	static boolean shouldExit = false;
 
-	@Test public void testSybylAtomType() throws Exception {
+	@Test public void testFingerprint() throws Exception {
 		String filename = "data/mdl/firstRiReg.rdf";
 		logger.info("Testing: " + filename);
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
@@ -251,13 +438,7 @@ public class InitialTest {
 		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
 		FingerprintGenerator fpGenerator = new FingerprintGenerator();
-	    fpGenerator.generateFingerprints(reactant);
-	    for(IAtom atom: reactant.atoms()){
-	    	logger.debug(atom.getID() + ":" + ((IAtomType)atom).getAtomTypeName());
-	    	//Map<String Atomtype("C.sp3","Br"), Integer >
-	    }
-	    
-	    
+	    List<Fingerprint> fpList = fpGenerator.generateFingerprints(reactant);
 	}
 	
 	private void percieveAtomTypesAndConfigureAtoms(IAtomContainer container) throws Exception {
@@ -269,6 +450,16 @@ public class InitialTest {
         	IAtomType matched = matcher.findMatchingAtomType(container, atom);
         	if (matched != null) AtomTypeManipulator.configure(atom, matched);
         }
+	}
+	
+	@Test public void testCloneAtomData() throws Exception {
+		byte [][] byteMatrix = new byte[1][1];
+		byteMatrix[0][0] = 1;
+		Fingerprint fp = new Fingerprint(byteMatrix);
+		AtomData atomData = new AtomData(fp, true);
+		AtomData clone = atomData.clone();
+		Assert.assertArrayEquals(byteMatrix, clone.getFingerprint().getBytes());
+		Assert.assertEquals(true, clone.getIsReactionCentre());
 	}
 	
 	@Test public void testGUI() throws Exception {

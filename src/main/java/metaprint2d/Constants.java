@@ -33,6 +33,11 @@
 /*    */ 
 /* 71 */     H_INDEX = ((Integer)ATOM_TYPE_INDEX.get("H")).intValue();
 /*    */   }
+		
+			public static String [] getSybylAtomTypes(){
+				return SYBYL_ATOMTYPES;
+			}
+
 /*    */ }
 
 // Location:           /home/podeus/az/metaprint2d-builder-app-r16427/ImportedClasses/
