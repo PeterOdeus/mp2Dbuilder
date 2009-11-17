@@ -96,7 +96,7 @@ public class InitialTest {
 		IAtomContainer reactant = null;
 		IAtomContainer product = null; 
 		IAtomContainer mcs = null;
-		String filename = "data/mdl/First50DB2005AllFields.rdf";
+		String filename = "data/mdl/First500DB2005AllFields.rdf";
 		logger.info("Testing: " + filename);
 		InputStream ins = null;
 		List<IAtomContainer> returnList = null;
@@ -120,6 +120,16 @@ public class InitialTest {
 			}
 		}
 		return returnList;		
+	}
+	
+	@Test public void testReactantWithoutProduct() throws Exception {
+		List returnList = getAtomContainersForReaction(62);
+		IAtomContainer reactant = (IAtomContainer)returnList.get(0);
+		IAtomContainer product = (IAtomContainer)returnList.get(1);
+		IAtomContainer mcs = (IAtomContainer)returnList.get(2);
+		Assert.assertEquals(0, product.getAtomCount());
+		Assert.assertEquals(0, mcs.getAtomCount());
+		
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -156,6 +166,7 @@ public class InitialTest {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void doTestCommonIdEquality(int reactionIndex) throws Exception {
 		List<? extends Object> returnList = getCommonIdAtomContainersForReaction(reactionIndex);
 		IAtomContainer reactant = (IAtomContainer)returnList.get(0);
@@ -464,7 +475,7 @@ public class InitialTest {
 	}
 	
 	@Test public void testGUI() throws Exception {
-		String filename = "data/mdl/First50DB2005AllFields.rdf";
+		String filename = "data/mdl/First500DB2005AllFields.rdf";
 		logger.info("Testing: " + filename);
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
 		URL url = this.getClass().getClassLoader().getResource(filename);

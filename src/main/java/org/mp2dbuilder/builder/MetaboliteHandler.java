@@ -154,7 +154,7 @@ public class MetaboliteHandler {
 	
 	public IAtomContainer getFirstMCSHavingMostAtoms(List<IAtomContainer> mcsList){
     	IAtomContainer chosenAtomContainer = null;
-		int maxCount = 0;
+		int maxCount = -1;
 		for(IAtomContainer atoms: mcsList){
 			if(atoms.getAtomCount() > maxCount){
 				maxCount = atoms.getAtomCount();

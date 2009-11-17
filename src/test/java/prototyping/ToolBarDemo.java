@@ -52,6 +52,7 @@ public class ToolBarDemo extends JPanel
     static final private String PREVIOUS = "previous";
     private JTextArea text;
     static final private String NEXT = "next";
+    static final private String GOTO = "Go";
     
     private ReaccsMDLRXNReader reader;
     private ImagePanel imagePanel;
@@ -180,7 +181,7 @@ public class ToolBarDemo extends JPanel
         text = new JTextArea(1,3);
 
         //first button
-        button = makeNavigationButton("Back24", PREVIOUS,
+        button = makeNavigationButton("Back", PREVIOUS,
                                       "Back to previous something-or-other",
                                       "Previous");
         toolBar.add(button);
@@ -189,9 +190,14 @@ public class ToolBarDemo extends JPanel
         toolBar.add(text);
 
         //third button
-        button = makeNavigationButton("Forward24", NEXT,
-                                      "Forward to something-or-other",
-                                      "Next");
+        button = makeNavigationButton("GO", GOTO,
+                                      "Forward to specific rireg",
+                                      "Go");
+        toolBar.add(button);
+        
+        button = makeNavigationButton("Forward", NEXT,
+                "Forward to something-or-other",
+                "Next");
         toolBar.add(button);
     }
 
@@ -230,8 +236,10 @@ public class ToolBarDemo extends JPanel
         try{
 	        if (PREVIOUS.equals(cmd)) { //first button clicked
 	            this.setRireg(this.currentRireg - 1);
-	        } else if (NEXT.equals(cmd)) { // third button clicked
+	        } else if (NEXT.equals(cmd)) { 
 	        	this.setRireg(this.currentRireg + 1);
+	        } else if (GOTO.equals(cmd)) { // third button clicked
+	        	this.setRireg(Integer.valueOf(text.getText().trim()));
 	        }
         }
         catch (Exception e1) {
