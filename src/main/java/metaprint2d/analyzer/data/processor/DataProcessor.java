@@ -39,7 +39,7 @@ import org.openscience.cdk.tools.LoggingTool;
 /*    */         }
 /*    */ 
 /* 38 */         if (this.LOG != null) {
-/* 39 */           this.LOG.debug(new Object[] { "Processing #", Integer.valueOf(this.nn) });
+/* 39 */           this.LOG.debug("Processing #" + Integer.valueOf(this.nn));
 /*    */         }
 /* 41 */         if (acceptPreProcess(o));
 /* 42 */         o = process(o);

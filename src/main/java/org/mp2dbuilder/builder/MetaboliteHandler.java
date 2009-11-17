@@ -12,6 +12,7 @@ import metaprint2d.Fingerprint;
 import metaprint2d.analyzer.FingerprintGenerator;
 import metaprint2d.analyzer.data.AtomData;
 import metaprint2d.analyzer.data.Transformation;
+import metaprint2d.builder.DataBuilderApp;
 
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
@@ -20,9 +21,11 @@ import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.isomorphism.AtomMappingTools;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.isomorphism.mcss.RMap;
+import org.openscience.cdk.tools.LoggingTool;
 @SuppressWarnings("unused")
 public class MetaboliteHandler {
 
+	private static LoggingTool LOG = new LoggingTool(MetaboliteHandler.class);
 	public static final String COMMON_ID_FIELD_NAME = "mcsCommonId";
 	public static final String REACTION_CENTRE_FIELD_NAME = "reactionCentre";
 	
@@ -153,9 +156,13 @@ public class MetaboliteHandler {
     	IAtomContainer chosenAtomContainer = null;
 		int maxCount = 0;
 		for(IAtomContainer atoms: mcsList){
-			System.out.println(atoms.getAtomCount());
 			if(atoms.getAtomCount() > maxCount){
 				maxCount = atoms.getAtomCount();
+				if(chosenAtomContainer == null){
+					LOG.info("Choosing MCS having " + atoms.getAtomCount() + ".");
+				}else{
+					LOG.info("No, wait... Choosing MCS having " + atoms.getAtomCount() + " instead.");
+				}
 				chosenAtomContainer = atoms;
 			}
 		}

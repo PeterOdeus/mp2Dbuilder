@@ -76,14 +76,14 @@ import org.openscience.cdk.tools.LoggingTool;
 /*  78 */               throw new IllegalArgumentException("Argument -i missing required value");
 /*     */             }
 /*  80 */             this.infile = ((String)it.next());
-/*  81 */             LOG.info(new Object[] { "Input: " + this.infile });
+/*  81 */             LOG.info("Input: " + this.infile);
 /*     */           }
 /*  83 */           else if ("-o".equals(opt)) {
 /*  84 */             if (this.outfile != null) {
 /*  85 */               throw new IllegalArgumentException("Argument -o already specified");
 /*     */             }
 /*  87 */             this.outfile = ((String)it.next());
-/*  88 */             LOG.info(new Object[] { "Output: " + this.outfile });
+/*  88 */             LOG.info("Output: " + this.outfile);
 /*     */           }
 /*  90 */           else if ("-s".equals(opt)) {
 /*  91 */             if (this.species != null) {
@@ -130,7 +130,7 @@ import org.openscience.cdk.tools.LoggingTool;
 /* 132 */             Logger.getRootLogger().addAppender(logfile);
 /*     */           }
 /*     */           else {
-/* 135 */             LOG.warn(new Object[] { "Ignoring unknown argument: " + opt });
+/* 135 */             LOG.warn("Ignoring unknown argument: " + opt);
 /*     */           }
 /*     */         }
 /*  51 */         
@@ -226,7 +226,7 @@ private void run()
 /*     */     boolean datain;
 /*     */     boolean dataout;
 /* 225 */     double maxMem = Runtime.getRuntime().maxMemory() / 1048576.0D;
-/* 226 */     LOG.info(new Object[] { String.format("Maximum available memory: %.1fMB%n", new Object[] { Double.valueOf(maxMem) }) });
+/* 226 */     LOG.info(String.format("Maximum available memory: %.1fMB%n", new Object[] { Double.valueOf(maxMem) }));
 /*     */ 
 ///* 230 */     ReactionTypes rtypes = MetaPrintReactionTypes.RXNTYPES;
 /*     */ 
@@ -319,7 +319,7 @@ private void run()
 /*     */     try {
 /* 320 */       builder.run();
 /*     */     } catch (OutOfMemoryError e) {
-/* 322 */       LOG.warn(new Object[] { e });
+/* 322 */       LOG.warn(e);
 /* 323 */       System.out.println();
 /* 324 */       System.out.println("OUT OF MEMORY ERROR");
 /* 325 */       System.out.println("Try increasing the amount of memory available to java.");
@@ -332,7 +332,7 @@ private void run()
 /* 332 */     out.close();
 /* 333 */     long t1 = System.currentTimeMillis();
 /*     */ 
-/* 335 */     LOG.info(new Object[] { "Build data complete: " + ((t1 - t0) / 1000L) + "s" });
+/* 335 */     LOG.info("Build data complete in " + ((t1 - t0) / 1000L) + " seconds.");
 /*     */   }
 /*     */ 
 /*     */   public static void main(String[] args)
