@@ -1,4 +1,4 @@
-package org.mp2dbuilder.renderer.generators;
+package org.mp2dbuilder.builder;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,11 +13,13 @@ import metaprint2d.analyzer.FingerprintGenerator;
 import metaprint2d.analyzer.data.AtomData;
 import metaprint2d.analyzer.data.Transformation;
 
+import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.isomorphism.AtomMappingTools;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
+import org.openscience.cdk.isomorphism.mcss.RMap;
 @SuppressWarnings("unused")
 public class MetaboliteHandler {
 
@@ -112,6 +114,7 @@ public class MetaboliteHandler {
 				currentId = (String) atom.getProperty(COMMON_ID_FIELD_NAME);
 				if(id.equals(currentId)){
 					atom.setProperty(REACTION_CENTRE_FIELD_NAME, new Boolean(true));
+					break;
 				}
 			}
 		}
@@ -128,7 +131,7 @@ public class MetaboliteHandler {
 			connectedAtoms = reactant.getConnectedAtomsList(atom);
 			for(IAtom connectedAtom: connectedAtoms){
 				if(connectedAtom.getProperty(COMMON_ID_FIELD_NAME) != null){
-					atom.setProperty(REACTION_CENTRE_FIELD_NAME, new Boolean(true));
+					connectedAtom.setProperty(REACTION_CENTRE_FIELD_NAME, new Boolean(true));
 				}
 			}
 		}
@@ -160,10 +163,8 @@ public class MetaboliteHandler {
     }
 	
 	public void setCommonIds(String identifierName, IAtomContainer mcs, IAtomContainer reactant,IAtomContainer product) throws Exception {
-		Map<Integer,Integer> mappedReactantAtoms = new HashMap<Integer,Integer>();
-		AtomMappingTools.mapAtomsOfAlignedStructures(reactant, mcs, mappedReactantAtoms);
-		Map<Integer,Integer> mappedProductAtoms = new HashMap<Integer,Integer>();
-		AtomMappingTools.mapAtomsOfAlignedStructures(product, mcs, mappedProductAtoms);
+		Map<Integer,Integer> mappedReactantAtoms = getAtomMappings(reactant, mcs);
+		Map<Integer,Integer> mappedProductAtoms = getAtomMappings(product, mcs);
 		Collection<Integer> reactantIds = mappedReactantAtoms.values();
 		Collection<Integer> productIds = mappedProductAtoms.values();
 		Collection<Integer> mcsIds = new HashSet();
@@ -180,6 +181,16 @@ public class MetaboliteHandler {
 		for(int targetIndex: mapper.keySet()){
 			targetAtomContainer.getAtom(targetIndex).setProperty(identifierName, Integer.toString(mapper.get(targetIndex)));
 		}
+	}
+	
+	public Map<Integer,Integer> getAtomMappings(
+			IAtomContainer firstAtomContainer, IAtomContainer secondAtomContainer) throws CDKException{
+		List<RMap> rMapList = UniversalIsomorphismTester.getSubgraphAtomsMap(firstAtomContainer, secondAtomContainer);
+		Map<Integer,Integer> atomMappings = new HashMap<Integer,Integer>();
+		for(RMap rMap: rMapList){
+			atomMappings.put(rMap.getId1(), rMap.getId2());
+		}
+		return atomMappings;
 	}
 
 }

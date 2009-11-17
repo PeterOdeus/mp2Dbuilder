@@ -23,9 +23,10 @@ import metaprint2d.analyzer.data.AtomData;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mp2dbuilder.renderer.generators.MetaboliteHandler;
+import org.mp2dbuilder.builder.MetaboliteHandler;
 import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
 import org.openscience.cdk.config.AtomTypeFactory;
+import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomType;
@@ -34,6 +35,7 @@ import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.io.ReaccsMDLRXNReader;
 import org.openscience.cdk.isomorphism.AtomMappingTools;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
+import org.openscience.cdk.isomorphism.mcss.RMap;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.tools.LoggingTool;
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator;
@@ -126,15 +128,14 @@ public class InitialTest {
 		IAtomContainer reactant = (IAtomContainer)returnList.get(0);
 		IAtomContainer product = (IAtomContainer)returnList.get(1);
 		IAtomContainer mcs = (IAtomContainer)returnList.get(2);
-		Map<Integer,Integer> mappedReactantAtoms = new HashMap<Integer,Integer>();
-		AtomMappingTools.mapAtomsOfAlignedStructures(reactant, mcs, mappedReactantAtoms);
-		Map<Integer,Integer> mappedProductAtoms = new HashMap<Integer,Integer>();
-		AtomMappingTools.mapAtomsOfAlignedStructures(product, mcs, mappedProductAtoms);
+		MetaboliteHandler metaboliteHandler = new MetaboliteHandler();
+		Map<Integer,Integer> mappedReactantAtoms = metaboliteHandler.getAtomMappings(reactant, mcs);
+		//AtomMappingTools.mapAtomsOfAlignedStructures(reactant, mcs, mappedReactantAtoms);
+		Map<Integer,Integer> mappedProductAtoms = metaboliteHandler.getAtomMappings(product, mcs);
+		//AtomMappingTools.mapAtomsOfAlignedStructures(product, mcs, mappedProductAtoms);
 		
 		returnList.add(mappedReactantAtoms);
 		returnList.add(mappedProductAtoms);
-		
-		MetaboliteHandler metaboliteHandler = new MetaboliteHandler();
 		
 		Collection<Integer> reactantIds = mappedReactantAtoms.values();
 		Collection<Integer> productIds = mappedProductAtoms.values();
@@ -163,26 +164,26 @@ public class InitialTest {
 		Map<Integer,Integer> mappedReactantAtoms = (Map<Integer,Integer>)returnList.get(3);
 		Map<Integer,Integer> mappedProductAtoms = (Map<Integer,Integer>)returnList.get(4);
 		StringBuffer sb = new StringBuffer();
-		sb.append("\nidx\tmcc\treac\tproduct\n");
-		int i = -1;
-		for(IAtom mcsAtom: mcs.atoms()){
-			i++;
-			sb.append(i + "\t" + mcsAtom.getSymbol())
-			.append("\t" + reactant.getAtom(i).getSymbol() + "\t" + product.getAtom(i).getSymbol() + "\n");
+		
+		int maxAtomCount = Math.max(reactant.getAtomCount(), product.getAtomCount());
+		int i = 0;
+		sb.append("\nIndex");
+		while(i < maxAtomCount){
+			sb.append("\t" + i++);
 		}
-		for(;i < product.getAtomCount();i++){
-			try{
-				sb.append(i + "\t \t" + reactant.getAtom(i).getSymbol() + "\t" + product.getAtom(i).getSymbol() + "\n");
-			}catch(NullPointerException npe){
-				for(;i < product.getAtomCount();i++){
-					sb.append(i + "\t \t \t" + product.getAtom(i).getSymbol() + "\n");
-				}
-				break;
-			}
-			for(;i < reactant.getAtomCount();i++){
-				sb.append(i + "\t \t" + reactant.getAtom(i).getSymbol() + "\n");
-			}
-		}		
+		sb.append("\nMCS");
+		for(IAtom mcsAtom: mcs.atoms()){
+			sb.append("\t" + mcsAtom.getSymbol());
+		}
+		sb.append("\nReac");
+		for(IAtom reactantAtom: reactant.atoms()){
+			sb.append("\t" + reactantAtom.getSymbol());
+		}
+		sb.append("\nProd");
+		for(IAtom productAtom: product.atoms()){
+			sb.append("\t" + productAtom.getSymbol());
+		}
+			
 		logger.debug(sb.toString());
 		logger.debug("mappedReactantAtoms\n" + mappedReactantAtoms);
 		logger.debug("mappedProductAtoms\n" + mappedProductAtoms);

@@ -6,7 +6,7 @@
 /*    */ import java.io.IOException;
 /*    */ import java.io.InputStream;
 
-import org.mp2dbuilder.renderer.generators.MetaboliteHandler;
+import org.mp2dbuilder.builder.MetaboliteHandler;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.io.ReaccsFileEndedException;
@@ -14,7 +14,6 @@ import org.openscience.cdk.io.ReaccsMDLRXNReader;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.tools.LoggingTool;
 
-import prototyping.InitialTest;
 
 import metaprint2d.analyzer.data.processor.DataSource;
 ///*    */ import sea36.rdfile.RDFileEntry;

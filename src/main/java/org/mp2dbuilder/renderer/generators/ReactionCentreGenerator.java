@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.vecmath.Point2d;
 
+import org.mp2dbuilder.builder.MetaboliteHandler;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;

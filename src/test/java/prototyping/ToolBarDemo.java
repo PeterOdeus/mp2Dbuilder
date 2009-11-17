@@ -27,8 +27,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
+import org.mp2dbuilder.builder.MetaboliteHandler;
 import org.mp2dbuilder.renderer.generators.MCSOverlayAtomGenerator;
-import org.mp2dbuilder.renderer.generators.MetaboliteHandler;
 import org.mp2dbuilder.renderer.generators.ReactionCentreGenerator;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
