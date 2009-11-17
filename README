@@ -1,5 +1,17 @@
 Setup instructions (hints):
 
+Hints: if Eclipse doesn't work the way you expect, here's the usual suspects of Eclipse: 
+	clean, close&open project, restart using -clean flag... 
+	
+	When eclipse is complaining about maven dependency jars: Please make sure that the given dependency 
+	jar file is "visible" inside the eclipse project ("Maven Dependencies").
+		If jar file dependency is missing: make sure to run ../mp2Dbuilder/installCDKIntoMaven followed by
+		AND/OR project right-click->Maven->Update Dependencies.
+		If jar file is present, but pom.xml is marked red: try editing the pom file, then Undo and Save 
+		before running "clean project".
+	
+
+
 Make sure Maven2 Eclipse plugin is installed:
 	Eclipse update site: http://m2eclipse.sonatype.org/update/
 		Choose the following optional stuff (just to make sure):
@@ -24,7 +36,3 @@ Add jchempaint jars to local Maven repo
 			</jar>
 	ant dist-all
 	../mp2Dbuilder/installCDKIntoMaven
-	
-	
-Hints if Eclipse doesn't work the way you expect, here's the usual suspects of Eclipse: 
-	clean, close&open project, restart using -clean flag... 
