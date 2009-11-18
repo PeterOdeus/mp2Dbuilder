@@ -17,9 +17,9 @@ import org.openscience.cdk.tools.LoggingTool;
 ///*     */   private Set<ReactionTypes.ReactionType> reactionTypeFilter;
 ///*     */   private Set<Species> speciesFilter;
 /*     */ 
-/*     */   public MetaPrintDataBuilder(DataSource<Transformation> in, DataSink<Transformation> out)
+/*     */   public MetaPrintDataBuilder(DataSource<Transformation> in, DataSink<Transformation> out, int nn)
 /*     */   {
-/*  27 */     super(in, out);
+/*  27 */     super(in, out, nn);
 /*  28 */     setLogger(LOG);
 /*     */   }
 /*     */ 

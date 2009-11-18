@@ -45,6 +45,11 @@ import metaprint2d.analyzer.data.processor.DataSource;
 /* 25 */     this(new FileInputStream(file));
 /*    */   }
 /*    */ 
+
+			public void setInitialReaction(int i){
+				this.reader.setInitialRiregNo(i);
+			}
+
 /*    */   public Transformation getNext()
 /*    */     throws Exception
 /*    */   {

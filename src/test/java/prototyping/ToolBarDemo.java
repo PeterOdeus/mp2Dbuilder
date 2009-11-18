@@ -17,12 +17,16 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
@@ -36,7 +40,6 @@ import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.io.ReaccsFileEndedException;
 import org.openscience.cdk.io.ReaccsMDLRXNReader;
-import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.renderer.Renderer;
@@ -95,11 +98,15 @@ public class ToolBarDemo extends JPanel
     	
     	try{
 	    	IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
-			IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
-			IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
-			List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
-			IAtomContainer mcs = metaboliteHandler.getFirstMCSHavingMostAtoms(mcsList);
-			metaboliteHandler.setReactionCentres(reactant, product, mcs);
+	    	List returnList = metaboliteHandler.prepareForTransformation(reactionSet);
+	    	IAtomContainer reactant = (IAtomContainer)returnList.get(0);
+			IAtomContainer product = (IAtomContainer)returnList.get(1);
+			IAtomContainer mcs = (IAtomContainer)returnList.get(2);
+//			IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
+//			IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
+//			List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
+//			IAtomContainer mcs = metaboliteHandler.getFirstMCSHavingMostAtoms(mcsList);
+//			metaboliteHandler.setReactionCentres(reactant, product, mcs);
 			
 			i1 = getImage(reactant, mcs, true, product);
 			i2 = getImage(product, mcs, false, null);
@@ -243,6 +250,10 @@ public class ToolBarDemo extends JPanel
 	        }
         }
         catch (Exception e1) {
+        	final Writer result = new StringWriter();
+            final PrintWriter printWriter = new PrintWriter(result);
+            e1.printStackTrace(printWriter);
+            JOptionPane.showMessageDialog(this, result.toString());
 			throw new RuntimeException(e1);
 		}
     }

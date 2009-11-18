@@ -32,6 +32,7 @@ import org.openscience.cdk.tools.LoggingTool;
 /*     */   private String smirks;
 /*     */   private Boolean includeMultiStep;
 /*     */   private Boolean includeNoRc;
+			private int initialReactionIndex = -1;
 /*     */ 
 /*     */   private void parseArgs(String[] args)
 /*     */     throws Exception
@@ -85,6 +86,14 @@ import org.openscience.cdk.tools.LoggingTool;
 /*  87 */             this.outfile = ((String)it.next());
 /*  88 */             LOG.info("Output: " + this.outfile);
 /*     */           }
+					else if ("-initialIndex".equals(opt)) {
+						if (this.initialReactionIndex != -1) {
+							throw new IllegalArgumentException("Argument -o already specified");
+						}
+						this.initialReactionIndex = Integer.parseInt(((String)it.next()));
+						LOG.info("Initial Reaction Index: " + this.initialReactionIndex);
+					}
+
 /*  90 */           else if ("-s".equals(opt)) {
 /*  91 */             if (this.species != null) {
 /*  92 */               throw new IllegalArgumentException("Argument -s already specified");
@@ -256,7 +265,12 @@ private void run()
 /* 254 */         fis.close();
 /* 255 */         is = new FileInputStream(infile);
 /*     */       }
-/* 257 */       in = new MetaboliteFileReader(is);
+MetaboliteFileReader metaboliteFileReader = new MetaboliteFileReader(is);
+/* 257 */       in = metaboliteFileReader;
+				if(this.initialReactionIndex < 0){
+					this.initialReactionIndex = 1;
+				}
+				metaboliteFileReader.setInitialReaction(this.initialReactionIndex);
 /* 258 */       //MetabolicSiteAnalyser analyser = new MetabolicSiteAnalyser();
 /* 259 */       if (this.smirks != null) {
 ///* 260 */         analyser.setReactionCentreTyper(new SmirksTyper(this.smirks));
@@ -300,7 +314,7 @@ private void run()
 ///*     */       }
 /*     */     }
 /*     */ 
-/* 303 */     MetaPrintDataBuilder builder = new MetaPrintDataBuilder(in, out);
+/* 303 */     MetaPrintDataBuilder builder = new MetaPrintDataBuilder(in, out, this.initialReactionIndex);
 /* 304 */     if (speciesFilter != null) {
 ///* 305 */       builder.setSpeciesFilter(speciesFilter);
 /*     */     }

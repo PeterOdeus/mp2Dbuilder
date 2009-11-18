@@ -29,11 +29,42 @@ public class MetaboliteHandler {
 	public static final String COMMON_ID_FIELD_NAME = "mcsCommonId";
 	public static final String REACTION_CENTRE_FIELD_NAME = "reactionCentre";
 	
+	@SuppressWarnings("unchecked")
 	public Transformation getTransformation(IReactionSet reactionSet) throws Exception{
 		Transformation t = null;
+		try{
+//		if (reaction.getReactantCount() != 1) {
+//			/* 34 */       throw new IllegalArgumentException("Reactant count expected: 1, found: " + 
+//			/* 35 */         reaction.getReactantCount());
+//			/*    */     }
+//			/* 37 */     if (reaction.getProductCount() != 1) {
+//			/* 38 */       throw new IllegalArgumentException("Product count expected: 1, found: " + 
+//			/* 39 */         reaction.getProductCount());
+//			/*    */     }
+		
+		List<? extends Object> preparedList =  prepareForTransformation(reactionSet);
+		
+		List<AtomData> atomDataList = (List<AtomData>)preparedList.get(3);		
+		
+		t = new Transformation();
+		t.setAtomData(atomDataList);
+
+		//????????? what about this one?
+//		t.setMappings(analysis.getMappings());
+		}catch(Exception e){
+			LOG.warn("Exception thrown. ignoring this reaction");
+		}
+		return t;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List prepareForTransformation(IReactionSet reactionSet) throws Exception {
+		
+		List returnList = new ArrayList();
 		
 		//Get the reaction
 		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
+		returnList.add(reactant);
 		
 		//and generate its fingerprints.
 		FingerprintGenerator fpGenerator = new FingerprintGenerator();
@@ -41,27 +72,24 @@ public class MetaboliteHandler {
 		
 	    //Then get the product
 		IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
+		returnList.add(product);
 		
 		//and generate the Maximum Common SubStructure
 		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
 		IAtomContainer mcs = getFirstMCSHavingMostAtoms(mcsList);
+		returnList.add(mcs);
 		
 		//Mark the reactant atoms that are reaction centres
 		setReactionCentres(reactant, product, mcs);
 		
 		//and generate a list of atoms to be returned
 		List<AtomData> atomDataList = getProcessedAtoms(fpList, reactant);
+		returnList.add(atomDataList);
 		
-		t = new Transformation();
-		t.setAtomData(atomDataList);
+		return returnList;
 		
-//		List atomData = analysis.getAtomData();
-//		t.setAtomData(atomData);
-//		t.setMappings(analysis.getMappings());
-
-		return t;
 	}
-	
+
 	private List<AtomData> getProcessedAtoms(List<Fingerprint> fpList,
 			IAtomContainer reactant) {
 		List<AtomData> atomDataList = new ArrayList<AtomData>();
@@ -193,6 +221,9 @@ public class MetaboliteHandler {
 	public Map<Integer,Integer> getAtomMappings(
 			IAtomContainer firstAtomContainer, IAtomContainer secondAtomContainer) throws CDKException{
 		List<RMap> rMapList = UniversalIsomorphismTester.getSubgraphAtomsMap(firstAtomContainer, secondAtomContainer);
+		if(rMapList == null){
+			rMapList = new ArrayList<RMap>();
+		}
 		Map<Integer,Integer> atomMappings = new HashMap<Integer,Integer>();
 		for(RMap rMap: rMapList){
 			atomMappings.put(rMap.getId1(), rMap.getId2());

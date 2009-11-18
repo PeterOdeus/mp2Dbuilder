@@ -92,28 +92,30 @@ public class InitialTest {
 		Assert.assertEquals(1, mcsList.size());
 	}
 	
-	private List<IAtomContainer> getAtomContainersForReaction(int reactionId) throws Exception{
+	private List getAtomContainersForReaction(int reactionId) throws Exception{
 		IAtomContainer reactant = null;
 		IAtomContainer product = null; 
 		IAtomContainer mcs = null;
 		String filename = "data/mdl/First500DB2005AllFields.rdf";
 		logger.info("Testing: " + filename);
 		InputStream ins = null;
-		List<IAtomContainer> returnList = null;
+		List returnList = null;
 		try{
 			ins = this.getClass().getClassLoader().getResourceAsStream(filename);
 			ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
 			reader.setInitialRiregNo(reactionId);
 			IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
-			reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
-			product = reactionSet.getReaction(0).getProducts().getMolecule(0);
-			//appendCommonIds(reactant, product);
-			List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
-			mcs = mcsList.get(0);
-			returnList = new ArrayList<IAtomContainer>();
-			returnList.add(reactant);
-			returnList.add(product);
-			returnList.add(mcs);
+//			reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+//			product = reactionSet.getReaction(0).getProducts().getMolecule(0);
+//			//appendCommonIds(reactant, product);
+//			List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
+			MetaboliteHandler metaboliteHandler = new MetaboliteHandler();
+			returnList = metaboliteHandler.prepareForTransformation(reactionSet);
+//			mcs = metaboliteHandler.getFirstMCSHavingMostAtoms(mcsList);
+//			returnList = new ArrayList<IAtomContainer>();
+//			returnList.add(reactant);
+//			returnList.add(product);
+//			returnList.add(mcs);
 		}finally{
 			if(ins != null){
 				ins.close();
@@ -123,13 +125,11 @@ public class InitialTest {
 	}
 	
 	@Test public void testReactantWithoutProduct() throws Exception {
-		List returnList = getAtomContainersForReaction(62);
-		IAtomContainer reactant = (IAtomContainer)returnList.get(0);
-		IAtomContainer product = (IAtomContainer)returnList.get(1);
-		IAtomContainer mcs = (IAtomContainer)returnList.get(2);
-		Assert.assertEquals(0, product.getAtomCount());
-		Assert.assertEquals(0, mcs.getAtomCount());
-		
+		doTestCommonIdEquality(62);		
+	}
+	
+	@Test public void testReactantAndProductWithoutMCS() throws Exception {
+		doTestCommonIdEquality(311);		
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -144,8 +144,8 @@ public class InitialTest {
 		Map<Integer,Integer> mappedProductAtoms = metaboliteHandler.getAtomMappings(product, mcs);
 		//AtomMappingTools.mapAtomsOfAlignedStructures(product, mcs, mappedProductAtoms);
 		
-		returnList.add(mappedReactantAtoms);
-		returnList.add(mappedProductAtoms);
+		returnList.add(mappedReactantAtoms); //index 4
+		returnList.add(mappedProductAtoms);//index 5
 		
 		Collection<Integer> reactantIds = mappedReactantAtoms.values();
 		Collection<Integer> productIds = mappedProductAtoms.values();
@@ -172,8 +172,8 @@ public class InitialTest {
 		IAtomContainer reactant = (IAtomContainer)returnList.get(0);
 		IAtomContainer product = (IAtomContainer)returnList.get(1);
 		IAtomContainer mcs = (IAtomContainer)returnList.get(2);
-		Map<Integer,Integer> mappedReactantAtoms = (Map<Integer,Integer>)returnList.get(3);
-		Map<Integer,Integer> mappedProductAtoms = (Map<Integer,Integer>)returnList.get(4);
+		Map<Integer,Integer> mappedReactantAtoms = (Map<Integer,Integer>)returnList.get(4);
+		Map<Integer,Integer> mappedProductAtoms = (Map<Integer,Integer>)returnList.get(5);
 		StringBuffer sb = new StringBuffer();
 		
 		int maxAtomCount = Math.max(reactant.getAtomCount(), product.getAtomCount());

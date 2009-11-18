@@ -18,9 +18,10 @@ import org.openscience.cdk.tools.LoggingTool;
 /* 15 */   private boolean started = false;
 /* 16 */   private boolean done = false;
 /*    */ 
-/*    */   public DataProcessor(DataSource<T> in, DataSink<T> out) {
+/*    */   public DataProcessor(DataSource<T> in, DataSink<T> out, int nn) {
 /* 19 */     this.in = in;
 /* 20 */     this.out = out;
+			this.nn = nn;
 /*    */   }
 /*    */ 
 /*    */   public void run() throws Exception {
@@ -29,7 +30,7 @@ import org.openscience.cdk.tools.LoggingTool;
 /*    */     try
 /*    */     {
 /*    */       while (true) {
-/* 29 */         this.nn += 1;
+/* 29 */         
 /* 30 */         if (this.LOG != null) {
 /* 31 */           this.LOG.debug("Reading #" + Integer.valueOf(this.nn));
 /*    */         }
@@ -45,6 +46,7 @@ import org.openscience.cdk.tools.LoggingTool;
 /* 42 */         o = process(o);
 /* 43 */         if (acceptPostProcess(o));
 /* 44 */         this.out.put(o);
+					this.nn += 1;
 /*    */       }
 /*    */ 
 /* 48 */       this.out.flush();
