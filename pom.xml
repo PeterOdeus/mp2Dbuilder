@@ -92,6 +92,11 @@
 		<version>bioclipse-2.1.x</version>
   	</dependency>
   	<dependency>
+  		<groupId>org.openscience.cdk</groupId>
+		<artifactId>cdk-smarts</artifactId>
+		<version>bioclipse-2.1.x</version>
+  	</dependency>
+  	<dependency>
   		<groupId>junit</groupId>
   		<artifactId>junit</artifactId>
   		<version>4.5</version>

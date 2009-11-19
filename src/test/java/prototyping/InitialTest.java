@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -26,17 +25,16 @@ import org.junit.Test;
 import org.mp2dbuilder.builder.MetaboliteHandler;
 import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
 import org.openscience.cdk.config.AtomTypeFactory;
-import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomType;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.io.ReaccsMDLRXNReader;
-import org.openscience.cdk.isomorphism.AtomMappingTools;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
-import org.openscience.cdk.isomorphism.mcss.RMap;
+import org.openscience.cdk.isomorphism.matchers.QueryAtomContainer;
 import org.openscience.cdk.nonotify.NNReactionSet;
+import org.openscience.cdk.smiles.smarts.parser.SMARTSParser;
 import org.openscience.cdk.tools.LoggingTool;
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator;
 
@@ -229,7 +227,20 @@ public class InitialTest {
 		}
 	}
 	
-	
+	 @Test public void testSMARTS() throws Exception {
+			String filename = "data/mdl/firstRiReg.rdf";
+			logger.info("Testing: " + filename);
+			InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
+			ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
+			IReactionSet reactionSet = null;
+			reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+			IAtomContainer reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+			IAtomContainer product = reactionSet.getReaction(0).getProducts().getMolecule(0);
+
+			 QueryAtomContainer query = SMARTSParser.parse("C*C");
+			 boolean queryMatch = UniversalIsomorphismTester.isSubgraph(reactant, query);
+		}
+	 
 	@Test public void testMultipleMCS() throws Exception {
 		String filename = "data/mdl/24thRiReg.rdf";
 		logger.info("Testing: " + filename);

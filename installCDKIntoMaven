@@ -253,3 +253,19 @@ mvn install:install-file \
   -Dclassifier=sources \
   -DgeneratePom=true
 
+mvn install:install-file \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-smarts.jar \
+  -DgroupId=org.openscience.cdk \
+  -DartifactId=cdk-smarts \
+  -Dversion=bioclipse-2.1.x \
+  -Dpackaging=jar \
+  -DgeneratePom=true
+
+mvn install:install-file \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-smarts-sources.jar \
+  -DgroupId=org.openscience.cdk  \
+  -DartifactId=cdk-smarts \
+  -Dversion=bioclipse-2.1.x \
+  -Dpackaging=jar \
+  -Dclassifier=sources \
+  -DgeneratePom=true
