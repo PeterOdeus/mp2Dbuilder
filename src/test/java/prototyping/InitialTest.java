@@ -3,7 +3,9 @@ package prototyping;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -89,7 +91,7 @@ public class InitialTest {
 		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
 		Assert.assertEquals(1, mcsList.size());
 	}
-	
+
 	private List getAtomContainersForReaction(int reactionId) throws Exception{
 		IAtomContainer reactant = null;
 		IAtomContainer product = null; 
@@ -103,17 +105,17 @@ public class InitialTest {
 			ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
 			reader.setInitialRiregNo(reactionId);
 			IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
-//			reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
-//			product = reactionSet.getReaction(0).getProducts().getMolecule(0);
-//			//appendCommonIds(reactant, product);
-//			List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
+			//			reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+			//			product = reactionSet.getReaction(0).getProducts().getMolecule(0);
+			//			//appendCommonIds(reactant, product);
+			//			List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
 			MetaboliteHandler metaboliteHandler = new MetaboliteHandler();
 			returnList = metaboliteHandler.prepareForTransformation(reactionSet);
-//			mcs = metaboliteHandler.getFirstMCSHavingMostAtoms(mcsList);
-//			returnList = new ArrayList<IAtomContainer>();
-//			returnList.add(reactant);
-//			returnList.add(product);
-//			returnList.add(mcs);
+			//			mcs = metaboliteHandler.getFirstMCSHavingMostAtoms(mcsList);
+			//			returnList = new ArrayList<IAtomContainer>();
+			//			returnList.add(reactant);
+			//			returnList.add(product);
+			//			returnList.add(mcs);
 		}finally{
 			if(ins != null){
 				ins.close();
@@ -121,15 +123,15 @@ public class InitialTest {
 		}
 		return returnList;		
 	}
-	
+
 	@Test public void testReactantWithoutProduct() throws Exception {
 		doTestCommonIdEquality(62);		
 	}
-	
+
 	@Test public void testReactantAndProductWithoutMCS() throws Exception {
 		doTestCommonIdEquality(311);		
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private List<? extends Object> getCommonIdAtomContainersForReaction(int reactionId) throws Exception{
 		List returnList = getAtomContainersForReaction(reactionId);
@@ -141,10 +143,10 @@ public class InitialTest {
 		//AtomMappingTools.mapAtomsOfAlignedStructures(reactant, mcs, mappedReactantAtoms);
 		Map<Integer,Integer> mappedProductAtoms = metaboliteHandler.getAtomMappings(product, mcs);
 		//AtomMappingTools.mapAtomsOfAlignedStructures(product, mcs, mappedProductAtoms);
-		
+
 		returnList.add(mappedReactantAtoms); //index 4
 		returnList.add(mappedProductAtoms);//index 5
-		
+
 		Collection<Integer> reactantIds = mappedReactantAtoms.values();
 		Collection<Integer> productIds = mappedProductAtoms.values();
 		Collection<Integer> mcsIds = new HashSet();
@@ -157,13 +159,13 @@ public class InitialTest {
 		metaboliteHandler.setIds(MetaboliteHandler.COMMON_ID_FIELD_NAME, product, mappedProductAtoms);
 		return returnList;
 	}
-	
+
 	@Test public void testCommonIdEquality() throws Exception {
 		for(int i = 1; i < 2; i++){
 			doTestCommonIdEquality(i);
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void doTestCommonIdEquality(int reactionIndex) throws Exception {
 		List<? extends Object> returnList = getCommonIdAtomContainersForReaction(reactionIndex);
@@ -173,7 +175,7 @@ public class InitialTest {
 		Map<Integer,Integer> mappedReactantAtoms = (Map<Integer,Integer>)returnList.get(4);
 		Map<Integer,Integer> mappedProductAtoms = (Map<Integer,Integer>)returnList.get(5);
 		StringBuffer sb = new StringBuffer();
-		
+
 		int maxAtomCount = Math.max(reactant.getAtomCount(), product.getAtomCount());
 		int i = 0;
 		sb.append("\nIndex");
@@ -192,14 +194,14 @@ public class InitialTest {
 		for(IAtom productAtom: product.atoms()){
 			sb.append("\t" + productAtom.getSymbol());
 		}
-			
+
 		logger.debug(sb.toString());
 		logger.debug("mappedReactantAtoms\n" + mappedReactantAtoms);
 		logger.debug("mappedProductAtoms\n" + mappedProductAtoms);
 		IAtom atom1; IAtom atom2;
 		for(int index: mappedReactantAtoms.keySet()){
-				atom1 = reactant.getAtom(index);
-				atom2 = mcs.getAtom(mappedReactantAtoms.get(index));
+			atom1 = reactant.getAtom(index);
+			atom2 = mcs.getAtom(mappedReactantAtoms.get(index));
 			try{
 				Assert.assertTrue(
 						atom1.getProperty(MetaboliteHandler.COMMON_ID_FIELD_NAME)
@@ -226,21 +228,22 @@ public class InitialTest {
 			}
 		}
 	}
-	
-	 @Test public void testSMARTS() throws Exception {
-			String filename = "data/mdl/firstRiReg.rdf";
-			logger.info("Testing: " + filename);
-			InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
-			ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
-			IReactionSet reactionSet = null;
-			reactionSet = (IReactionSet)reader.read(new NNReactionSet());
-			IAtomContainer reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
-			IAtomContainer product = reactionSet.getReaction(0).getProducts().getMolecule(0);
 
-			 QueryAtomContainer query = SMARTSParser.parse("C*C");
-			 boolean queryMatch = UniversalIsomorphismTester.isSubgraph(reactant, query);
-		}
-	 
+	@Test public void testSMARTS() throws Exception {
+		String filename = "data/mdl/firstRiReg.rdf";
+		logger.info("Testing: " + filename);
+		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
+		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
+		IReactionSet reactionSet = null;
+		reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+		IAtomContainer reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+		IAtomContainer product = reactionSet.getReaction(0).getProducts().getMolecule(0);
+
+		QueryAtomContainer query = SMARTSParser.parse("CBr");
+		boolean queryMatch = UniversalIsomorphismTester.isSubgraph(reactant, query);
+		Assert.assertEquals(true, queryMatch);
+	}
+
 	@Test public void testMultipleMCS() throws Exception {
 		String filename = "data/mdl/24thRiReg.rdf";
 		logger.info("Testing: " + filename);
@@ -253,7 +256,7 @@ public class InitialTest {
 		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
 		Assert.assertEquals(2, mcsList.size());
 	}
-	
+
 	@Test public void testMultipleRiRegs() throws Exception {
 		String filename = "data/mdl/First50DB2005AllFields.rdf";
 		logger.info("Testing: " + filename);
@@ -273,7 +276,7 @@ public class InitialTest {
 			}
 		}
 	}
-	
+
 	@Test public void testAbsentAtomId() throws Exception {
 		String filename = "data/mdl/First50DB2005AllFields.rdf";
 		logger.info("Testing: " + filename);
@@ -287,7 +290,7 @@ public class InitialTest {
 		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
 		Assert.assertNull(mcsList.get(0).getAtom(10).getID());
 	}
-	
+
 	@Test public void testExtractSingleMCS() throws Exception {
 		String filename = "data/mdl/First50DB2005AllFields.rdf";
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
@@ -314,8 +317,8 @@ public class InitialTest {
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
 		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
 		IReactionSet reactionSet = null;
-//		Map<Integer, List<Integer>> mcsMap = new HashMap<Integer,List<Integer>>();
-//		int maxCount = 0;
+		//		Map<Integer, List<Integer>> mcsMap = new HashMap<Integer,List<Integer>>();
+		//		int maxCount = 0;
 		StringBuffer buf = new StringBuffer();
 		IMolecule product = null;
 		IMolecule reactant = null;
@@ -325,28 +328,28 @@ public class InitialTest {
 			reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
 			product = reactionSet.getReaction(0).getProducts().getMolecule(0);
 			mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
-//			if(mcsList.size() > 1){
-				buf.setLength(0);
-				buf.append("Rireg #" + (i + 1) + "\t");
-				for(IAtomContainer atoms: mcsList){
-					buf.append(" :" + atoms.getAtomCount());
-				}
-				System.out.println(buf.toString());
-//			}			
+			//			if(mcsList.size() > 1){
+			buf.setLength(0);
+			buf.append("Rireg #" + (i + 1) + "\t");
+			for(IAtomContainer atoms: mcsList){
+				buf.append(" :" + atoms.getAtomCount());
+			}
+			System.out.println(buf.toString());
+			//			}			
 		}
-//		Iterator<Entry<Integer,List<Integer>>> iter = mcsMap.entrySet().iterator(); 
-//		;
-//		while(iter.hasNext()){
-//			
-//			Entry<Integer,List<Integer>> entry = iter.next();
-//			
-//			for(Integer i: entry.getValue()){
-//				buf.append(":" + i);
-//			}
-//			
-//		}
+		//		Iterator<Entry<Integer,List<Integer>>> iter = mcsMap.entrySet().iterator(); 
+		//		;
+		//		while(iter.hasNext()){
+		//			
+		//			Entry<Integer,List<Integer>> entry = iter.next();
+		//			
+		//			for(Integer i: entry.getValue()){
+		//				buf.append(":" + i);
+		//			}
+		//			
+		//		}
 	}
-	
+
 	@Test public void testFileLength() throws Exception{
 		String filename = "data/mdl/First500DB2005AllFields.rdf";
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
@@ -356,7 +359,7 @@ public class InitialTest {
 		boolean isLessThanInt = fileLengthLong < Integer.MAX_VALUE;
 		Assert.assertEquals(true, isLessThanInt);
 	}
-	
+
 	@Test public void testSpecificRiReg() throws Exception {
 		String filename = "data/mdl/First50DB2005AllFields.rdf";
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
@@ -373,7 +376,7 @@ public class InitialTest {
 		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
 		Assert.assertEquals(2, mcsList.size());
 	}
-	
+
 	@Test public void testSpecificRiRegAndPrevious() throws Exception {
 		String filename = "data/mdl/First500DB2005AllFields.rdf";
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
@@ -397,8 +400,8 @@ public class InitialTest {
 		mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
 		Assert.assertEquals(14, mcsList.get(0).getAtomCount());
 	}
-	
-	
+
+
 	@Test public void testSpecificRiRegAndNext() throws Exception {
 		String filename = "data/mdl/First50DB2005AllFields.rdf";
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
@@ -427,7 +430,7 @@ public class InitialTest {
 		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
 		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 		IMolecule reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
-		
+
 		//Get current sybyl atom types
 		InputStream stream = this.getClass().getClassLoader().getResourceAsStream("org/openscience/cdk/dict/data/sybyl-atom-types.owl");
 		AtomTypeFactory factory = AtomTypeFactory.getInstance(stream, "owl", reactant.getBuilder());
@@ -438,7 +441,7 @@ public class InitialTest {
 		}
 		//Get old sybyl atom types
 		List <String> oldSybylAtomTypes = Constants.ATOM_TYPE_LIST;
-		
+
 		for(String oldAtomTypeName: oldSybylAtomTypes){
 			try{
 				Assert.assertEquals(true, newAtomTypeNames.contains(oldAtomTypeName.toUpperCase()));
@@ -448,7 +451,7 @@ public class InitialTest {
 						newAtomTypeNames.toString());
 			}
 		}
-		
+
 	}
 
 	static boolean shouldExit = false;
@@ -461,20 +464,20 @@ public class InitialTest {
 		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
 		FingerprintGenerator fpGenerator = new FingerprintGenerator();
-	    List<Fingerprint> fpList = fpGenerator.generateFingerprints(reactant);
+		List<Fingerprint> fpList = fpGenerator.generateFingerprints(reactant);
 	}
-	
+
 	private void percieveAtomTypesAndConfigureAtoms(IAtomContainer container) throws Exception {
-    	SybylAtomTypeMatcher matcher = SybylAtomTypeMatcher.getInstance(container.getBuilder());
-        Iterator<IAtom> atoms = container.atoms().iterator();
-        while (atoms.hasNext()) {
-        	IAtom atom = atoms.next();
-        	atom.setAtomTypeName(null);
-        	IAtomType matched = matcher.findMatchingAtomType(container, atom);
-        	if (matched != null) AtomTypeManipulator.configure(atom, matched);
-        }
+		SybylAtomTypeMatcher matcher = SybylAtomTypeMatcher.getInstance(container.getBuilder());
+		Iterator<IAtom> atoms = container.atoms().iterator();
+		while (atoms.hasNext()) {
+			IAtom atom = atoms.next();
+			atom.setAtomTypeName(null);
+			IAtomType matched = matcher.findMatchingAtomType(container, atom);
+			if (matched != null) AtomTypeManipulator.configure(atom, matched);
+		}
 	}
-	
+
 	@Test public void testCloneAtomData() throws Exception {
 		byte [][] byteMatrix = new byte[1][1];
 		byteMatrix[0][0] = 1;
@@ -484,30 +487,45 @@ public class InitialTest {
 		Assert.assertArrayEquals(byteMatrix, clone.getFingerprint().getBytes());
 		Assert.assertEquals(true, clone.getIsReactionCentre());
 	}
-	
-	@Test public void testGUI() throws Exception {
+
+	private ReaccsMDLRXNReader getReaccsReader() throws URISyntaxException, IOException{
 		String filename = "data/mdl/First500DB2005AllFields.rdf";
 		logger.info("Testing: " + filename);
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
 		URL url = this.getClass().getClassLoader().getResource(filename);
 		File file = new File(url.toURI());
-		long fileLengthLong = file.length();
 		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
+		long fileLengthLong = file.length();
 		reader.activateReset(fileLengthLong);
-//		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
-//		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
-//		IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
-//		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
-		render(reader);
-		
+		return reader;
+	}
+	@Test public void testMoleculeViewer() throws Exception {
+		ReaccsMDLRXNReader reader = getReaccsReader();
+		//		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+		//		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
+		//		IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
+		//		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
+		MoleculeViewer gui = new MoleculeViewer(reader);
+		gui.setRireg(1);
+		showGUI(gui);
+	}
+
+	@Test public void testFilteringMoleculeViewer() throws Exception {
+		ReaccsMDLRXNReader reader = getReaccsReader();
+		//		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+		//		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
+		//		IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
+		//		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
+		FilteringMoleculeViewer gui = new FilteringMoleculeViewer(reader);
+		showGUI(gui);
 	}
 	
-	public void render(ReaccsMDLRXNReader reader){
+	public void showGUI(MoleculeViewer gui){
 		try {
-//			ImagePanel panel = new ImagePanel(
-//					getImage(reactant, mcs, true), 
-//					getImage(product, mcs, false), 
-//					getImage(mcs, mcs, false));
+			//			ImagePanel panel = new ImagePanel(
+			//					getImage(reactant, mcs, true), 
+			//					getImage(product, mcs, false), 
+			//					getImage(mcs, mcs, false));
 
 			JFrame frame = new JFrame("Reactant - Product - MCS");
 			frame.addWindowListener(new WindowAdapter()
@@ -518,7 +536,7 @@ public class InitialTest {
 				}
 			});
 			
-			frame.getContentPane().add(new ToolBarDemo(reader));
+			frame.getContentPane().add(gui);
 			frame.pack();
 			frame.setVisible(true);
 		} catch (Exception e) {
@@ -535,7 +553,7 @@ public class InitialTest {
 		}
 	}
 
-	
+
 }
 
 

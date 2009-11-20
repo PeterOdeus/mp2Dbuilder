@@ -26,6 +26,7 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -40,6 +41,7 @@ import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.io.ReaccsFileEndedException;
 import org.openscience.cdk.io.ReaccsMDLRXNReader;
+import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.renderer.Renderer;
@@ -48,36 +50,43 @@ import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
 
-public class ToolBarDemo extends JPanel
+public class MoleculeViewer extends JPanel
                          implements ActionListener {
     protected JTextArea textArea;
     protected String newline = "\n";
-    static final private String PREVIOUS = "previous";
+    static final protected String PREVIOUS = "previous";
     private JTextArea text;
-    static final private String NEXT = "next";
-    static final private String GOTO = "Go";
+    protected JLabel riregNoLabel;
+    static final protected String NEXT = "next";
+    static final protected String GOTO = "Go";
     
-    private ReaccsMDLRXNReader reader;
+    protected ReaccsMDLRXNReader reader;
     private ImagePanel imagePanel;
-    private int currentRireg = 1;
+    protected int currentRireg = 0;
     
     private MetaboliteHandler metaboliteHandler = new MetaboliteHandler();
 
-    public ToolBarDemo(ReaccsMDLRXNReader reader) throws Exception {
+    public MoleculeViewer(ReaccsMDLRXNReader reader) throws Exception {
         super(new BorderLayout());
         this.reader = reader;
-        reader.setInitialRiregNo(currentRireg);
         //Create the toolbar.
         JToolBar toolBar = new JToolBar("Still draggable");
         addButtons(toolBar);
-       
-        generateImage();
+        
+        initImagePanel();
         
         add(toolBar, BorderLayout.PAGE_START);
         add(imagePanel, BorderLayout.CENTER);
     }
     
-    private void setRireg(int targetRireg) throws Exception{
+    private void initImagePanel() throws CDKException{
+    	Image i1 = getImage(null,null,false,null);
+    	Image i2 = getImage(null,null,false,null);
+    	Image i3 = getImage(null,null,false,null);
+    	imagePanel = new ImagePanel(i1,i2,i3);
+    }
+    
+    public void setRireg(int targetRireg) throws Exception{
     	if(targetRireg <= currentRireg){
     		reader.reset();
     	}
@@ -85,10 +94,14 @@ public class ToolBarDemo extends JPanel
     	if(currentRireg < 1){
     		currentRireg = 1;
     	}
-    	this.text.setText(this.currentRireg + "");
+    	this.riregNoLabel.setText(this.currentRireg + "");
     	reader.setInitialRiregNo(currentRireg);
     	this.generateImage();
     	this.repaint();
+    }
+    
+    protected IReactionSet getNextReactionSet() throws ReaccsFileEndedException, CDKException{
+    	return (IReactionSet)reader.read(new NNReactionSet());
     }
     
     private void generateImage() throws Exception{
@@ -116,12 +129,7 @@ public class ToolBarDemo extends JPanel
     		i2 = getImage(null,null,false,null);
     		i3 = getImage(null,null,false,null);
     	}
-		if(imagePanel == null){
-			imagePanel = new ImagePanel(i1,i2,i3);
-		}else{
-			imagePanel.setImages(i1	,i2,i3);
-					
-		}
+		imagePanel.setImages(i1	,i2,i3);
     }
     
     private Image getImage(IAtomContainer atomContainer, 
@@ -186,14 +194,16 @@ public class ToolBarDemo extends JPanel
     protected void addButtons(JToolBar toolBar) {
         JButton button = null;
         text = new JTextArea(1,3);
-
+        JLabel riregNoLabelLabel = new JLabel("current RIREG: ");
+        riregNoLabel = new JLabel("null");
         //first button
         button = makeNavigationButton("Back", PREVIOUS,
                                       "Back to previous something-or-other",
                                       "Previous");
         toolBar.add(button);
 
-        
+        toolBar.add(riregNoLabelLabel);
+        toolBar.add(riregNoLabel);
         toolBar.add(text);
 
         //third button
@@ -216,7 +226,7 @@ public class ToolBarDemo extends JPanel
         String imgLocation = "images/"
                              + imageName
                              + ".gif";
-        URL imageURL = ToolBarDemo.class.getResource(imgLocation);
+        URL imageURL = MoleculeViewer.class.getResource(imgLocation);
        
         //Create and initialize the button.
         JButton button = new JButton();
@@ -262,35 +272,5 @@ public class ToolBarDemo extends JPanel
         textArea.append(actionDescription + newline);
         textArea.setCaretPosition(textArea.getDocument().getLength());
     }
-
-//    /**
-//     * Create the GUI and show it.  For thread safety,
-//     * this method should be invoked from the
-//     * event dispatch thread.
-//     */
-//    private static void createAndShowGUI() {
-//        //Create and set up the window.
-//        JFrame frame = new JFrame("ToolBarDemo");
-//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//
-//        //Add content to the window.
-//        frame.add(new ToolBarDemo());
-//
-//        //Display the window.
-//        frame.pack();
-//        frame.setVisible(true);
-//    }
-//
-//    public static void main(String[] args) {
-//        //Schedule a job for the event dispatch thread:
-//        //creating and showing this application's GUI.
-//        SwingUtilities.invokeLater(new Runnable() {
-//            public void run() {
-//                //Turn off metal's use of bold fonts
-//	        UIManager.put("swing.boldMetal", Boolean.FALSE);
-//	        createAndShowGUI();
-//            }
-//        });
-//    }
 }
 
