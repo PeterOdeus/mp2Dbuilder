@@ -20,6 +20,12 @@ Make sure Maven2 Eclipse plugin is installed:
 			POM Editor
 			POM XML Editor
 
+Apply jchempaint patches
+	If there are patch files in the same directory as this readme file, then they should be applied
+	to the jchempaint project:
+	
+	e.g. git am 0001-Added-generation-of-java-source-jars.patch  
+	
 
 Add jchempaint jars to local Maven repo
 

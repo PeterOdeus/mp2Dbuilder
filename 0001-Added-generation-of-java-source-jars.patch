@@ -1,0 +1,29 @@
+From b85b362e2dbbca78e345035c7db369ba875f29d9 Mon Sep 17 00:00:00 2001
+From: =?utf-8?q?Peter=20Od=C3=A9us?= <peter.odeus@gmail.com>
+Date: Mon, 2 Nov 2009 14:03:40 +0100
+Subject: [PATCH] Added generation of java source jars
+
+---
+ build.xml |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+diff --git a/build.xml b/build.xml
+index 6e4fcd3..0ad43b7 100644
+--- a/build.xml
++++ b/build.xml
+@@ -409,6 +409,12 @@
+                 </fileset>
+             </jar>
+ 
++        	<jar jarfile="${dist}/jar/cdk-${module}-sources.jar">
++				<fileset dir="${build.src}/${module}">
++					<include name="**/*.java" />
++				</fileset>
++			</jar>
++        	
+             <!-- clean up afterwards -->
+             <delete dir="${build.src}/${module}"/>
+             <delete dir="${build}/${module}"/>
+-- 
+1.6.0.4
+
