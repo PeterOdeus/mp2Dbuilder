@@ -240,8 +240,26 @@ public class InitialTest {
 		IAtomContainer product = reactionSet.getReaction(0).getProducts().getMolecule(0);
 
 		QueryAtomContainer query = SMARTSParser.parse("CBr");
-		boolean queryMatch = UniversalIsomorphismTester.isSubgraph(reactant, query);
-		Assert.assertEquals(true, queryMatch);
+		boolean reactantQueryMatch = UniversalIsomorphismTester.isSubgraph(reactant, query);
+		Assert.assertEquals(true, reactantQueryMatch);
+		boolean productQueryMatch = UniversalIsomorphismTester.isSubgraph(product, query);
+		Assert.assertEquals(false, productQueryMatch);
+	}
+	
+	@Test public void testCountMatchingSMARTS() throws Exception {
+		String filename = "data/mdl/First500DB2005AllFields.rdf";
+		logger.info("Testing: " + filename);
+		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
+		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
+		reader.setInitialRiregNo(160);
+		IReactionSet reactionSet = null;
+		reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+		IAtomContainer reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+		IAtomContainer product = reactionSet.getReaction(0).getProducts().getMolecule(0);
+
+		QueryAtomContainer query = SMARTSParser.parse("[CH]");
+		List<IAtomContainer> reactantQueryMatchList = UniversalIsomorphismTester.getOverlaps(reactant, query);
+		Assert.assertEquals(1, reactantQueryMatchList.size());
 	}
 
 	@Test public void testMultipleMCS() throws Exception {
@@ -454,8 +472,6 @@ public class InitialTest {
 
 	}
 
-	static boolean shouldExit = false;
-
 	@Test public void testFingerprint() throws Exception {
 		String filename = "data/mdl/firstRiReg.rdf";
 		logger.info("Testing: " + filename);
@@ -499,6 +515,7 @@ public class InitialTest {
 		reader.activateReset(fileLengthLong);
 		return reader;
 	}
+	
 	@Test public void testMoleculeViewer() throws Exception {
 		ReaccsMDLRXNReader reader = getReaccsReader();
 		//		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
@@ -520,37 +537,41 @@ public class InitialTest {
 		showGUI(gui);
 	}
 	
-	public void showGUI(MoleculeViewer gui){
-		try {
-			//			ImagePanel panel = new ImagePanel(
-			//					getImage(reactant, mcs, true), 
-			//					getImage(product, mcs, false), 
-			//					getImage(mcs, mcs, false));
+	public void showGUI(final MoleculeViewer gui){
+		new Runnable() {
+			boolean shouldExit = false;
+			@Override
+			public void run() {
+				
+				try {
 
-			JFrame frame = new JFrame("Reactant - Product - MCS");
-			frame.addWindowListener(new WindowAdapter()
-			{
-				public void windowClosing(WindowEvent paramWindowEvent)
-				{
-					shouldExit = true;
+					JFrame frame = new JFrame("Reactant - Product - MCS");
+					frame.addWindowListener(new WindowAdapter()
+					{
+						public void windowClosing(WindowEvent paramWindowEvent)
+						{
+							shouldExit = true;
+						}
+					});
+					
+					frame.getContentPane().add(gui);
+					frame.pack();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			});
-			
-			frame.getContentPane().add(gui);
-			frame.pack();
-			frame.setVisible(true);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		int i = 0;
-		while(shouldExit == false){
-			try{
-				Thread.currentThread().sleep(1000);
-			}catch(Exception e){
-				i++;
+				int i = 0;
+				while(shouldExit == false){
+					try{
+						Thread.sleep(1000);
+					}catch(Exception e){
+						i++;
+					}
+				}
 			}
-		}
+		}.run();
+		
 	}
 
 
