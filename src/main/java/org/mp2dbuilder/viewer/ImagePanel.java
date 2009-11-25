@@ -1,4 +1,4 @@
-package prototyping;
+package org.mp2dbuilder.viewer;
 
 import java.awt.Dimension;
 import java.awt.Graphics;

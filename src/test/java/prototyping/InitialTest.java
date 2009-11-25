@@ -25,6 +25,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mp2dbuilder.builder.MetaboliteHandler;
+import org.mp2dbuilder.viewer.FilteringMoleculeViewer;
+import org.mp2dbuilder.viewer.MoleculeViewer;
 import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
 import org.openscience.cdk.config.AtomTypeFactory;
 import org.openscience.cdk.interfaces.IAtom;
@@ -518,10 +520,6 @@ public class InitialTest {
 	
 	@Test public void testMoleculeViewer() throws Exception {
 		ReaccsMDLRXNReader reader = getReaccsReader();
-		//		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
-		//		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
-		//		IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
-		//		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
 		MoleculeViewer gui = new MoleculeViewer(reader);
 		gui.setRireg(1);
 		showGUI(gui);

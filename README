@@ -42,3 +42,11 @@ Add jchempaint jars to local Maven repo
 			</jar>
 	ant dist-all
 	../mp2Dbuilder/installCDKIntoMaven
+	
+Maven build
+	In its current incarnation, when performing the "package" goal of Maven, a jar will be built specifically 
+	for the MoleculeViewer being the main class.
+	The resulting jar can be found in the target directory and can be executed by issuing the following command:
+	java -Dcdk.debugging=true -jar mp2Dbuilder-0.0.1-SNAPSHOT.jar /home/podeus/dev/azWorkspace/mp2Dbuilder/src/test/resources/data/mdl/First500DB2005AllFields.rdf
+	
+	

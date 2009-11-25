@@ -1,4 +1,4 @@
-package prototyping;
+package org.mp2dbuilder.viewer;
 
 
 
@@ -16,16 +16,24 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -49,6 +57,7 @@ import org.openscience.cdk.renderer.font.AWTFontManager;
 import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
+
 
 public class MoleculeViewer extends JPanel
                          implements ActionListener {
@@ -238,8 +247,6 @@ public class MoleculeViewer extends JPanel
             button.setIcon(new ImageIcon(imageURL, altText));
         } else {                                     //no image found
             button.setText(altText);
-            System.err.println("Resource not found: "
-                               + imgLocation);
         }
 
         return button;
@@ -272,5 +279,50 @@ public class MoleculeViewer extends JPanel
         textArea.append(actionDescription + newline);
         textArea.setCaretPosition(textArea.getDocument().getLength());
     }
+    
+    protected static ReaccsMDLRXNReader getReaccsReader(String filename) throws URISyntaxException, IOException{
+    	InputStream ins = new FileInputStream(filename);;
+    	File file = new File(filename);
+		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
+		long fileLengthLong = file.length();
+		reader.activateReset(fileLengthLong);
+		return reader;
+	}
+    
+    public static void main(String[] args) throws Exception, IOException{
+    	String fileName = null;
+    	if(args ==  null || (args != null && args.length == 0)){
+    		System.out.println("syntax: java [-Dcdk.debugging=true|false] -jar mp2Dbuilder-0.0.1-SNAPSHOT.jar <file path, e.g. /tmp/rdffile.rdf>");
+    		return;
+    	}
+    	fileName = args[0];
+    	ReaccsMDLRXNReader reader = getReaccsReader(fileName);
+		MoleculeViewer gui = new MoleculeViewer(reader);
+		gui.setRireg(1);
+		showGUI(gui);
+    }
+    
+    protected static void showGUI(final MoleculeViewer gui){
+    	try {
+
+			JFrame frame = new JFrame("Reactant - Product - MCS");
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//			frame.addWindowListener(new WindowAdapter()
+//			{
+//				public void windowClosing(WindowEvent paramWindowEvent)
+//				{
+//					shouldExit = true;
+//				}
+//			});
+			
+			frame.getContentPane().add(gui);
+			frame.pack();
+			frame.setVisible(true);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
 }
 
