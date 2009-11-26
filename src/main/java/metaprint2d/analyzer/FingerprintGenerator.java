@@ -21,11 +21,11 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 /*    */ {
 /* 24 */   private Fingerprinter fingerprinter = new Fingerprinter();
 /*    */ 
-/*    */   public List<Fingerprint> generateFingerprints(IAtomContainer mol)
+/*    */   public List<Fingerprint> generateFingerprints(IAtomContainer mol, IAtomType[] types)
 /*    */   {
 /*    */     Molecule cmol;
 /*    */     try {
-/* 30 */       cmol = getAtomTypedMolecule(mol);
+/* 30 */       cmol = getAtomTypedMolecule(mol, types);
 /*    */     } catch (CDKException e) {
 /* 32 */       throw new RuntimeException(e);
 /*    */     }
@@ -33,14 +33,11 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 /* 35 */     return this.fingerprinter.fingerprint(cmol, 5);
 /*    */   }
 /*    */ 
-/*    */   public static Molecule getAtomTypedMolecule(IAtomContainer m)
+/*    */   public static Molecule getAtomTypedMolecule(IAtomContainer m, IAtomType[] types)
 /*    */     throws CDKException
 /*    */   {
 /*    */     Atom atom;
 /* 41 */     //IMolecule ac = CDKAdaptor.getDefaultInstance().getCDKMolecule(m);
-/*    */ 
-/* 55 */     SybylAtomTypeMatcher matcher = SybylAtomTypeMatcher.getInstance(m.getBuilder());
-/* 56 */     IAtomType[] types = matcher.findMatchingAtomType(m);
 /*    */ 
 /* 59 */     Molecule mol = new Molecule();
 /* 60 */     Map map = new HashMap();

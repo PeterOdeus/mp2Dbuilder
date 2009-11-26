@@ -253,15 +253,22 @@ public class InitialTest {
 		logger.info("Testing: " + filename);
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
 		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
-		reader.setInitialRiregNo(160);
+		reader.setInitialRiregNo(1);
 		IReactionSet reactionSet = null;
 		reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+		
 		IAtomContainer reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+		SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher.getInstance(reactant.getBuilder());
+		reactantMatcher.findMatchingAtomType(reactant);
+		
 		IAtomContainer product = reactionSet.getReaction(0).getProducts().getMolecule(0);
+		SybylAtomTypeMatcher productMatcher = SybylAtomTypeMatcher.getInstance(product.getBuilder());
+		// we don't care about the types result,just the transformation the product goes through.
+		reactantMatcher.findMatchingAtomType(product);
 
-		QueryAtomContainer query = SMARTSParser.parse("[CH]");
+		QueryAtomContainer query = SMARTSParser.parse("[H1]");
 		List<IAtomContainer> reactantQueryMatchList = UniversalIsomorphismTester.getOverlaps(reactant, query);
-		Assert.assertEquals(1, reactantQueryMatchList.size());
+		Assert.assertEquals(2, reactantQueryMatchList.size());
 	}
 
 	@Test public void testMultipleMCS() throws Exception {
@@ -481,8 +488,10 @@ public class InitialTest {
 		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
 		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
+		SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher.getInstance(reactant.getBuilder());
+		IAtomType[] reactantTypes = reactantMatcher.findMatchingAtomType(reactant);
 		FingerprintGenerator fpGenerator = new FingerprintGenerator();
-		List<Fingerprint> fpList = fpGenerator.generateFingerprints(reactant);
+		List<Fingerprint> fpList = fpGenerator.generateFingerprints(reactant, reactantTypes);
 	}
 
 	private void percieveAtomTypesAndConfigureAtoms(IAtomContainer container) throws Exception {

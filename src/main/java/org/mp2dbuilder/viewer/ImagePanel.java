@@ -24,7 +24,12 @@ public class ImagePanel extends JPanel {
 
 	public ImagePanel(Image img, Image img2, Image mcsImg) {
 		setImages(img, img2, mcsImg);
-		Dimension size = new Dimension(img.getWidth(null)*3, img.getHeight(null));
+		Dimension size = null;
+		if(mcsImg == null){
+			size = new Dimension(img.getWidth(null)*2 + 10, img.getHeight(null));
+		}else{
+			size = new Dimension(img.getWidth(null)*3 + 10, img.getHeight(null));
+		}			
 		setPreferredSize(size);
 		setMinimumSize(size);
 		setMaximumSize(size);

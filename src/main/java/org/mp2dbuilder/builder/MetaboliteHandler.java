@@ -14,9 +14,11 @@ import metaprint2d.analyzer.data.AtomData;
 import metaprint2d.analyzer.data.Transformation;
 import metaprint2d.builder.DataBuilderApp;
 
+import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IAtomType;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.isomorphism.AtomMappingTools;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
@@ -62,17 +64,27 @@ public class MetaboliteHandler {
 		
 		List returnList = new ArrayList();
 		
-		//Get the reaction
+		//Get the reaction and its Sybyl types 
 		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
 		returnList.add(reactant);
+		SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher.getInstance(reactant.getBuilder());
+		IAtomType[] reactantTypes = reactantMatcher.findMatchingAtomType(reactant);
 		
 		//and generate its fingerprints.
 		FingerprintGenerator fpGenerator = new FingerprintGenerator();
-	    List<Fingerprint> fpList = fpGenerator.generateFingerprints(reactant);
+	    List<Fingerprint> fpList = fpGenerator.generateFingerprints(reactant, reactantTypes);
 		
 	    //Then get the product
 		IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
 		returnList.add(product);
+		
+		/*	
+		 * 	Aromaticity needs to be perceived in the same way
+		 * 	for both reactant AND product, otherwise the mcs will be incorrect.
+		 */
+		SybylAtomTypeMatcher productMatcher = SybylAtomTypeMatcher.getInstance(product.getBuilder());
+		// we don't care about the types result,just the transformation the product goes through.
+		reactantMatcher.findMatchingAtomType(product);
 		
 		//and generate the Maximum Common SubStructure
 		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);

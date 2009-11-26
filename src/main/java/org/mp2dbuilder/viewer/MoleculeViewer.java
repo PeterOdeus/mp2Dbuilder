@@ -57,10 +57,14 @@ import org.openscience.cdk.renderer.font.AWTFontManager;
 import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
+import org.openscience.cdk.tools.LoggingTool;
+
+import prototyping.InitialTest;
 
 
 public class MoleculeViewer extends JPanel
                          implements ActionListener {
+	private static LoggingTool logger = new LoggingTool(MoleculeViewer.class);
     protected JTextArea textArea;
     protected String newline = "\n";
     static final protected String PREVIOUS = "previous";
@@ -70,7 +74,7 @@ public class MoleculeViewer extends JPanel
     static final protected String GOTO = "Go";
     
     protected ReaccsMDLRXNReader reader;
-    private ImagePanel imagePanel;
+    protected ImagePanel imagePanel;
     protected int currentRireg = 0;
     
     private MetaboliteHandler metaboliteHandler = new MetaboliteHandler();
@@ -88,7 +92,7 @@ public class MoleculeViewer extends JPanel
         add(imagePanel, BorderLayout.CENTER);
     }
     
-    private void initImagePanel() throws CDKException{
+    protected void initImagePanel() throws CDKException{
     	Image i1 = getImage(null,null,false,null);
     	Image i2 = getImage(null,null,false,null);
     	Image i3 = getImage(null,null,false,null);
@@ -113,7 +117,7 @@ public class MoleculeViewer extends JPanel
     	return (IReactionSet)reader.read(new NNReactionSet());
     }
     
-    private void generateImage() throws Exception{
+    protected void generateImage() throws Exception{
     	Image i1 = null;
     	Image i2 = null;
     	Image i3 = null;
@@ -141,7 +145,7 @@ public class MoleculeViewer extends JPanel
 		imagePanel.setImages(i1	,i2,i3);
     }
     
-    private Image getImage(IAtomContainer atomContainer, 
+    protected Image getImage(IAtomContainer atomContainer, 
 			IAtomContainer mcsContainer,
 			boolean renderReactionCentre,
 			IAtomContainer productContainer) throws CDKException {
@@ -296,6 +300,7 @@ public class MoleculeViewer extends JPanel
     		return;
     	}
     	fileName = args[0];
+    	logger.info("using file:" + fileName);
     	ReaccsMDLRXNReader reader = getReaccsReader(fileName);
 		MoleculeViewer gui = new MoleculeViewer(reader);
 		gui.setRireg(1);
