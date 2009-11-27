@@ -54,6 +54,7 @@ import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.renderer.Renderer;
 import org.openscience.cdk.renderer.font.AWTFontManager;
+import org.openscience.cdk.renderer.generators.ExtendedAtomGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
@@ -68,7 +69,7 @@ public class MoleculeViewer extends JPanel
     protected JTextArea textArea;
     protected String newline = "\n";
     static final protected String PREVIOUS = "previous";
-    private JTextArea text;
+    protected JTextArea text;
     protected JLabel riregNoLabel;
     static final protected String NEXT = "next";
     static final protected String GOTO = "Go";
@@ -177,7 +178,8 @@ public class MoleculeViewer extends JPanel
 		List<IGenerator> generators = new ArrayList<IGenerator>();
 		
 		//generators.add(new BasicAtomGenerator());
-		generators.add(new MCSOverlayAtomGenerator(mcsContainer));
+		//generators.add(new MCSOverlayAtomGenerator(mcsContainer));
+		generators.add(new ExtendedAtomGenerator());
 		generators.add(new RingGenerator());
 		if(renderReactionCentre == true){
 			generators.add(new ReactionCentreGenerator(mcsContainer, productContainer));
@@ -217,18 +219,28 @@ public class MoleculeViewer extends JPanel
 
         toolBar.add(riregNoLabelLabel);
         toolBar.add(riregNoLabel);
-        toolBar.add(text);
+        
+        addTextfields(toolBar);
 
         //third button
-        button = makeNavigationButton("GO", GOTO,
-                                      "Forward to specific rireg",
-                                      "Go");
-        toolBar.add(button);
+        addGoButton(toolBar);
         
         button = makeNavigationButton("Forward", NEXT,
                 "Forward to something-or-other",
                 "Next");
         toolBar.add(button);
+    }
+    
+    protected void addTextfields(JToolBar toolBar){
+    	toolBar.add(text);
+    }
+    
+    protected void addGoButton(JToolBar toolBar){
+    	JButton button = null;
+    	button = makeNavigationButton("GO", GOTO,
+                "Forward to specific rireg",
+                "Go");
+    	toolBar.add(button);
     }
 
     protected JButton makeNavigationButton(String imageName,

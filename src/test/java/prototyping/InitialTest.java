@@ -37,6 +37,7 @@ import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.io.ReaccsMDLRXNReader;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.isomorphism.matchers.QueryAtomContainer;
+import org.openscience.cdk.isomorphism.mcss.RMap;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.smiles.smarts.parser.SMARTSParser;
 import org.openscience.cdk.tools.LoggingTool;
@@ -266,9 +267,11 @@ public class InitialTest {
 		// we don't care about the types result,just the transformation the product goes through.
 		reactantMatcher.findMatchingAtomType(product);
 
-		QueryAtomContainer query = SMARTSParser.parse("[H1]");
-		List<IAtomContainer> reactantQueryMatchList = UniversalIsomorphismTester.getOverlaps(reactant, query);
-		Assert.assertEquals(2, reactantQueryMatchList.size());
+		QueryAtomContainer query = SMARTSParser.parse("[#6][#7]");
+		List<List<RMap>> res = UniversalIsomorphismTester.getSubgraphMaps(reactant, query);
+		Assert.assertEquals(4, res.size());
+//		List<IAtomContainer> reactantQueryMatchList = UniversalIsomorphismTester.getOverlaps(reactant, query);
+//		Assert.assertEquals(2, reactantQueryMatchList.size());
 	}
 
 	@Test public void testMultipleMCS() throws Exception {
