@@ -39,6 +39,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 
 import org.mp2dbuilder.builder.MetaboliteHandler;
 import org.mp2dbuilder.renderer.generators.MCSOverlayAtomGenerator;
@@ -70,13 +71,15 @@ public class MoleculeViewer extends JPanel
     protected String newline = "\n";
     static final protected String PREVIOUS = "previous";
     protected JTextArea text;
-    protected JLabel riregNoLabel;
+    final protected JLabel riregNoLabel = new JLabel("null");;
     static final protected String NEXT = "next";
     static final protected String GOTO = "Go";
     
     protected ReaccsMDLRXNReader reader;
     protected ImagePanel imagePanel;
     protected int currentRireg = 0;
+    
+    protected String readerFileName;
     
     private MetaboliteHandler metaboliteHandler = new MetaboliteHandler();
 
@@ -93,6 +96,11 @@ public class MoleculeViewer extends JPanel
         add(imagePanel, BorderLayout.CENTER);
     }
     
+    public MoleculeViewer(String fileName) throws Exception {
+    	this(getReaccsReader(fileName));
+    	this.readerFileName = fileName;
+    }
+    
     protected void initImagePanel() throws CDKException{
     	Image i1 = getImage(null,null,false,null);
     	Image i2 = getImage(null,null,false,null);
@@ -101,20 +109,29 @@ public class MoleculeViewer extends JPanel
     }
     
     public void setRireg(int targetRireg) throws Exception{
+    	boolean isReset = false;
     	if(targetRireg <= currentRireg){
     		reader.reset();
+    		isReset = true;
     	}
     	currentRireg = targetRireg;
     	if(currentRireg < 1){
     		currentRireg = 1;
     	}
     	this.riregNoLabel.setText(this.currentRireg + "");
-    	reader.setInitialRiregNo(currentRireg);
+    	if(isReset == true){
+    		reader.setInitialRiregNo(currentRireg);
+    	}
     	this.generateImage();
-    	this.repaint();
+    	SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				repaint();
+			}
+		});
     }
     
-    protected IReactionSet getNextReactionSet() throws ReaccsFileEndedException, CDKException{
+    protected IReactionSet getNextReactionSetForRendering() throws ReaccsFileEndedException, CDKException{
     	return (IReactionSet)reader.read(new NNReactionSet());
     }
     
@@ -124,7 +141,7 @@ public class MoleculeViewer extends JPanel
     	Image i3 = null;
     	
     	try{
-	    	IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+	    	IReactionSet reactionSet = getNextReactionSetForRendering();
 	    	List returnList = metaboliteHandler.prepareForTransformation(reactionSet);
 	    	IAtomContainer reactant = (IAtomContainer)returnList.get(0);
 			IAtomContainer product = (IAtomContainer)returnList.get(1);
@@ -210,7 +227,7 @@ public class MoleculeViewer extends JPanel
         JButton button = null;
         text = new JTextArea(1,3);
         JLabel riregNoLabelLabel = new JLabel("current RIREG: ");
-        riregNoLabel = new JLabel("null");
+        //riregNoLabel = new JLabel("null");
         //first button
         button = makeNavigationButton("Back", PREVIOUS,
                                       "Back to previous something-or-other",
@@ -279,6 +296,8 @@ public class MoleculeViewer extends JPanel
 	        } else if (NEXT.equals(cmd)) { 
 	        	this.setRireg(this.currentRireg + 1);
 	        } else if (GOTO.equals(cmd)) { // third button clicked
+	        	reader.reset();
+	        	reader.setInitialRiregNo(Integer.valueOf(text.getText().trim()));
 	        	this.setRireg(Integer.valueOf(text.getText().trim()));
 	        }
         }
@@ -296,9 +315,9 @@ public class MoleculeViewer extends JPanel
         textArea.setCaretPosition(textArea.getDocument().getLength());
     }
     
-    protected static ReaccsMDLRXNReader getReaccsReader(String filename) throws URISyntaxException, IOException{
-    	InputStream ins = new FileInputStream(filename);;
-    	File file = new File(filename);
+    protected static ReaccsMDLRXNReader getReaccsReader(String fileName) throws URISyntaxException, IOException{
+    	InputStream ins = new FileInputStream(fileName);
+    	File file = new File(fileName);
 		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
 		long fileLengthLong = file.length();
 		reader.activateReset(fileLengthLong);
@@ -313,8 +332,7 @@ public class MoleculeViewer extends JPanel
     	}
     	fileName = args[0];
     	logger.info("using file:" + fileName);
-    	ReaccsMDLRXNReader reader = getReaccsReader(fileName);
-		MoleculeViewer gui = new MoleculeViewer(reader);
+    	MoleculeViewer gui = new MoleculeViewer(fileName);
 		gui.setRireg(1);
 		showGUI(gui);
     }

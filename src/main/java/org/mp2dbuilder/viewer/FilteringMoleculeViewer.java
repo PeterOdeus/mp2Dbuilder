@@ -1,19 +1,23 @@
 package org.mp2dbuilder.viewer;
 
+import java.awt.BorderLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 import org.mp2dbuilder.builder.MetaboliteHandler;
 import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
@@ -33,11 +37,16 @@ import org.openscience.cdk.smiles.smarts.parser.SMARTSParser;
 public class FilteringMoleculeViewer extends MoleculeViewer {
 
 	private List<Integer> riregMap = new ArrayList<Integer>();
-	private int currentItemIndex=0;
+	private int currentItemIndex=-1;
 	protected JTextArea text2;
+	private IReactionSet currentReactionSet;
 	
 	public FilteringMoleculeViewer(ReaccsMDLRXNReader reader) throws Exception {
-		super(reader);
+        super(reader);
+    }
+	
+	public FilteringMoleculeViewer(String fileName) throws Exception {
+		super(fileName);
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -48,12 +57,18 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 		text2 = new JTextArea(1,3);
 		toolBar.add(new JLabel(" SMARTS#2"));
     	toolBar.add(text2);
-    	text.setText("[#6][#7]");
-    	text2.setText("[#6]=O");
+    	text.setText("[#6]Br");
+    	text2.setText("[#6]Br");
     }
 	
 	@Override
-	protected void addGoButton(JToolBar toolBar){}
+	protected IReactionSet getNextReactionSetForRendering() throws ReaccsFileEndedException, CDKException{
+		if(this.currentReactionSet == null){
+			return (IReactionSet)reader.read(new NNReactionSet());
+		}else{
+			return this.currentReactionSet;
+		}
+    }
 	
 	@Override
 	protected void generateImage() throws Exception{
@@ -61,13 +76,14 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
     	Image i2 = null;
     	
     	try{
-	    	IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+	    	IReactionSet reactionSet = getNextReactionSetForRendering();
 	    	
 	    	IAtomContainer reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
 			SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher.getInstance(reactant.getBuilder());
 			reactantMatcher.findMatchingAtomType(reactant);
 			QueryAtomContainer query = SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
-			List<List<RMap>> res = UniversalIsomorphismTester.getSubgraphMaps(reactant, query);
+			List<List<RMap>> res = UniversalIsomorphismTester.search(
+					reactant, query, new BitSet(), UniversalIsomorphismTester.getBitSet(query), true, true);
 			setReactionCentres(reactant, res);
 			
 			
@@ -76,7 +92,8 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 			// we don't care about the types result,just the transformation the product goes through.
 			reactantMatcher.findMatchingAtomType(product);
 			query = SMARTSParser.parse(text2.getText().trim());
-			res = UniversalIsomorphismTester.getSubgraphMaps(product, query);
+			res = UniversalIsomorphismTester.search(
+					product, query, new BitSet(), UniversalIsomorphismTester.getBitSet(query), true, true);
 			setReactionCentres(product, res);
 			
 			i1 = getImage(reactant, null, true, product);
@@ -108,53 +125,110 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
     	imagePanel = new ImagePanel(i1,i2,null);
     }
 	
-	private void establishNextFilteredItem(){
+	private boolean isMatchingBothSmarts(IReactionSet reactionSet) throws CDKException{
+		IAtomContainer reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+		SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher.getInstance(reactant.getBuilder());
+		reactantMatcher.findMatchingAtomType(reactant);
+		QueryAtomContainer query = SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
+		List<List<RMap>> res = UniversalIsomorphismTester.search(
+				reactant, query, new BitSet(), UniversalIsomorphismTester.getBitSet(query), false, false);
+		
+		if(res.size() == 0 || res.size() > 0 && res.get(0).size() == 0){
+			return false;
+		}	
+		
+		IAtomContainer product = reactionSet.getReaction(0).getProducts().getMolecule(0);
+		SybylAtomTypeMatcher productMatcher = SybylAtomTypeMatcher.getInstance(product.getBuilder());
+		// we don't care about the types result,just the transformation the product goes through.
+		reactantMatcher.findMatchingAtomType(product);
+		query = SMARTSParser.parse(text2.getText().trim());
+		res = UniversalIsomorphismTester.search(
+				product, query, new BitSet(), UniversalIsomorphismTester.getBitSet(query), false, false);
+			
+		if(res.size() == 0 || res.size() > 0 && res.get(0).size() == 0){
+			return false;
+		}
+		return true;
+	}
+	
+	private void establishNextFilteredItem() throws ReaccsFileEndedException, CDKException{
 		int i = 0;
-		while(i++ < 5){
-			try {
-				IReactionSet reactionSet = this.getNextReactionSet();
-				this.currentRireg++;
-				this.riregNoLabel.setText(this.currentRireg + "");
-				//if(i%2==0){
-					riregMap.add(this.currentRireg);
-					currentItemIndex = riregMap.size()-1;
-					break;
-				//}
-			} catch (ReaccsFileEndedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (CDKException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		int targetRireg = this.currentRireg;
+		while(true){
+			currentReactionSet = (IReactionSet)reader.read(new NNReactionSet());
+			targetRireg++;
+			System.out.println(""+targetRireg);
+			if(isMatchingBothSmarts(currentReactionSet) == true){
+				riregMap.add(targetRireg);
+				break;
 			}
 		}
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-        String cmd = e.getActionCommand();
-        String description = null;
-        int currentRireg = 0;
+		currentReactionSet = null;
+		String cmd = e.getActionCommand();
+        int tempCurrentRireg = 0;
         try{
 	        if (PREVIOUS.equals(cmd)) { //first button clicked
-	        	currentRireg = riregMap.get(currentItemIndex - 1);
+	        	if(currentItemIndex == 0){
+	        		JOptionPane.showMessageDialog(this, "Don't go there.");
+	        		return;
+	        	}
+	        	tempCurrentRireg = riregMap.get(currentItemIndex - 1);
 	        	currentItemIndex -= 1;
 	        } else if (NEXT.equals(cmd)) { 
-	        	if((currentItemIndex + 1) >= riregMap.size()){
+	        	currentItemIndex++;
+	        	if(currentItemIndex >= riregMap.size()){
 	        		establishNextFilteredItem();
+	        		currentItemIndex = riregMap.size() -1;
+	        		tempCurrentRireg = riregMap.get(currentItemIndex);
+	        	}else{
+	        		tempCurrentRireg = riregMap.get(currentItemIndex);
+	        		reader.reset();
+	        		reader.setInitialRiregNo(tempCurrentRireg);
 	        	}
-	        	currentRireg = riregMap.get(currentItemIndex);
 	        } else if (GOTO.equals(cmd)) { // third button clicked
-	        	currentItemIndex = 0;
+	        	currentItemIndex = -1;
 	        	riregMap.clear();
-	        	this.reader.reset();
-	        	this.currentRireg = 0;
+	        	reader.reset();
+	        	currentRireg = 0;
 	        	establishNextFilteredItem();
-	        	currentRireg = riregMap.get(currentItemIndex);
+	        	currentItemIndex = riregMap.size() -1;
+	        	tempCurrentRireg = riregMap.get(currentItemIndex);
 	        }
-        }catch(IndexOutOfBoundsException outOfBounds){
-        	    currentRireg = riregMap.get(currentItemIndex);
-        }
-        catch (Exception e1) {
+        }catch(ReaccsFileEndedException reaccsFileEndedException){
+        	final Writer result = new StringWriter();
+            final PrintWriter printWriter = new PrintWriter(result);
+            reaccsFileEndedException.printStackTrace(printWriter);
+            JOptionPane.showMessageDialog(this, result.toString());
+            try{
+            	try {
+					reader.close();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+            }finally{
+            	if(this.readerFileName != null){
+	            	currentItemIndex = -1;
+		        	riregMap.clear();
+		        	currentRireg = 0;
+		        	text.setText("[#6]Br");
+		        	text2.setText("[#6]Br");
+		        	try {
+						this.reader = getReaccsReader(this.readerFileName);
+						establishNextFilteredItem();
+		        		currentItemIndex = riregMap.size() -1;
+		        		tempCurrentRireg = riregMap.get(currentItemIndex);
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+						System.exit(0);
+					}
+            	}
+            }
+        }catch (Exception e1) {
         	final Writer result = new StringWriter();
             final PrintWriter printWriter = new PrintWriter(result);
             e1.printStackTrace(printWriter);
@@ -162,7 +236,7 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 			throw new RuntimeException(e1);
 		}
         try {
-			this.setRireg(currentRireg);
+			setRireg(tempCurrentRireg);
 		} catch (Exception e1) {
 			final Writer result = new StringWriter();
             final PrintWriter printWriter = new PrintWriter(result);
@@ -179,9 +253,8 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
     		return;
     	}
     	fileName = args[0];
-    	ReaccsMDLRXNReader reader = getReaccsReader(fileName);
-		MoleculeViewer gui = new FilteringMoleculeViewer(reader);
-		gui.setRireg(1);
+    	MoleculeViewer gui = new FilteringMoleculeViewer(fileName);
+		//gui.setRireg(1);
 		showGUI(gui);
     }
 
