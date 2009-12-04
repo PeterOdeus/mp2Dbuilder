@@ -94,11 +94,11 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 			res = getSubgraphMaps(product, query);
 			setSmartsHitsForBonds(product, res);
 
-			i1 = getImage(reactant, null, true, product);
-			i2 = getImage(product, null, true, null);
+			i1 = getImage(reactant, null, true, product, 2);
+			i2 = getImage(product, null, true, null, 2);
 		} catch(ReaccsFileEndedException e){
-			i1 = getImage(null,null,false,null);
-			i2 = getImage(null,null,false,null);
+			i1 = getImage(null,null,false,null, 2);
+			i2 = getImage(null,null,false,null, 2);
 		}
 		imagePanel.setImages(i1	,i2,null);
 	}
@@ -152,8 +152,8 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 
 	@Override
 	protected void initImagePanel() throws CDKException{
-		Image i1 = getImage(null,null,false,null);
-		Image i2 = getImage(null,null,false,null);
+		Image i1 = getImage(null,null,false,null, 2);
+		Image i2 = getImage(null,null,false,null, 2);
 		imagePanel = new ImagePanel(i1,i2,null);
 	}
 

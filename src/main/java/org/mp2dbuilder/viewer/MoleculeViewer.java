@@ -97,9 +97,9 @@ public class MoleculeViewer extends JPanel
     }
     
     protected void initImagePanel() throws CDKException{
-    	Image i1 = getImage(null,null,false,null);
-    	Image i2 = getImage(null,null,false,null);
-    	Image i3 = getImage(null,null,false,null);
+    	Image i1 = getImage(null,null,false,null,3);
+    	Image i2 = getImage(null,null,false,null,3);
+    	Image i3 = getImage(null,null,false,null,3);
     	imagePanel = new ImagePanel(i1,i2,i3);
     }
     
@@ -147,13 +147,13 @@ public class MoleculeViewer extends JPanel
 //			IAtomContainer mcs = metaboliteHandler.getFirstMCSHavingMostAtoms(mcsList);
 //			metaboliteHandler.setReactionCentres(reactant, product, mcs);
 			
-			i1 = getImage(reactant, mcs, true, product);
-			i2 = getImage(product, mcs, false, null);
-			i3 = getImage(mcs, mcs, false,null);
+			i1 = getImage(reactant, mcs, true, product,3);
+			i2 = getImage(product, mcs, false, null,3);
+			i3 = getImage(mcs, mcs, false,null,3);
     	} catch(ReaccsFileEndedException e){
-    		i1 = getImage(null,null,false,null);
-    		i2 = getImage(null,null,false,null);
-    		i3 = getImage(null,null,false,null);
+    		i1 = getImage(null,null,false,null,3);
+    		i2 = getImage(null,null,false,null,3);
+    		i3 = getImage(null,null,false,null,3);
     	}
 		imagePanel.setImages(i1	,i2,i3);
     }
@@ -161,10 +161,17 @@ public class MoleculeViewer extends JPanel
     protected Image getImage(IAtomContainer atomContainer, 
 			IAtomContainer mcsContainer,
 			boolean renderReactionCentre,
-			IAtomContainer productContainer) throws CDKException {
+			IAtomContainer productContainer,
+			int numberOfGraphs) throws CDKException {
+    	
 		int WIDTH = 400;
 		int HEIGHT = 500;
 
+		if(numberOfGraphs == 2){
+			WIDTH = 500;
+			HEIGHT = 600;
+		}
+		
 		// the draw area and the image should be the same size
 		Rectangle drawArea = new Rectangle(WIDTH, HEIGHT);
 		Image image = new BufferedImage(
@@ -214,7 +221,7 @@ public class MoleculeViewer extends JPanel
 		g2.fillRect(0, 0, WIDTH, HEIGHT);
 
 		// the paint method also needs a toolkit-specific renderer
-		renderer.paintMolecule(molecule, new AWTDrawVisitor(g2), new Rectangle(0,0,400,500),true);
+		renderer.paintMolecule(molecule, new AWTDrawVisitor(g2), new Rectangle(0,0,WIDTH,HEIGHT),true);
 
 		return image;
 	}
