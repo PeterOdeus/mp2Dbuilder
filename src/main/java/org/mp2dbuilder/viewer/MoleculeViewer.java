@@ -16,8 +16,6 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,15 +40,14 @@ import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
 import org.mp2dbuilder.builder.MetaboliteHandler;
-import org.mp2dbuilder.renderer.generators.MCSOverlayAtomGenerator;
 import org.mp2dbuilder.renderer.generators.ReactionCentreGenerator;
+import org.mp2dbuilder.renderer.generators.SmartHitsGenerator;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.io.ReaccsFileEndedException;
 import org.openscience.cdk.io.ReaccsMDLRXNReader;
-import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.renderer.Renderer;
@@ -60,8 +57,6 @@ import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
 import org.openscience.cdk.tools.LoggingTool;
-
-import prototyping.InitialTest;
 
 
 public class MoleculeViewer extends JPanel
@@ -199,7 +194,8 @@ public class MoleculeViewer extends JPanel
 		generators.add(new ExtendedAtomGenerator());
 		generators.add(new RingGenerator());
 		if(renderReactionCentre == true){
-			generators.add(new ReactionCentreGenerator(mcsContainer, productContainer));
+			generators.add(new SmartHitsGenerator());
+			generators.add(new ReactionCentreGenerator());
 		}
 		
 		//generators.add(new AtomNumberGenerator());

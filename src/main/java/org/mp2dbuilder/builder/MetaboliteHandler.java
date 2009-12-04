@@ -30,6 +30,7 @@ public class MetaboliteHandler {
 	private static LoggingTool LOG = new LoggingTool(MetaboliteHandler.class);
 	public static final String COMMON_ID_FIELD_NAME = "mcsCommonId";
 	public static final String REACTION_CENTRE_FIELD_NAME = "reactionCentre";
+	public static final String SMART_HIT_FIELD_NAME = "isSmartsHit";
 	
 	@SuppressWarnings("unchecked")
 	public Transformation getTransformation(IReactionSet reactionSet) throws Exception{

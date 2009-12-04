@@ -15,7 +15,6 @@ import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
 import org.mp2dbuilder.builder.MetaboliteHandler;
-import org.openscience.cdk.Bond;
 import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
@@ -82,7 +81,7 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 			//			List<List<RMap>> res = UniversalIsomorphismTester.search(
 			//					reactant, query, new BitSet(), UniversalIsomorphismTester.getBitSet(query), true, true);
 			List<List<RMap>> res = getSubgraphMaps(reactant, query);
-			setReactionCentres(reactant, res);
+			setSmartsHitsForBonds(reactant, res);
 
 
 			IAtomContainer product = reactionSet.getReaction(0).getProducts().getMolecule(0);
@@ -93,7 +92,7 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 			//			res = UniversalIsomorphismTester.search(
 			//					product, query, new BitSet(), UniversalIsomorphismTester.getBitSet(query), true, true);
 			res = getSubgraphMaps(product, query);
-			setReactionCentres(product, res);
+			setSmartsHitsForBonds(product, res);
 
 			i1 = getImage(reactant, null, true, product);
 			i2 = getImage(product, null, true, null);
@@ -117,14 +116,7 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 				if (atom instanceof IQueryAtom) {
 					IQueryAtom qAtom = (IQueryAtom)atom;
 					if (qAtom.matches(atom2)){
-						RMap rMap = null;
-						int idx;
-						List<IBond>bonds  = g1.getConnectedBondsList(atom2);
-						for(IBond bond:bonds){
-							idx = g1.getBondNumber(bond);
-							rMap = new RMap(idx, 0);
-							rMapList.add(rMap);
-						}
+						atom2.setProperty(MetaboliteHandler.SMART_HIT_FIELD_NAME, new Boolean(true));
 					}
 				} else if (atom2 instanceof IQueryAtom) {
 					if(true){throw new WhatToDoHereException();}
@@ -145,14 +137,14 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 
 	}
 
-	private void setReactionCentres(IAtomContainer atomContainer, List<List<RMap>> res){
+	private void setSmartsHitsForBonds(IAtomContainer atomContainer, List<List<RMap>> res){
 		IBond bond = null;
 		Boolean trueValue = new Boolean(true);
 		for(List<RMap> rMapList: res){
 			for(RMap rMap:rMapList){
 				bond = atomContainer.getBond(rMap.getId1());
 				for(IAtom atom : bond.atoms()){
-					atom.setProperty(MetaboliteHandler.REACTION_CENTRE_FIELD_NAME, trueValue);
+					atom.setProperty(MetaboliteHandler.SMART_HIT_FIELD_NAME, trueValue);
 				}
 			}
 		}
