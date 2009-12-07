@@ -103,10 +103,26 @@ public class MoleculeViewer extends JPanel
     	imagePanel = new ImagePanel(i1,i2,i3);
     }
     
+	protected void tryToReset() throws Exception, IOException{
+		try{
+			//System.out.println("Resetting");
+			reader.reset();
+		}catch(Exception e){
+			try{
+				reader.close();
+			}catch(Exception e1){
+				
+			}
+			//System.out.println("failed to reset: Try to create new file reader.");
+			this.reader = getReaccsReader(this.readerFileName);
+			//System.out.println("Created new file reader.");
+		}
+	}
+    
     public void setRireg(int targetRireg) throws Exception{
     	boolean isReset = false;
     	if(targetRireg <= currentRireg){
-    		reader.reset();
+    		tryToReset();
     		isReset = true;
     	}
     	currentRireg = targetRireg;
@@ -299,7 +315,7 @@ public class MoleculeViewer extends JPanel
 	        } else if (NEXT.equals(cmd)) { 
 	        	this.setRireg(this.currentRireg + 1);
 	        } else if (GOTO.equals(cmd)) { // third button clicked
-	        	reader.reset();
+	        	tryToReset();
 	        	reader.setInitialRiregNo(Integer.valueOf(text.getText().trim()));
 	        	this.setRireg(Integer.valueOf(text.getText().trim()));
 	        }
@@ -323,7 +339,7 @@ public class MoleculeViewer extends JPanel
     	File file = new File(fileName);
 		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
 		long fileLengthLong = file.length();
-		reader.activateReset(fileLengthLong);
+		reader.activateReset(1024);
 		return reader;
 	}
     

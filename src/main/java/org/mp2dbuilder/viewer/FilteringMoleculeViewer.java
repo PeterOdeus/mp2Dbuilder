@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -198,7 +199,7 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 			}
 		}
 	}
-
+	
 	public void actionPerformed(ActionEvent e) {
 		currentReactionSet = null;
 		String cmd = e.getActionCommand();
@@ -219,13 +220,13 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 					tempCurrentRireg = riregMap.get(currentItemIndex);
 				}else{
 					tempCurrentRireg = riregMap.get(currentItemIndex);
-					reader.reset();
+					tryToReset();
 					reader.setInitialRiregNo(tempCurrentRireg);
 				}
 			} else if (GOTO.equals(cmd)) { // third button clicked
 				currentItemIndex = -1;
 				riregMap.clear();
-				reader.reset();
+				tryToReset();
 				currentRireg = 0;
 				establishNextFilteredItem();
 				currentItemIndex = riregMap.size() -1;

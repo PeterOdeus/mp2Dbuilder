@@ -103,7 +103,13 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 
 	public void activateReset(long fileLengthLong) throws IOException {
 		this.fileLengthLong = fileLengthLong;
-		input.mark((int)this.fileLengthLong);
+		if(this.fileLengthLong > Integer.MAX_VALUE){
+			logger.info("marking Integer.MAX_VALUE");
+			input.mark(Integer.MAX_VALUE);
+		}else{
+			logger.info("marking " + (int)this.fileLengthLong);
+			input.mark((int)this.fileLengthLong);
+		}
 	}
 
 	public void reset() throws IOException {
