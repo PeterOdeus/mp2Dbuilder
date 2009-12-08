@@ -28,6 +28,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -336,6 +337,9 @@ public class MoleculeViewer extends JPanel
     
     protected static ReaccsMDLRXNReader getReaccsReader(String fileName) throws URISyntaxException, IOException{
     	InputStream ins = new FileInputStream(fileName);
+    	if(fileName.endsWith(".gz")){
+    		ins = new GZIPInputStream(ins);
+    	}
     	File file = new File(fileName);
 		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
 		long fileLengthLong = file.length();
