@@ -4,6 +4,7 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URISyntaxException;
@@ -15,6 +16,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
+import org.junit.Assert;
 import org.mp2dbuilder.builder.MetaboliteHandler;
 import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
 import org.openscience.cdk.exception.CDKException;
@@ -26,10 +28,15 @@ import org.openscience.cdk.io.ReaccsFileEndedException;
 import org.openscience.cdk.io.ReaccsMDLRXNReader;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.isomorphism.matchers.IQueryAtom;
+import org.openscience.cdk.isomorphism.matchers.IQueryAtomContainer;
 import org.openscience.cdk.isomorphism.matchers.QueryAtomContainer;
 import org.openscience.cdk.isomorphism.mcss.RMap;
 import org.openscience.cdk.nonotify.NNReactionSet;
+import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
+import org.openscience.cdk.smiles.smarts.parser.ASTStart;
+import org.openscience.cdk.smiles.smarts.parser.ParseException;
 import org.openscience.cdk.smiles.smarts.parser.SMARTSParser;
+import org.openscience.cdk.smiles.smarts.parser.visitor.SmartsQueryVisitor;
 
 public class FilteringMoleculeViewer extends MoleculeViewer {
 
@@ -54,8 +61,8 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 		text2 = new JTextArea(1,3);
 		toolBar.add(new JLabel(" SMARTS#2"));
 		toolBar.add(text2);
-		text.setText("[#6]Br");
-		text2.setText("[#6]Br");
+		text.setText("[$(NC=O)]");
+		text2.setText("[#6]");
 	}
 
 	@Override
@@ -78,12 +85,23 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 			IAtomContainer reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
 			SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher.getInstance(reactant.getBuilder());
 			reactantMatcher.findMatchingAtomType(reactant);
-			QueryAtomContainer query = SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
-			//			List<List<RMap>> res = UniversalIsomorphismTester.search(
-			//					reactant, query, new BitSet(), UniversalIsomorphismTester.getBitSet(query), true, true);
-			List<List<RMap>> res = getSubgraphMaps(reactant, query);
-			setSmartsHitsForBonds(reactant, res);
-
+			//QueryAtomContainer query = SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
+			QueryAtomContainer query = null;//SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
+			String q = text.getText().trim();
+			SMARTSQueryTool sqt = new SMARTSQueryTool(q);
+	        if(sqt.matches(reactant)){
+	        	int nmatch = sqt.countMatches();
+		        int nqmatch = sqt.getUniqueMatchingAtoms().size();
+		        List<List<Integer>> matchingAtomsList = sqt.getUniqueMatchingAtoms();
+		        IAtom targetAtom = null;
+		        for(List<Integer> list: matchingAtomsList){
+		        	for(Integer i: list){
+		        		targetAtom = reactant.getAtom(i);
+		        		targetAtom.setProperty(MetaboliteHandler.SMART_HIT_FIELD_NAME, new Boolean(true));
+		        	}
+		        }
+	        }
+			
 
 			IAtomContainer product = reactionSet.getReaction(0).getProducts().getMolecule(0);
 			SybylAtomTypeMatcher productMatcher = SybylAtomTypeMatcher.getInstance(product.getBuilder());
@@ -92,7 +110,7 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 			query = SMARTSParser.parse(text2.getText().trim());
 			//			res = UniversalIsomorphismTester.search(
 			//					product, query, new BitSet(), UniversalIsomorphismTester.getBitSet(query), true, true);
-			res = getSubgraphMaps(product, query);
+			List<List<RMap>> res = getSubgraphMaps(product, query, false);
 			setSmartsHitsForBonds(product, res);
 
 			i1 = getImage(reactant, null, true, product, 2);
@@ -104,10 +122,12 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 		imagePanel.setImages(i1	,i2,null);
 	}
 
-	private List<List<RMap>> getSubgraphMaps(IAtomContainer g1, IAtomContainer g2) throws CDKException{
+	private List<List<RMap>> getSubgraphMaps(
+			IAtomContainer g1, 
+			IAtomContainer g2, boolean isDollar) throws CDKException{
 		if (g2.getAtomCount() > g1.getAtomCount()) return null;
 		// test for single atom case
-		if (g2.getAtomCount() == 1) {
+		if (g2.getAtomCount() == 1 && !isDollar) {
 			List<List<RMap>> listList = new ArrayList<List<RMap>>();
 			List<RMap> rMapList = new ArrayList<RMap>();
 			listList.add(rMapList);
@@ -157,32 +177,38 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 		Image i2 = getImage(null,null,false,null, 2);
 		imagePanel = new ImagePanel(i1,i2,null);
 	}
-
+	
 	private boolean isMatchingBothSmarts(IReactionSet reactionSet) throws CDKException{
-		IAtomContainer reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
-		SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher.getInstance(reactant.getBuilder());
-		reactantMatcher.findMatchingAtomType(reactant);
-		QueryAtomContainer query = SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
-		//		List<List<RMap>> res = UniversalIsomorphismTester.search(
-		//				reactant, query, new BitSet(), UniversalIsomorphismTester.getBitSet(query), false, false);
-		boolean hasSubgraph = UniversalIsomorphismTester.isSubgraph(reactant, query);
-
-		if(hasSubgraph == false){
-			return false;
-		}	
-
-		IAtomContainer product = reactionSet.getReaction(0).getProducts().getMolecule(0);
-		SybylAtomTypeMatcher productMatcher = SybylAtomTypeMatcher.getInstance(product.getBuilder());
-		// we don't care about the types result,just the transformation the product goes through.
-		reactantMatcher.findMatchingAtomType(product);
-		query = SMARTSParser.parse(text2.getText().trim());
-		//		res = UniversalIsomorphismTester.search(
-		//				product, query, new BitSet(), UniversalIsomorphismTester.getBitSet(query), false, false);
-		hasSubgraph = UniversalIsomorphismTester.isSubgraph(product, query);
-
-		if(hasSubgraph == false){
-			return false;
-		}
+		
+			IAtomContainer reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+			SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher.getInstance(reactant.getBuilder());
+			reactantMatcher.findMatchingAtomType(reactant);
+			QueryAtomContainer query = null;//SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
+			String q = text.getText().trim();
+//			SMARTSParser parser = new SMARTSParser(new StringReader(q));
+//	    	ASTStart start = parser.Start();
+//	    	SmartsQueryVisitor visitor = new SmartsQueryVisitor();
+//	    	query = (QueryAtomContainer) visitor.visit(start, null);
+//			boolean hasSubgraph = UniversalIsomorphismTester.isSubgraph(reactant, query);
+			SMARTSQueryTool sqt = new SMARTSQueryTool(q);//("[NX3;h1,h2,H1,H2;!$(NC=O)]");
+	        boolean status = sqt.matches(reactant);
+	
+			if(status == false){
+				return false;
+			}	
+	
+			IAtomContainer product = reactionSet.getReaction(0).getProducts().getMolecule(0);
+			SybylAtomTypeMatcher productMatcher = SybylAtomTypeMatcher.getInstance(product.getBuilder());
+			// we don't care about the types result,just the transformation the product goes through.
+			reactantMatcher.findMatchingAtomType(product);
+			query = SMARTSParser.parse(text2.getText().trim());
+			//		res = UniversalIsomorphismTester.search(
+			//				product, query, new BitSet(), UniversalIsomorphismTester.getBitSet(query), false, false);
+			status = UniversalIsomorphismTester.isSubgraph(product, query);
+	
+			if(status == false){
+				return false;
+			}
 		return true;
 	}
 
