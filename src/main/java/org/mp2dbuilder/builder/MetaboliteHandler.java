@@ -85,6 +85,7 @@ public class MetaboliteHandler {
 		 */
 		SybylAtomTypeMatcher productMatcher = SybylAtomTypeMatcher.getInstance(product.getBuilder());
 		// we don't care about the types result,just the transformation the product goes through.
+		//I.e. CDKHueckelAromaticityDetector
 		reactantMatcher.findMatchingAtomType(product);
 		
 		//and generate the Maximum Common SubStructure

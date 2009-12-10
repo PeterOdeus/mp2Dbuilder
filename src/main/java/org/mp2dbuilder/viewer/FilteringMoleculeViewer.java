@@ -81,18 +81,21 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 
 		try{
 			IReactionSet reactionSet = getNextReactionSetForRendering();
-
-			IAtomContainer reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
-			SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher.getInstance(reactant.getBuilder());
-			reactantMatcher.findMatchingAtomType(reactant);
+			
+			List returnList = metaboliteHandler.prepareForTransformation(reactionSet);
+	    	IAtomContainer reactant = (IAtomContainer)returnList.get(0);
+			IAtomContainer product = (IAtomContainer)returnList.get(1);
+//			IAtomContainer mcs = (IAtomContainer)returnList.get(2);
+//
+//			IAtomContainer reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+//			SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher.getInstance(reactant.getBuilder());
+//			reactantMatcher.findMatchingAtomType(reactant);
 			//QueryAtomContainer query = SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
-			QueryAtomContainer query = null;//SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
+			//QueryAtomContainer query = null;//SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
 			String q = text.getText().trim();
 			SMARTSQueryTool sqt = new SMARTSQueryTool(q);
 	        if(sqt.matches(reactant)){
-	        	int nmatch = sqt.countMatches();
-		        int nqmatch = sqt.getUniqueMatchingAtoms().size();
-		        List<List<Integer>> matchingAtomsList = sqt.getUniqueMatchingAtoms();
+	        	List<List<Integer>> matchingAtomsList = sqt.getUniqueMatchingAtoms();
 		        IAtom targetAtom = null;
 		        for(List<Integer> list: matchingAtomsList){
 		        	for(Integer i: list){
@@ -103,15 +106,23 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 	        }
 			
 
-			IAtomContainer product = reactionSet.getReaction(0).getProducts().getMolecule(0);
-			SybylAtomTypeMatcher productMatcher = SybylAtomTypeMatcher.getInstance(product.getBuilder());
-			// we don't care about the types result,just the transformation the product goes through.
-			reactantMatcher.findMatchingAtomType(product);
-			query = SMARTSParser.parse(text2.getText().trim());
-			//			res = UniversalIsomorphismTester.search(
-			//					product, query, new BitSet(), UniversalIsomorphismTester.getBitSet(query), true, true);
-			List<List<RMap>> res = getSubgraphMaps(product, query, false);
-			setSmartsHitsForBonds(product, res);
+//			IAtomContainer product = reactionSet.getReaction(0).getProducts().getMolecule(0);
+//			SybylAtomTypeMatcher productMatcher = SybylAtomTypeMatcher.getInstance(product.getBuilder());
+//			// we don't care about the types result,just the transformation the product goes through.
+//			reactantMatcher.findMatchingAtomType(product);
+//			//query = null;//SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
+			q = text2.getText().trim();
+			sqt = new SMARTSQueryTool(q);
+	        if(sqt.matches(product)){
+	        	List<List<Integer>> matchingAtomsList = sqt.getUniqueMatchingAtoms();
+		        IAtom targetAtom = null;
+		        for(List<Integer> list: matchingAtomsList){
+		        	for(Integer i: list){
+		        		targetAtom = product.getAtom(i);
+		        		targetAtom.setProperty(MetaboliteHandler.SMART_HIT_FIELD_NAME, new Boolean(true));
+		        	}
+		        }
+	        }
 
 			i1 = getImage(reactant, null, true, product, 2);
 			i2 = getImage(product, null, true, null, 2);
@@ -183,13 +194,8 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 			IAtomContainer reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
 			SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher.getInstance(reactant.getBuilder());
 			reactantMatcher.findMatchingAtomType(reactant);
-			QueryAtomContainer query = null;//SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
+			//QueryAtomContainer query = null;//SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
 			String q = text.getText().trim();
-//			SMARTSParser parser = new SMARTSParser(new StringReader(q));
-//	    	ASTStart start = parser.Start();
-//	    	SmartsQueryVisitor visitor = new SmartsQueryVisitor();
-//	    	query = (QueryAtomContainer) visitor.visit(start, null);
-//			boolean hasSubgraph = UniversalIsomorphismTester.isSubgraph(reactant, query);
 			SMARTSQueryTool sqt = new SMARTSQueryTool(q);//("[NX3;h1,h2,H1,H2;!$(NC=O)]");
 	        boolean status = sqt.matches(reactant);
 	
@@ -200,11 +206,13 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 			IAtomContainer product = reactionSet.getReaction(0).getProducts().getMolecule(0);
 			SybylAtomTypeMatcher productMatcher = SybylAtomTypeMatcher.getInstance(product.getBuilder());
 			// we don't care about the types result,just the transformation the product goes through.
+			//I.e. CDKHueckelAromaticityDetector
 			reactantMatcher.findMatchingAtomType(product);
-			query = SMARTSParser.parse(text2.getText().trim());
-			//		res = UniversalIsomorphismTester.search(
-			//				product, query, new BitSet(), UniversalIsomorphismTester.getBitSet(query), false, false);
-			status = UniversalIsomorphismTester.isSubgraph(product, query);
+			//query = SMARTSParser.parse(text2.getText().trim());
+			//status = UniversalIsomorphismTester.isSubgraph(product, query);
+			q = text2.getText().trim();
+			sqt = new SMARTSQueryTool(q);//("[NX3;h1,h2,H1,H2;!$(NC=O)]");
+	        status = sqt.matches(product);
 	
 			if(status == false){
 				return false;

@@ -77,7 +77,7 @@ public class MoleculeViewer extends JPanel
     
     protected String readerFileName;
     
-    private MetaboliteHandler metaboliteHandler = new MetaboliteHandler();
+    protected MetaboliteHandler metaboliteHandler = new MetaboliteHandler();
 
     public MoleculeViewer(ReaccsMDLRXNReader reader) throws Exception {
         super(new BorderLayout());
