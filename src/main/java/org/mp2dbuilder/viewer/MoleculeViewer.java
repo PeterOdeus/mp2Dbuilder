@@ -137,7 +137,6 @@ public class MoleculeViewer extends JPanel
     	}
     	this.generateImage();
     	SwingUtilities.invokeLater(new Runnable() {
-			@Override
 			public void run() {
 				repaint();
 			}

@@ -38,7 +38,6 @@ public class ReactionCentreGenerator implements IGenerator {
 		return group;
 	}
 
-	@Override
 	public List<IGeneratorParameter<?>> getParameters() {
 		// TODO Auto-generated method stub
 		return new ArrayList<IGeneratorParameter<?>>();

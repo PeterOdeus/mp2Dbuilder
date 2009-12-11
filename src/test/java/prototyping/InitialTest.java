@@ -551,7 +551,6 @@ public class InitialTest {
 	public void showGUI(final MoleculeViewer gui){
 		new Runnable() {
 			boolean shouldExit = false;
-			@Override
 			public void run() {
 				
 				try {
