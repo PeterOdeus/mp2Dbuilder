@@ -41,9 +41,9 @@
   	<resources>
   			<resource>
 		        <directory>src/main/resources</directory>
-		      </resource>
+		    </resource>
             <resource>
-                    <directory>${basedir}/target/dependency</directory>
+            	<directory>${basedir}/target/dependency</directory>
             </resource>
     </resources>
   </build>

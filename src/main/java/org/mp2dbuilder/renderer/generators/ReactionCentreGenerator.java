@@ -1,6 +1,7 @@
 package org.mp2dbuilder.renderer.generators;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,7 +11,6 @@ import javax.vecmath.Point2d;
 import org.mp2dbuilder.builder.MetaboliteHandler;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
-import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.elements.ElementGroup;
 import org.openscience.cdk.renderer.elements.IRenderingElement;
@@ -38,9 +38,12 @@ public class ReactionCentreGenerator implements IGenerator {
 		return group;
 	}
 
-	public List<IGeneratorParameter> getParameters() {
+	@Override
+	public List<IGeneratorParameter<?>> getParameters() {
 		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<IGeneratorParameter<?>>();
 	}
+
+	
 
 }

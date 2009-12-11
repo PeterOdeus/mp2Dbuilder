@@ -1,6 +1,7 @@
 package org.mp2dbuilder.renderer.generators;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,9 +38,10 @@ public class SmartHitsGenerator implements IGenerator {
 		return group;
 	}
 
-	public List<IGeneratorParameter> getParameters() {
+	@Override
+	public List<IGeneratorParameter<?>> getParameters() {
 		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<IGeneratorParameter<?>>();
 	}
 
 }

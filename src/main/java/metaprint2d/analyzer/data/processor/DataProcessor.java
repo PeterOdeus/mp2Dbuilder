@@ -1,17 +1,13 @@
 /*    */ package metaprint2d.analyzer.data.processor;
 /*    */ 
-/*    */ import java.io.IOException;
-
-import metaprint2d.builder.DataBuilderApp;
-
-import org.openscience.cdk.tools.LoggingTool;
+/*    */ import org.openscience.cdk.tools.ILoggingTool;
 
 //import sea36.util.LogTool;
 /*    */ 
 /*    */ public class DataProcessor<T>
 /*    */   implements MonitorableProcess
 /*    */ {
-/*    */   private LoggingTool LOG;
+/*    */   private ILoggingTool LOG;
 /*    */   private DataSource<T> in;
 /*    */   private DataSink<T> out;
 /*    */   private int nn;
@@ -73,7 +69,7 @@ import org.openscience.cdk.tools.LoggingTool;
 /* 69 */     return o;
 /*    */   }
 /*    */ 
-/*    */   protected void setLogger(LoggingTool log) {
+/*    */   protected void setLogger(ILoggingTool log) {
 /* 73 */     this.LOG = log;
 /*    */   }
 /*    */ 

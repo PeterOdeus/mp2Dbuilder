@@ -11,22 +11,23 @@ import org.openscience.cdk.interfaces.IChemObject;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.interfaces.IReactionSet;
-import org.openscience.cdk.tools.LoggingTool;
+import org.openscience.cdk.tools.ILoggingTool;
+import org.openscience.cdk.tools.LoggingToolFactory;
 
 public class ReaccsMDLRXNReader extends MDLRXNReader {
 
-	private LoggingTool logger = null;
+	private ILoggingTool logger = null;
 	private String riregNo = "";
 	private long fileLengthLong;
 
 	public ReaccsMDLRXNReader(Reader in, Mode mode) {
 		super(in, mode);
-		logger = new LoggingTool(this);
+		logger = LoggingToolFactory.createLoggingTool(ReaccsMDLRXNReader.class);
 	}
 
 	public ReaccsMDLRXNReader(InputStream input) {
 		super(input, Mode.RELAXED);
-		logger = new LoggingTool(this);
+		logger = LoggingToolFactory.createLoggingTool(ReaccsMDLRXNReader.class);
 	}
 	
 	public void setInitialRiregNo(int riregNo){

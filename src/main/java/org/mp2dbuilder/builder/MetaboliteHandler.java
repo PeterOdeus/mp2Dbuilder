@@ -12,7 +12,6 @@ import metaprint2d.Fingerprint;
 import metaprint2d.analyzer.FingerprintGenerator;
 import metaprint2d.analyzer.data.AtomData;
 import metaprint2d.analyzer.data.Transformation;
-import metaprint2d.builder.DataBuilderApp;
 
 import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
 import org.openscience.cdk.exception.CDKException;
@@ -20,14 +19,14 @@ import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomType;
 import org.openscience.cdk.interfaces.IReactionSet;
-import org.openscience.cdk.isomorphism.AtomMappingTools;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.isomorphism.mcss.RMap;
-import org.openscience.cdk.tools.LoggingTool;
+import org.openscience.cdk.tools.ILoggingTool;
+import org.openscience.cdk.tools.LoggingToolFactory;
 @SuppressWarnings("unused")
 public class MetaboliteHandler {
 
-	private static LoggingTool LOG = new LoggingTool(MetaboliteHandler.class);
+	private static ILoggingTool LOG = LoggingToolFactory.createLoggingTool(MetaboliteHandler.class);
 	public static final String COMMON_ID_FIELD_NAME = "mcsCommonId";
 	public static final String REACTION_CENTRE_FIELD_NAME = "reactionCentre";
 	public static final String SMART_HIT_FIELD_NAME = "isSmartsHit";

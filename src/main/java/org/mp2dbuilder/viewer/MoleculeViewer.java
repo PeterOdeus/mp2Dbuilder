@@ -57,12 +57,13 @@ import org.openscience.cdk.renderer.generators.ExtendedAtomGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
-import org.openscience.cdk.tools.LoggingTool;
+import org.openscience.cdk.tools.ILoggingTool;
+import org.openscience.cdk.tools.LoggingToolFactory;
 
 
 public class MoleculeViewer extends JPanel
                          implements ActionListener {
-	private static LoggingTool logger = new LoggingTool(MoleculeViewer.class);
+	private static ILoggingTool logger = LoggingToolFactory.createLoggingTool(MoleculeViewer.class);
     protected JTextArea textArea;
     protected String newline = "\n";
     static final protected String PREVIOUS = "previous";

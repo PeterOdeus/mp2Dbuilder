@@ -40,16 +40,17 @@ import org.openscience.cdk.isomorphism.matchers.QueryAtomContainer;
 import org.openscience.cdk.isomorphism.mcss.RMap;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.smiles.smarts.parser.SMARTSParser;
-import org.openscience.cdk.tools.LoggingTool;
+import org.openscience.cdk.tools.ILoggingTool;
+import org.openscience.cdk.tools.LoggingToolFactory;
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator;
 
 @SuppressWarnings("unused")
 public class InitialTest {
 
-	private static LoggingTool logger = new LoggingTool(InitialTest.class);
+	private static ILoggingTool logger =  null;//LoggingToolFactory.createLoggingTool(InitialTest.class); // new LoggingTool();
 
 	@BeforeClass public static void setup() {
-		logger = new LoggingTool(InitialTest.class);
+		logger = LoggingToolFactory.createLoggingTool(InitialTest.class);
 		//setSimpleChemObjectReader(new MDLRXNReader(), "data/mdl/reaction-1.rxn");
 	}
 

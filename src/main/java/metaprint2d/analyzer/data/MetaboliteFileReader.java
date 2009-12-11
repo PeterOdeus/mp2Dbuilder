@@ -1,10 +1,12 @@
 /*    */ package metaprint2d.analyzer.data;
 /*    */ 
 /*    */ import java.io.File;
-/*    */ import java.io.FileInputStream;
-/*    */ import java.io.FileNotFoundException;
-/*    */ import java.io.IOException;
-/*    */ import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
+import metaprint2d.analyzer.data.processor.DataSource;
 
 import org.mp2dbuilder.builder.MetaboliteHandler;
 import org.openscience.cdk.exception.CDKException;
@@ -12,20 +14,15 @@ import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.io.ReaccsFileEndedException;
 import org.openscience.cdk.io.ReaccsMDLRXNReader;
 import org.openscience.cdk.nonotify.NNReactionSet;
-import org.openscience.cdk.tools.LoggingTool;
-
-
-import metaprint2d.analyzer.data.processor.DataSource;
-///*    */ import sea36.rdfile.RDFileEntry;
-///*    */ import sea36.rdfile.RDFileReader;
-/*    */ 
-/*    */ public class MetaboliteFileReader
+import org.openscience.cdk.tools.ILoggingTool;
+import org.openscience.cdk.tools.LoggingToolFactory;
+public class MetaboliteFileReader
 /*    */   implements DataSource<Transformation>
 /*    */ {
 /*    */   //public RDFileReader in;
 /*    */   //private MetaboliteEntryReader reader;
 	
-			private static LoggingTool logger = new LoggingTool(MetaboliteFileReader.class);
+			private static ILoggingTool logger = LoggingToolFactory.createLoggingTool(MetaboliteFileReader.class);
 			private ReaccsMDLRXNReader reader;
 			private IReactionSet currentReactionSet;
 			private MetaboliteHandler handler;

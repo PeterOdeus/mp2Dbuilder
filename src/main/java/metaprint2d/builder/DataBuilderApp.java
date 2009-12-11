@@ -12,19 +12,19 @@ import java.util.zip.GZIPInputStream;
 import metaprint2d.analyzer.data.MetaboliteFileReader;
 import metaprint2d.analyzer.data.processor.DataSink;
 import metaprint2d.analyzer.data.processor.DataSource;
-import metaprint2d.analyzer.data.processor.ProgressMonitor;
 import metaprint2d.builder.data.BinFileBuilder;
 
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
-import org.openscience.cdk.tools.LoggingTool;
+import org.openscience.cdk.tools.ILoggingTool;
+import org.openscience.cdk.tools.LoggingToolFactory;
 
 //import sea36.util.LogTool;
 /*     */ 
 /*     */ public class DataBuilderApp
 /*     */ {
-/*  32 */   private static LoggingTool LOG = new LoggingTool(DataBuilderApp.class);
+/*  32 */   private static ILoggingTool LOG = LoggingToolFactory.createLoggingTool(DataBuilderApp.class);
 /*     */   public String infile;
 /*     */   public String outfile;
 /*     */   private String species;

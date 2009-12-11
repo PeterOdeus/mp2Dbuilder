@@ -5,12 +5,13 @@ import metaprint2d.analyzer.data.processor.DataProcessor;
 import metaprint2d.analyzer.data.processor.DataSink;
 import metaprint2d.analyzer.data.processor.DataSource;
 
-import org.openscience.cdk.tools.LoggingTool;
+import org.openscience.cdk.tools.ILoggingTool;
+import org.openscience.cdk.tools.LoggingToolFactory;
 //import sea36.util.LogTool;
 /*     */ 
 /*     */ public class MetaPrintDataBuilder extends DataProcessor<Transformation>
 /*     */ {
-/*  19 */   private static LoggingTool LOG = new LoggingTool(MetaPrintDataBuilder.class);
+/*  19 */   private static ILoggingTool LOG = LoggingToolFactory.createLoggingTool(MetaPrintDataBuilder.class);
 /*     */ 
 /*  21 */   private boolean skipMultistep = true;
 /*  22 */   private boolean skipNoRc = true;
