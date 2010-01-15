@@ -519,8 +519,8 @@ public class InitialTest {
 		Assert.assertEquals(true, clone.getIsReactionCentre());
 	}
 
-	private ReaccsMDLRXNReader getReaccsReader() throws URISyntaxException, IOException{
-		String filename = "data/mdl/First500DB2005AllFields.rdf";
+	private ReaccsMDLRXNReader getReaccsReader(String fileNameString) throws URISyntaxException, IOException{
+		String filename = fileNameString;
 		logger.info("Testing: " + filename);
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
 		URL url = this.getClass().getClassLoader().getResource(filename);
@@ -532,21 +532,48 @@ public class InitialTest {
 	}
 	
 	@Test public void testMoleculeViewer() throws Exception {
-		ReaccsMDLRXNReader reader = getReaccsReader();
-		MoleculeViewer gui = new MoleculeViewer(reader);
+		String f = "data/mdl/First500DB2005AllFields.rdf";
+		ReaccsMDLRXNReader reader = getReaccsReader(f);
+		URL url = this.getClass().getClassLoader().getResource(f);
+		File file = new File(url.toURI());
+		MoleculeViewer gui = new MoleculeViewer(reader, file.getAbsolutePath());
 		gui.setRireg(1);
 		showGUI(gui);
 	}
+	
+//	@Test public void testMoleculeViewerFor73320thRiReg() throws Exception {
+//		ReaccsMDLRXNReader reader = getReaccsReader("data/mdl/73320thRiReg.rdf");
+//		MoleculeViewer gui = new MoleculeViewer(reader);
+//		gui.setRireg(73320);
+//		showGUI(gui);
+//	}
+	
+//	@Test public void testFilteringMoleculeViewerFor73320thRiReg() throws Exception {
+//		String f = "data/mdl/73320thRiReg.rdf";
+//		ReaccsMDLRXNReader reader = getReaccsReader(f);
+//		//		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+//		//		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
+//		//		IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
+//		//		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
+//		URL url = this.getClass().getClassLoader().getResource(f);
+//		File file = new File(url.toURI());
+//		FilteringMoleculeViewer gui = new FilteringMoleculeViewer(reader, file.getAbsolutePath());
+//		showGUI(gui);
+//	}
 
 	@Test public void testFilteringMoleculeViewer() throws Exception {
-		ReaccsMDLRXNReader reader = getReaccsReader();
+		String f = "data/mdl/First500DB2005AllFields.rdf";
+		ReaccsMDLRXNReader reader = getReaccsReader(f);
 		//		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 		//		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
 		//		IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
 		//		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
-		FilteringMoleculeViewer gui = new FilteringMoleculeViewer(reader);
+		URL url = this.getClass().getClassLoader().getResource(f);
+		File file = new File(url.toURI());
+		FilteringMoleculeViewer gui = new FilteringMoleculeViewer(reader, file.getAbsolutePath());
 		showGUI(gui);
 	}
+	
 	
 	public void showGUI(final MoleculeViewer gui){
 		new Runnable() {

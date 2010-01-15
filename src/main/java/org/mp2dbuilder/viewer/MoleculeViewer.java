@@ -80,9 +80,10 @@ public class MoleculeViewer extends JPanel
     
     protected MetaboliteHandler metaboliteHandler = new MetaboliteHandler();
 
-    public MoleculeViewer(ReaccsMDLRXNReader reader) throws Exception {
+    public MoleculeViewer(ReaccsMDLRXNReader reader, String fileName) throws Exception {
         super(new BorderLayout());
         this.reader = reader;
+        this.readerFileName = fileName;
         //Create the toolbar.
         JToolBar toolBar = new JToolBar("Still draggable");
         addButtons(toolBar);
@@ -94,7 +95,7 @@ public class MoleculeViewer extends JPanel
     }
     
     public MoleculeViewer(String fileName) throws Exception {
-    	this(getReaccsReader(fileName));
+    	this(getReaccsReader(fileName), fileName);
     	this.readerFileName = fileName;
     }
     

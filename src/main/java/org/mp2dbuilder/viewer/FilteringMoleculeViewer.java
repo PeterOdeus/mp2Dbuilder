@@ -37,16 +37,20 @@ import org.openscience.cdk.smiles.smarts.parser.ASTStart;
 import org.openscience.cdk.smiles.smarts.parser.ParseException;
 import org.openscience.cdk.smiles.smarts.parser.SMARTSParser;
 import org.openscience.cdk.smiles.smarts.parser.visitor.SmartsQueryVisitor;
+import org.openscience.cdk.tools.ILoggingTool;
+import org.openscience.cdk.tools.LoggingToolFactory;
 
 public class FilteringMoleculeViewer extends MoleculeViewer {
 
+	private static ILoggingTool logger = LoggingToolFactory.createLoggingTool(FilteringMoleculeViewer.class);
 	private List<Integer> riregMap = new ArrayList<Integer>();
 	private int currentItemIndex=-1;
 	protected JTextArea text2;
+	protected JTextArea riregNoText;
 	private IReactionSet currentReactionSet;
 
-	public FilteringMoleculeViewer(ReaccsMDLRXNReader reader) throws Exception {
-		super(reader);
+	public FilteringMoleculeViewer(ReaccsMDLRXNReader reader, String fileName) throws Exception {
+		super(reader, fileName);
 	}
 
 	public FilteringMoleculeViewer(String fileName) throws Exception {
@@ -61,6 +65,10 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 		text2 = new JTextArea(1,3);
 		toolBar.add(new JLabel(" SMARTS#2"));
 		toolBar.add(text2);
+		riregNoText = new JTextArea(1,3);
+		toolBar.add(new JLabel(" RIREG#"));
+		toolBar.add(riregNoText);
+		riregNoText.setText("1");
 		text.setText("[$(NC=O)]");
 		text2.setText("[#6]");
 	}
@@ -191,28 +199,36 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 	
 	private boolean isMatchingBothSmarts(IReactionSet reactionSet) throws CDKException{
 		
-			IAtomContainer reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
-			SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher.getInstance(reactant.getBuilder());
-			reactantMatcher.findMatchingAtomType(reactant);
-			//QueryAtomContainer query = null;//SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
-			String q = text.getText().trim();
-			SMARTSQueryTool sqt = new SMARTSQueryTool(q);//("[NX3;h1,h2,H1,H2;!$(NC=O)]");
-	        boolean status = sqt.matches(reactant);
-	
-			if(status == false){
-				return false;
-			}	
-	
-			IAtomContainer product = reactionSet.getReaction(0).getProducts().getMolecule(0);
-			SybylAtomTypeMatcher productMatcher = SybylAtomTypeMatcher.getInstance(product.getBuilder());
-			// we don't care about the types result,just the transformation the product goes through.
-			//I.e. CDKHueckelAromaticityDetector
-			reactantMatcher.findMatchingAtomType(product);
-			//query = SMARTSParser.parse(text2.getText().trim());
-			//status = UniversalIsomorphismTester.isSubgraph(product, query);
-			q = text2.getText().trim();
-			sqt = new SMARTSQueryTool(q);//("[NX3;h1,h2,H1,H2;!$(NC=O)]");
-	        status = sqt.matches(product);
+			boolean status = false;
+			try {
+				IAtomContainer reactant = reactionSet.getReaction(0).getReactants().getMolecule(0);
+				SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher.getInstance(reactant.getBuilder());
+				reactantMatcher.findMatchingAtomType(reactant);
+				//QueryAtomContainer query = null;//SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
+				String q = text.getText().trim();
+				SMARTSQueryTool sqt = new SMARTSQueryTool(q);//("[NX3;h1,h2,H1,H2;!$(NC=O)]");
+				status = sqt.matches(reactant);
+
+				if(status == false){
+					return false;
+				}	
+
+				IAtomContainer product = reactionSet.getReaction(0).getProducts().getMolecule(0);
+				SybylAtomTypeMatcher productMatcher = SybylAtomTypeMatcher.getInstance(product.getBuilder());
+				// we don't care about the types result,just the transformation the product goes through.
+				//I.e. CDKHueckelAromaticityDetector
+				reactantMatcher.findMatchingAtomType(product);
+				//query = SMARTSParser.parse(text2.getText().trim());
+				//status = UniversalIsomorphismTester.isSubgraph(product, query);
+				q = text2.getText().trim();
+				sqt = new SMARTSQueryTool(q);//("[NX3;h1,h2,H1,H2;!$(NC=O)]");
+				status = sqt.matches(product);
+			} catch (Exception e) {
+				if("Timeout for AllringsFinder exceeded".equals(e.getMessage())){
+					logger.warn("RIREG skipped because of timeout");
+					return false;
+				}
+			}
 	
 			if(status == false){
 				return false;
@@ -261,42 +277,50 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 				currentItemIndex = -1;
 				riregMap.clear();
 				tryToReset();
-				currentRireg = 0;
+				int targetRiregNo = Integer.parseInt(riregNoText.getText());
+				if(targetRiregNo == 1){
+					currentRireg = 0;
+				}else{
+					currentRireg = targetRiregNo - 1;
+					reader.setInitialRiregNo(targetRiregNo);
+				}
 				establishNextFilteredItem();
 				currentItemIndex = riregMap.size() -1;
 				tempCurrentRireg = riregMap.get(currentItemIndex);
 			}
 		}catch(ReaccsFileEndedException reaccsFileEndedException){
-			final Writer result = new StringWriter();
-			final PrintWriter printWriter = new PrintWriter(result);
-			reaccsFileEndedException.printStackTrace(printWriter);
-			JOptionPane.showMessageDialog(this, result.toString());
-			try{
-				try {
-					reader.close();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}finally{
-				if(this.readerFileName != null){
-					currentItemIndex = -1;
-					riregMap.clear();
-					currentRireg = 0;
-					text.setText("[#6]Br");
-					text2.setText("[#6]Br");
-					try {
-						this.reader = getReaccsReader(this.readerFileName);
-						establishNextFilteredItem();
-						currentItemIndex = riregMap.size() -1;
-						tempCurrentRireg = riregMap.get(currentItemIndex);
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-						System.exit(0);
-					}
-				}
-			}
+//			final Writer result = new StringWriter();
+//			final PrintWriter printWriter = new PrintWriter(result);
+//			reaccsFileEndedException.printStackTrace(printWriter);
+//			JOptionPane.showMessageDialog(this, result.toString());
+			JOptionPane.showMessageDialog(this, "End of file reached");
+			return;
+//			try{
+//				try {
+//					reader.close();
+//				} catch (IOException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+//			}finally{
+//				if(this.readerFileName != null){
+//					currentItemIndex = -1;
+//					riregMap.clear();
+//					currentRireg = 0;
+//					text.setText("[#6]Br");
+//					text2.setText("[#6]Br");
+//					try {
+//						this.reader = getReaccsReader(this.readerFileName);
+//						establishNextFilteredItem();
+//						currentItemIndex = riregMap.size() -1;
+//						tempCurrentRireg = riregMap.get(currentItemIndex);
+//					} catch (Exception e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//						System.exit(0);
+//					}
+//				}
+//			}
 		}catch (Exception e1) {
 			final Writer result = new StringWriter();
 			final PrintWriter printWriter = new PrintWriter(result);
