@@ -48,6 +48,8 @@ import prototyping.ReacSmartsTest;
 
 public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 
+	private static final long serialVersionUID = 1L;
+
 	private List<Integer> riregMap = new ArrayList<Integer>();
 	private int currentItemIndex=-1;
 	protected JTextArea text2;
@@ -56,7 +58,7 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 	private List<IReaction> reactionList;
 
 	public ReactSmartsMoleculeViewer(ReaccsMDLRXNReader reader) throws Exception {
-		super(reader);
+		super(reader,null);
 		c=0;
 		initializeReactionList();
 	}
