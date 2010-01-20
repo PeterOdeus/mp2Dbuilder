@@ -129,14 +129,19 @@
 		<version>bioclipse-2.1.x</version>
   	</dependency>
   	<dependency>
+  		<groupId>org.openscience.cdk</groupId>
+		<artifactId>cdk-valencycheck</artifactId>
+		<version>bioclipse-2.1.x</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.openscience.cdk</groupId>
+		<artifactId>cdk-smiles</artifactId>
+		<version>bioclipse-2.1.x</version>
+  	</dependency>
+  	<dependency>
   		<groupId>junit</groupId>
   		<artifactId>junit</artifactId>
   		<version>4.5</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>java3d</groupId>
-  		<artifactId>vecmath</artifactId>
-  		<version>1.3.1</version>
   	</dependency>
   	<dependency>
   		<groupId>jgrapht</groupId>
@@ -153,5 +158,21 @@
   		<artifactId>google-collect</artifactId>
   		<version>snapshot-20080530</version>
   	</dependency>
+  	<dependency>
+  		<groupId>java3d</groupId>
+  		<artifactId>vecmath</artifactId>
+  		<version>1.3.1</version>
+  	</dependency>
   </dependencies>
+  <dependencyManagement>
+  	<dependencies>
+  		<dependency>
+  			<groupId>java3d</groupId>
+  			<artifactId>vecmath</artifactId>
+  			<version>1.3.1</version>
+  			<type>jar</type>
+  			<scope>compile</scope>
+  		</dependency>
+  	</dependencies>
+  </dependencyManagement>
 </project>
