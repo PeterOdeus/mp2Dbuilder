@@ -277,3 +277,27 @@ mvn install:install-file \
   -Dversion=bioclipse-2.1.x \
   -Dpackaging=jar \
   -DgeneratePom=true
+
+mvn install:install-file \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-valencycheck-sources.jar \
+  -DgroupId=org.openscience.cdk \
+  -DartifactId=cdk-valencycheck \
+  -Dversion=bioclipse-2.1.x \
+  -Dpackaging=sources \
+  -DgeneratePom=true
+
+mvn install:install-file \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-smiles.jar \
+  -DgroupId=org.openscience.cdk \
+  -DartifactId=cdk-smiles \
+  -Dversion=bioclipse-2.1.x \
+  -Dpackaging=jar \
+  -DgeneratePom=true
+
+mvn install:install-file \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-smiles-sources.jar \
+  -DgroupId=org.openscience.cdk \
+  -DartifactId=cdk-smiles \
+  -Dversion=bioclipse-2.1.x \
+  -Dpackaging=sources \
+  -DgeneratePom=true
