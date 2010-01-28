@@ -20,9 +20,13 @@ import org.openscience.cdk.io.ReaccsFileEndedException;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.smiles.smarts.ReactionSmartsQueryTool;
 import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
+import org.openscience.cdk.tools.ILoggingTool;
+import org.openscience.cdk.tools.LoggingToolFactory;
 
 public class ReactSmartsMoleculeViewerWorker extends SwingWorker<Void, String> {
 
+	protected static ILoggingTool logger = LoggingToolFactory.createLoggingTool(ReactSmartsMoleculeViewerWorker.class);
+	
 	private String _cmd;
 	private ReactSmartsMoleculeViewer _viewer;
 	
@@ -42,7 +46,13 @@ public class ReactSmartsMoleculeViewerWorker extends SwingWorker<Void, String> {
 	@Override
 	protected void process(List<String> paramList){
 		for(String s: paramList){
-			_viewer.riregNoLabel.setText(s);
+			if(s.startsWith("log:")){
+				_viewer.logTextArea.append(s.substring(4) + "\n");
+			}else if (s.startsWith("deleteLog")){
+				_viewer.logTextArea.setText("");
+			}else{
+				_viewer.riregNoLabel.setText(s);
+			}
 		}
 	}
 	@SuppressWarnings("static-access")
@@ -78,6 +88,7 @@ public class ReactSmartsMoleculeViewerWorker extends SwingWorker<Void, String> {
 				_viewer.currentItemIndex = -1;
 				_viewer.riregMap.clear();
 				_viewer.tryToReset();
+				this.publish("deleteLog");
 				int targetRiregNo = Integer.parseInt(_viewer.riregNoText.getText());
 				if(targetRiregNo == 1){
 					_viewer.currentRireg = 0;
@@ -125,7 +136,7 @@ public class ReactSmartsMoleculeViewerWorker extends SwingWorker<Void, String> {
 			targetRireg++;
 			publish(""+targetRireg);
 			System.out.println(""+targetRireg);
-			if(isMatchingBothSmarts(_viewer.currentReactionSet) == true){
+			if(isMatchingBothSmarts(_viewer.currentReactionSet, targetRireg) == true){
 				_viewer.riregMap.add(targetRireg);
 				break;
 			}
@@ -138,7 +149,7 @@ public class ReactSmartsMoleculeViewerWorker extends SwingWorker<Void, String> {
 	 * @return true if both smarts match in rectant and product
 	 * @throws CDKException
 	 */
-	private boolean isMatchingBothSmarts(IReactionSet reactionSet) throws CDKException{
+	private boolean isMatchingBothSmarts(IReactionSet reactionSet, int currentRireg) throws CDKException{
 		
 		//Get next reaction from list of SMILES
 		IReaction reaction = reactionSet.getReaction(0);
@@ -159,7 +170,18 @@ public class ReactSmartsMoleculeViewerWorker extends SwingWorker<Void, String> {
 		IAtomContainer product = (IAtomContainer) reaction.getProducts().getMolecule(0);
 
 		//If we have at least one match, highlight atoms
-		if(sqt.matches(reaction)){
+		boolean isMatch = false;
+		try{
+			isMatch = sqt.matches(reaction);
+		} catch (Exception e) {
+			if(e.getMessage().indexOf("Timeout for AllringsFinder exceeded") >= 0){
+				String msg = "RIREG#" + currentRireg +  " skipped because of timeout";
+				logger.warn(msg);
+				this.publish("log:" + msg);
+				return false;
+			}
+		}
+		if(isMatch){
 
 	        //List of reactant atom numbers to highlight
         	List<List<Integer>> matchingReactantAtomsList = sqt.getUniqueReactantMatchingAtoms();

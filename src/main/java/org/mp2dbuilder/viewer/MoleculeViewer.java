@@ -37,6 +37,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
@@ -65,7 +66,7 @@ import org.openscience.cdk.tools.LoggingToolFactory;
 
 public class MoleculeViewer extends JPanel
                          implements ActionListener {
-	private static ILoggingTool logger = LoggingToolFactory.createLoggingTool(MoleculeViewer.class);
+	protected static ILoggingTool logger = LoggingToolFactory.createLoggingTool(MoleculeViewer.class);
     protected JTextArea textArea;
     protected String newline = "\n";
     static final protected String PREVIOUS = "previous";
@@ -88,6 +89,7 @@ public class MoleculeViewer extends JPanel
 	public JButton nextButton;
 	public JButton cancelButton;
 	public JButton goButton;
+	public JTextArea logTextArea;
 
     public MoleculeViewer(ReaccsMDLRXNReader reader, String fileName) throws Exception {
         super(new BorderLayout());
@@ -101,6 +103,12 @@ public class MoleculeViewer extends JPanel
         
         add(toolBar, BorderLayout.PAGE_START);
         add(imagePanel, BorderLayout.CENTER);
+        
+        logTextArea = new JTextArea(5, 20);
+        JScrollPane scrollPane = new JScrollPane(logTextArea); 
+        logTextArea.setEditable(false);
+        add(scrollPane,BorderLayout.SOUTH);
+        
     }
     
     public MoleculeViewer(String fileName) throws Exception {

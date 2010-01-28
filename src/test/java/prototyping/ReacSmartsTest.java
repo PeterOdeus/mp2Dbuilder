@@ -144,7 +144,7 @@ SMARTS:
 
 	@Test 
 	public void testReactSmartsMoleculeViewer() throws Exception {
-		String f = "data/mdl/First500DB2005AllFields.rdf";
+		String f = "data/mdl/First500DB2005AllFields.rdf"; //"data/mdl/73320thRiReg.rdf";
 		ReaccsMDLRXNReader reader = getReaccsReader(f);
 		//		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 		//		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
