@@ -20,7 +20,7 @@
 	        <archive>
 	              <manifest>
 	                <addClasspath>true</addClasspath>
-	                <mainClass>org.mp2dbuilder.viewer.FilteringMoleculeViewer</mainClass>
+	                <mainClass>org.mp2dbuilder.viewer.ReactSmartsMoleculeViewer</mainClass>
 	              </manifest>
 	        </archive>
 	      </configuration>

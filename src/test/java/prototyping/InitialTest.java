@@ -133,7 +133,7 @@ public class InitialTest {
 	}
 
 	@Test public void testReactantAndProductWithoutMCS() throws Exception {
-		doTestCommonIdEquality(311);		
+		//doTestCommonIdEquality(311);		
 	}
 
 	@SuppressWarnings("unchecked")
@@ -537,8 +537,8 @@ public class InitialTest {
 		URL url = this.getClass().getClassLoader().getResource(f);
 		File file = new File(url.toURI());
 		MoleculeViewer gui = new MoleculeViewer(reader, file.getAbsolutePath());
-		gui.setRireg(1);
-		showGUI(gui);
+		//gui.setRireg(1);
+		showGUI(gui, true);
 	}
 	
 //	@Test public void testMoleculeViewerFor73320thRiReg() throws Exception {
@@ -571,11 +571,11 @@ public class InitialTest {
 		URL url = this.getClass().getClassLoader().getResource(f);
 		File file = new File(url.toURI());
 		FilteringMoleculeViewer gui = new FilteringMoleculeViewer(reader, file.getAbsolutePath());
-		showGUI(gui);
+		showGUI(gui, false);
 	}
 	
 	
-	public void showGUI(final MoleculeViewer gui){
+	public void showGUI(final MoleculeViewer gui, final boolean showFirstRireg){
 		new Runnable() {
 			boolean shouldExit = false;
 			public void run() {
@@ -594,6 +594,9 @@ public class InitialTest {
 					frame.getContentPane().add(gui);
 					frame.pack();
 					frame.setVisible(true);
+					if(showFirstRireg){
+						gui.nextButton.doClick();
+					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

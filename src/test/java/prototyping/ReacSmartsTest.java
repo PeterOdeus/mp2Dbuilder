@@ -36,9 +36,7 @@ public class ReacSmartsTest {
 
 	private static ILoggingTool logger =  null;//LoggingToolFactory.createLoggingTool(InitialTest.class); // new LoggingTool();
 
-	//Our dealkylation smarts definition
-	public static String N_DEALKYLATION_REACTANT_SMARTS="[$([CH3][NH0;X3:1]([CH3])[*:2])]";
-	public static String N_DEALKYLATION_PRODUCT_SMARTS="[CH3][NH:1][*:2]";
+	
 
 	//Our hydroxylation smarts definition
 	private static String HYDROXYLATION_REACTANT_SMARTS="[$([*:1])]";
@@ -68,26 +66,34 @@ SMARTS:
 
 //		//No dealkylation, daylight and we return false
 		rsmiles="CCCN(C)C>>CCN(C)C";
-		assertFalse(isDoubleMatch(rsmiles, N_DEALKYLATION_REACTANT_SMARTS, N_DEALKYLATION_PRODUCT_SMARTS));
+		assertFalse(isDoubleMatch(rsmiles, 
+				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
+				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
 //
 //		//This is a dealkylation without any difficulties.
 //		//Daylight depict results in hit in subs and product
 //		//This should return true, classes do not make difference in this case
 		rsmiles="CCCCCCCN(C)C>>CCCCCCCNC";
-		assertTrue(isDoubleMatch(rsmiles, N_DEALKYLATION_REACTANT_SMARTS, N_DEALKYLATION_PRODUCT_SMARTS));
+		assertTrue(isDoubleMatch(rsmiles, 
+				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
+				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
 
 		
 //		This test has match in substrate and product but not on a conserved N.
 //		Daylight depict returns true for [$([CH3][NH0;X3]([CH3])[*])]>>[CH3][NH][*] (No classes)
 //		but we should return no matches due to non-conservation.
 		rsmiles="CNC(CC=OC)CCCCN(C)C>>CNC(CC=OC)CCCCN(C)C";
-		assertFalse(isDoubleMatch(rsmiles, N_DEALKYLATION_REACTANT_SMARTS, N_DEALKYLATION_PRODUCT_SMARTS));
+		assertFalse(isDoubleMatch(rsmiles, 
+				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
+				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
 
 ////		This test has match in substrate and 2 matches in product, but only one is conserved.
 ////		Daylight depict returns true for [$([CH3][NH0;X3]([CH3])[*])]>>[CH3][NH][*] (No classes)
 ////		but we should return no matches due to non-conservation.
 		rsmiles="CNCC(O)CCCN(C)C>>CNCC(O)CCCNC";
-		assertTrue(isDoubleMatch(rsmiles, N_DEALKYLATION_REACTANT_SMARTS, N_DEALKYLATION_PRODUCT_SMARTS));
+		assertTrue(isDoubleMatch(rsmiles, 
+				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
+				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
 		
 		
 	}
@@ -138,8 +144,15 @@ SMARTS:
 
 	@Test 
 	public void testReactSmartsMoleculeViewer() throws Exception {
-		ReaccsMDLRXNReader reader = getReaccsReader();
-		ReactSmartsMoleculeViewer gui = new ReactSmartsMoleculeViewer(reader);
+		String f = "data/mdl/First500DB2005AllFields.rdf";
+		ReaccsMDLRXNReader reader = getReaccsReader(f);
+		//		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+		//		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
+		//		IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
+		//		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
+		URL url = this.getClass().getClassLoader().getResource(f);
+		File file = new File(url.toURI());
+		ReactSmartsMoleculeViewer gui = new ReactSmartsMoleculeViewer(reader, file.getAbsolutePath());
 		showGUI(gui);
 	}
 	
@@ -179,8 +192,7 @@ SMARTS:
 		
 	}
 	
-	private ReaccsMDLRXNReader getReaccsReader() throws URISyntaxException, IOException{
-		String filename = "data/mdl/First500DB2005AllFields.rdf";
+	private ReaccsMDLRXNReader getReaccsReader(String filename) throws URISyntaxException, IOException{
 		logger.info("Testing: " + filename);
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
 		URL url = this.getClass().getClassLoader().getResource(filename);

@@ -33,19 +33,12 @@ Add jchempaint jars to local Maven repo
 	git clone http://pele.farmbio.uu.se/git/jchempaint-primary.git/
 	cd jchempaint-primary
 	git checkout -b bc-2.1.x origin/bioclipse-2.1.x
-	edit build.xml to generate source jar files when building:
-		inside ant target "compile-module", append the following BEFORE "<!-- clean up afterwards -->":
-			<jar jarfile="${dist}/jar/cdk-${module}-sources.jar">
-				<fileset dir="${build.src}/${module}">
-					<include name="**/*.java" />
-				</fileset>
-			</jar>
 	ant dist-all
 	../mp2Dbuilder/installCDKIntoMaven
 	
 Maven build
 	In its current incarnation, when performing the "package" goal of Maven, a jar will be built specifically 
-	for the MoleculeViewer being the main class.
+	for the ReactSmartsMoleculeViewer being the main class.
 	The resulting jar can be found in the target directory and can be executed by issuing the following command:
 	java -Dcdk.debugging=true -jar mp2Dbuilder-0.0.1-SNAPSHOT.jar /home/podeus/dev/azWorkspace/mp2Dbuilder/src/test/resources/data/mdl/First500DB2005AllFields.rdf
 	

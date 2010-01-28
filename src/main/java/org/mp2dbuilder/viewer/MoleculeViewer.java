@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -39,6 +40,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 import org.mp2dbuilder.builder.MetaboliteHandler;
 import org.mp2dbuilder.renderer.generators.ReactionCentreGenerator;
@@ -71,14 +73,21 @@ public class MoleculeViewer extends JPanel
     final protected JLabel riregNoLabel = new JLabel("null");;
     static final protected String NEXT = "next";
     static final protected String GOTO = "Go";
+    static final protected String CANCEL = "cancel";
     
     protected ReaccsMDLRXNReader reader;
     protected ImagePanel imagePanel;
     protected int currentRireg = 0;
     
+    protected SwingWorker swingWorker = null;
+    
     protected String readerFileName;
     
     protected MetaboliteHandler metaboliteHandler = new MetaboliteHandler();
+	private JButton previousButton;
+	public JButton nextButton;
+	public JButton cancelButton;
+	public JButton goButton;
 
     public MoleculeViewer(ReaccsMDLRXNReader reader, String fileName) throws Exception {
         super(new BorderLayout());
@@ -122,27 +131,27 @@ public class MoleculeViewer extends JPanel
 		}
 	}
     
-    public void setRireg(int targetRireg) throws Exception{
-    	boolean isReset = false;
-    	if(targetRireg <= currentRireg){
-    		tryToReset();
-    		isReset = true;
-    	}
-    	currentRireg = targetRireg;
-    	if(currentRireg < 1){
-    		currentRireg = 1;
-    	}
-    	this.riregNoLabel.setText(this.currentRireg + "");
-    	if(isReset == true){
-    		reader.setInitialRiregNo(currentRireg);
-    	}
-    	this.generateImage();
-    	SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				repaint();
-			}
-		});
-    }
+//    public void setRireg(int targetRireg) throws Exception{
+//    	boolean isReset = false;
+//    	if(targetRireg <= currentRireg){
+//    		tryToReset();
+//    		isReset = true;
+//    	}
+//    	currentRireg = targetRireg;
+//    	if(currentRireg < 1){
+//    		currentRireg = 1;
+//    	}
+//    	this.riregNoLabel.setText(this.currentRireg + "");
+//    	if(isReset == true){
+//    		reader.setInitialRiregNo(currentRireg);
+//    	}
+//    	this.generateImage();
+////    	SwingUtilities.invokeLater(new Runnable() {
+////			public void run() {
+////				repaint();
+////			}
+////		});
+//    }
     
     protected IReactionSet getNextReactionSetForRendering() throws ReaccsFileEndedException, CDKException{
     	return (IReactionSet)reader.read(new NNReactionSet());
@@ -245,15 +254,14 @@ public class MoleculeViewer extends JPanel
 	}
 
     protected void addButtons(JToolBar toolBar) {
-        JButton button = null;
-        text = new JTextArea(1,3);
+    	text = new JTextArea(1,3);
         JLabel riregNoLabelLabel = new JLabel("current RIREG: ");
         //riregNoLabel = new JLabel("null");
         //first button
-        button = makeNavigationButton("Back", PREVIOUS,
+        previousButton = makeNavigationButton("Back", PREVIOUS,
                                       "Back to previous something-or-other",
                                       "Previous");
-        toolBar.add(button);
+        toolBar.add(previousButton);
 
         toolBar.add(riregNoLabelLabel);
         toolBar.add(riregNoLabel);
@@ -263,10 +271,14 @@ public class MoleculeViewer extends JPanel
         //third button
         addGoButton(toolBar);
         
-        button = makeNavigationButton("Forward", NEXT,
+        cancelButton = makeNavigationButton("Cancel", CANCEL, "Cancel current operation", "Cancel");
+        cancelButton.setEnabled(false);
+        toolBar.add(cancelButton);
+        
+        nextButton = makeNavigationButton("Forward", NEXT,
                 "Forward to something-or-other",
                 "Next");
-        toolBar.add(button);
+        toolBar.add(nextButton);
     }
     
     protected void addTextfields(JToolBar toolBar){
@@ -274,11 +286,10 @@ public class MoleculeViewer extends JPanel
     }
     
     protected void addGoButton(JToolBar toolBar){
-    	JButton button = null;
-    	button = makeNavigationButton("GO", GOTO,
+    	goButton = makeNavigationButton("GO", GOTO,
                 "Forward to specific rireg",
                 "Go");
-    	toolBar.add(button);
+    	toolBar.add(goButton);
     }
 
     protected JButton makeNavigationButton(String imageName,
@@ -307,29 +318,34 @@ public class MoleculeViewer extends JPanel
     }
 
     public void actionPerformed(ActionEvent e) {
-        String cmd = e.getActionCommand();
-        String description = null;
-
-        // Handle each button.
-        try{
-	        if (PREVIOUS.equals(cmd)) { //first button clicked
-	            this.setRireg(this.currentRireg - 1);
-	        } else if (NEXT.equals(cmd)) { 
-	        	this.setRireg(this.currentRireg + 1);
-	        } else if (GOTO.equals(cmd)) { // third button clicked
-	        	tryToReset();
-	        	reader.setInitialRiregNo(Integer.valueOf(text.getText().trim()));
-	        	this.setRireg(Integer.valueOf(text.getText().trim()));
-	        }
-        }
-        catch (Exception e1) {
-        	final Writer result = new StringWriter();
-            final PrintWriter printWriter = new PrintWriter(result);
-            e1.printStackTrace(printWriter);
-            JOptionPane.showMessageDialog(this, result.toString());
-			throw new RuntimeException(e1);
-		}
-    }
+    	//if(swingWorker == null){
+    		swingWorker = new MoleculeViewerWorker(this, e.getActionCommand());
+    	//}
+    	swingWorker.execute();
+	}
+//    public void executeWorkerThreadtask(String cmd) {
+//        String description = null;
+//
+//        // Handle each button.
+//        try{
+//	        if (PREVIOUS.equals(cmd)) { //first button clicked
+//	            this.setRireg(this.currentRireg - 1);
+//	        } else if (NEXT.equals(cmd)) { 
+//	        	this.setRireg(this.currentRireg + 1);
+//	        } else if (GOTO.equals(cmd)) { // third button clicked
+//	        	tryToReset();
+//	        	reader.setInitialRiregNo(Integer.valueOf(text.getText().trim()));
+//	        	this.setRireg(Integer.valueOf(text.getText().trim()));
+//	        }
+//        }
+//        catch (Exception e1) {
+//        	final Writer result = new StringWriter();
+//            final PrintWriter printWriter = new PrintWriter(result);
+//            e1.printStackTrace(printWriter);
+//            JOptionPane.showMessageDialog(this, result.toString());
+//			throw new RuntimeException(e1);
+//		}
+//    }
 
     protected void displayResult(String actionDescription) {
         textArea.append(actionDescription + newline);
@@ -357,11 +373,11 @@ public class MoleculeViewer extends JPanel
     	fileName = args[0];
     	logger.info("using file:" + fileName);
     	MoleculeViewer gui = new MoleculeViewer(fileName);
-		gui.setRireg(1);
-		showGUI(gui);
+		//gui.setRireg(1);
+		showGUI(gui, true);
     }
     
-    protected static void showGUI(final MoleculeViewer gui){
+    protected static void showGUI(final MoleculeViewer gui, boolean showFirstRireg){
     	try {
 
 			JFrame frame = new JFrame("Reactant - Product - MCS");
@@ -377,6 +393,9 @@ public class MoleculeViewer extends JPanel
 			frame.getContentPane().add(gui);
 			frame.pack();
 			frame.setVisible(true);
+			if(showFirstRireg){
+				gui.nextButton.doClick();
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

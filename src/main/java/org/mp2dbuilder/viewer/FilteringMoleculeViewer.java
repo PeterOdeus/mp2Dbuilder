@@ -43,11 +43,11 @@ import org.openscience.cdk.tools.LoggingToolFactory;
 public class FilteringMoleculeViewer extends MoleculeViewer {
 
 	private static ILoggingTool logger = LoggingToolFactory.createLoggingTool(FilteringMoleculeViewer.class);
-	private List<Integer> riregMap = new ArrayList<Integer>();
-	private int currentItemIndex=-1;
+	List<Integer> riregMap = new ArrayList<Integer>();
+	int currentItemIndex=-1;
 	protected JTextArea text2;
 	protected JTextArea riregNoText;
-	private IReactionSet currentReactionSet;
+	IReactionSet currentReactionSet;
 
 	public FilteringMoleculeViewer(ReaccsMDLRXNReader reader, String fileName) throws Exception {
 		super(reader, fileName);
@@ -55,7 +55,6 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 
 	public FilteringMoleculeViewer(String fileName) throws Exception {
 		super(fileName);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -66,7 +65,7 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 		toolBar.add(new JLabel(" SMARTS#2"));
 		toolBar.add(text2);
 		riregNoText = new JTextArea(1,3);
-		toolBar.add(new JLabel(" RIREG#"));
+		toolBar.add(new JLabel("Start @ RIREG#"));
 		toolBar.add(riregNoText);
 		riregNoText.setText("1");
 		text.setText("[$(NC=O)]");
@@ -197,7 +196,7 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 		imagePanel = new ImagePanel(i1,i2,null);
 	}
 	
-	private boolean isMatchingBothSmarts(IReactionSet reactionSet) throws CDKException{
+	boolean isMatchingBothSmarts(IReactionSet reactionSet) throws CDKException{
 		
 			boolean status = false;
 			try {
@@ -236,109 +235,90 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 		return true;
 	}
 
-	private void establishNextFilteredItem() throws ReaccsFileEndedException, CDKException{
-		int i = 0;
-		int targetRireg = this.currentRireg;
-		while(true){
-			currentReactionSet = (IReactionSet)reader.read(new NNReactionSet());
-			targetRireg++;
-			System.out.println(""+targetRireg);
-			if(isMatchingBothSmarts(currentReactionSet) == true){
-				riregMap.add(targetRireg);
-				break;
-			}
+//	private void establishNextFilteredItem() throws ReaccsFileEndedException, CDKException{
+//		int i = 0;
+//		int targetRireg = this.currentRireg;
+//		while(true){
+//			currentReactionSet = (IReactionSet)reader.read(new NNReactionSet());
+//			targetRireg++;
+//			System.out.println(""+targetRireg);
+//			riregNoText.setText(""+targetRireg);
+//			if(isMatchingBothSmarts(currentReactionSet) == true){
+//				riregMap.add(targetRireg);
+//				break;
+//			}
+//		}
+//	}
+	
+//	private void executeWorkerThreadtask(String cmd) {
+//		currentReactionSet = null;
+//		int tempCurrentRireg = 0;
+//		try{
+//			if (PREVIOUS.equals(cmd)) { //first button clicked
+//				if(currentItemIndex == 0){
+//					JOptionPane.showMessageDialog(this, "Don't go there.");
+//					return;
+//				}
+//				tempCurrentRireg = riregMap.get(currentItemIndex - 1);
+//				currentItemIndex -= 1;
+//			} else if (NEXT.equals(cmd)) { 
+//				currentItemIndex++;
+//				if(currentItemIndex >= riregMap.size()){
+//					establishNextFilteredItem();
+//					currentItemIndex = riregMap.size() -1;
+//					tempCurrentRireg = riregMap.get(currentItemIndex);
+//				}else{
+//					tempCurrentRireg = riregMap.get(currentItemIndex);
+//					tryToReset();
+//					reader.setInitialRiregNo(tempCurrentRireg);
+//				}
+//			} else if (GOTO.equals(cmd)) { // third button clicked
+//				currentItemIndex = -1;
+//				riregMap.clear();
+//				tryToReset();
+//				int targetRiregNo = Integer.parseInt(riregNoText.getText());
+//				if(targetRiregNo == 1){
+//					currentRireg = 0;
+//				}else{
+//					currentRireg = targetRiregNo - 1;
+//					reader.setInitialRiregNo(targetRiregNo);
+//				}
+//				establishNextFilteredItem();
+//				currentItemIndex = riregMap.size() -1;
+//				tempCurrentRireg = riregMap.get(currentItemIndex);
+//			}
+//		}catch(ReaccsFileEndedException reaccsFileEndedException){
+//			JOptionPane.showMessageDialog(this, "End of file reached");
+//			return;
+//		}catch (Exception e1) {
+//			final Writer result = new StringWriter();
+//			final PrintWriter printWriter = new PrintWriter(result);
+//			e1.printStackTrace(printWriter);
+//			JOptionPane.showMessageDialog(this, result.toString());
+//			throw new RuntimeException(e1);
+//		}
+//		try {
+//			//setRireg(tempCurrentRireg);
+//		} catch (Exception e1) {
+//			final Writer result = new StringWriter();
+//			final PrintWriter printWriter = new PrintWriter(result);
+//			e1.printStackTrace(printWriter);
+//			JOptionPane.showMessageDialog(this, result.toString());
+//			throw new RuntimeException(e1);
+//		}
+//	}
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if(!CANCEL.equals(e.getActionCommand())){
+			cancelButton.setEnabled(true);
+			swingWorker = new FilteringMoleculeViewerWorker(this, e.getActionCommand());
+	    	swingWorker.execute();
+		}else{
+			swingWorker.cancel(true);
+			cancelButton.setEnabled(false);
 		}
 	}
 	
-	public void actionPerformed(ActionEvent e) {
-		currentReactionSet = null;
-		String cmd = e.getActionCommand();
-		int tempCurrentRireg = 0;
-		try{
-			if (PREVIOUS.equals(cmd)) { //first button clicked
-				if(currentItemIndex == 0){
-					JOptionPane.showMessageDialog(this, "Don't go there.");
-					return;
-				}
-				tempCurrentRireg = riregMap.get(currentItemIndex - 1);
-				currentItemIndex -= 1;
-			} else if (NEXT.equals(cmd)) { 
-				currentItemIndex++;
-				if(currentItemIndex >= riregMap.size()){
-					establishNextFilteredItem();
-					currentItemIndex = riregMap.size() -1;
-					tempCurrentRireg = riregMap.get(currentItemIndex);
-				}else{
-					tempCurrentRireg = riregMap.get(currentItemIndex);
-					tryToReset();
-					reader.setInitialRiregNo(tempCurrentRireg);
-				}
-			} else if (GOTO.equals(cmd)) { // third button clicked
-				currentItemIndex = -1;
-				riregMap.clear();
-				tryToReset();
-				int targetRiregNo = Integer.parseInt(riregNoText.getText());
-				if(targetRiregNo == 1){
-					currentRireg = 0;
-				}else{
-					currentRireg = targetRiregNo - 1;
-					reader.setInitialRiregNo(targetRiregNo);
-				}
-				establishNextFilteredItem();
-				currentItemIndex = riregMap.size() -1;
-				tempCurrentRireg = riregMap.get(currentItemIndex);
-			}
-		}catch(ReaccsFileEndedException reaccsFileEndedException){
-//			final Writer result = new StringWriter();
-//			final PrintWriter printWriter = new PrintWriter(result);
-//			reaccsFileEndedException.printStackTrace(printWriter);
-//			JOptionPane.showMessageDialog(this, result.toString());
-			JOptionPane.showMessageDialog(this, "End of file reached");
-			return;
-//			try{
-//				try {
-//					reader.close();
-//				} catch (IOException e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				}
-//			}finally{
-//				if(this.readerFileName != null){
-//					currentItemIndex = -1;
-//					riregMap.clear();
-//					currentRireg = 0;
-//					text.setText("[#6]Br");
-//					text2.setText("[#6]Br");
-//					try {
-//						this.reader = getReaccsReader(this.readerFileName);
-//						establishNextFilteredItem();
-//						currentItemIndex = riregMap.size() -1;
-//						tempCurrentRireg = riregMap.get(currentItemIndex);
-//					} catch (Exception e1) {
-//						// TODO Auto-generated catch block
-//						e1.printStackTrace();
-//						System.exit(0);
-//					}
-//				}
-//			}
-		}catch (Exception e1) {
-			final Writer result = new StringWriter();
-			final PrintWriter printWriter = new PrintWriter(result);
-			e1.printStackTrace(printWriter);
-			JOptionPane.showMessageDialog(this, result.toString());
-			throw new RuntimeException(e1);
-		}
-		try {
-			setRireg(tempCurrentRireg);
-		} catch (Exception e1) {
-			final Writer result = new StringWriter();
-			final PrintWriter printWriter = new PrintWriter(result);
-			e1.printStackTrace(printWriter);
-			JOptionPane.showMessageDialog(this, result.toString());
-			throw new RuntimeException(e1);
-		}
-	}
-
 	public static void main(String[] args) throws Exception, IOException{
 		String fileName = null;
 		if(args ==  null || (args != null && args.length == 0)){
@@ -348,7 +328,7 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 		fileName = args[0];
 		MoleculeViewer gui = new FilteringMoleculeViewer(fileName);
 		//gui.setRireg(1);
-		showGUI(gui);
+		showGUI(gui, false);
 	}
 
 }

@@ -3,23 +3,14 @@ package org.mp2dbuilder.viewer;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
-import org.junit.Assert;
 import org.mp2dbuilder.builder.MetaboliteHandler;
-import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.interfaces.IAtom;
@@ -31,36 +22,32 @@ import org.openscience.cdk.io.ReaccsFileEndedException;
 import org.openscience.cdk.io.ReaccsMDLRXNReader;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.isomorphism.matchers.IQueryAtom;
-import org.openscience.cdk.isomorphism.matchers.IQueryAtomContainer;
-import org.openscience.cdk.isomorphism.matchers.QueryAtomContainer;
 import org.openscience.cdk.isomorphism.mcss.RMap;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
-import org.openscience.cdk.smiles.smarts.ReactionSmartsQueryTool;
-import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
-import org.openscience.cdk.smiles.smarts.parser.ASTStart;
-import org.openscience.cdk.smiles.smarts.parser.ParseException;
-import org.openscience.cdk.smiles.smarts.parser.SMARTSParser;
-import org.openscience.cdk.smiles.smarts.parser.visitor.SmartsQueryVisitor;
 
-import prototyping.ReacSmartsTest;
+//import prototyping.ReacSmartsTest;
 
 public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 
+	//Our dealkylation smarts definition
+	public static String N_DEALKYLATION_REACTANT_SMARTS="[$([CH3][NH0;X3:1]([CH3])[*:2])]";
+	public static String N_DEALKYLATION_PRODUCT_SMARTS="[CH3][NH:1][*:2]";
+	
 	private static final long serialVersionUID = 1L;
 
-	private List<Integer> riregMap = new ArrayList<Integer>();
-	private int currentItemIndex=-1;
+	List<Integer> riregMap = new ArrayList<Integer>();
+	public int currentItemIndex=-1;
 	protected JTextArea text2;
-	private IReactionSet currentReactionSet;
-	private int c;
-	private List<IReaction> reactionList;
+	IReactionSet currentReactionSet;
+	public List<IReaction> reactionList;
 
-	public ReactSmartsMoleculeViewer(ReaccsMDLRXNReader reader) throws Exception {
-		super(reader,null);
-		c=0;
-		initializeReactionList();
+	JTextArea riregNoText;
+
+	public ReactSmartsMoleculeViewer(ReaccsMDLRXNReader reader, String filename) throws Exception {
+		super(reader,filename);
+		//initializeReactionList();
 	}
 
 	private void initializeReactionList() throws InvalidSmilesException {
@@ -75,7 +62,6 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 
 	public ReactSmartsMoleculeViewer(String fileName) throws Exception {
 		super(fileName);
-		c=0;
 	}
 
 	@Override
@@ -85,8 +71,12 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 		text2 = new JTextArea(1,3);
 		toolBar.add(new JLabel(" SMARTS#2"));
 		toolBar.add(text2);
-		text.setText(ReacSmartsTest.N_DEALKYLATION_REACTANT_SMARTS);
-		text2.setText(ReacSmartsTest.N_DEALKYLATION_PRODUCT_SMARTS);
+		riregNoText = new JTextArea(1,3);
+		toolBar.add(new JLabel("Start @ RIREG#"));
+		toolBar.add(riregNoText);
+		riregNoText.setText("1");
+		text.setText(N_DEALKYLATION_REACTANT_SMARTS);
+		text2.setText(N_DEALKYLATION_PRODUCT_SMARTS);
 	}
 
 	@Override
@@ -105,45 +95,10 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 
 		try{
 			
-			//Get next reaction from list of SMILES
-			IReaction reaction = getCurrentReaction();
-
-			//Get the two input smarts and set up query tool
-			//TODO: factor out to be separated by >>
-			String reactantQuery = text.getText().trim();
-			String productQuery = text2.getText().trim();
-			ReactionSmartsQueryTool sqt = new ReactionSmartsQueryTool(reactantQuery,productQuery);
+			IReactionSet reactionSet = getNextReactionSetForRendering();
 			
-			//We also know we only have one reactant and one product
-			IAtomContainer reactant = (IAtomContainer) reaction.getReactants().getMolecule(0);
-			IAtomContainer product = (IAtomContainer) reaction.getProducts().getMolecule(0);
-
-			//If we have at least one match, highlight atoms
-			if(sqt.matches(reaction)){
-
-		        //List of reactant atom numbers to highlight
-	        	List<List<Integer>> matchingReactantAtomsList = sqt.getUniqueReactantMatchingAtoms();
-		        IAtom targetAtom = null;
-		        for(List<Integer> list: matchingReactantAtomsList){
-		        	for(Integer i: list){
-		        		targetAtom = reactant.getAtom(i);
-		        		targetAtom.setProperty(MetaboliteHandler.SMART_HIT_FIELD_NAME, new Boolean(true));
-		        	}
-		        }
-
-				//Process product matches
-	        	List<List<Integer>> matchingProductAtomsList = sqt.getUniqueProductMatchingAtoms();
-		        targetAtom = null;
-		        
-		        //List of product atom numbers to highlight
-		        for(List<Integer> list: matchingProductAtomsList){
-		        	for(Integer i: list){
-		        		targetAtom = product.getAtom(i);
-		        		targetAtom.setProperty(MetaboliteHandler.SMART_HIT_FIELD_NAME, new Boolean(true));
-		        	}
-		        }
-
-			}
+			IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
+			IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
 			
 			i1 = getImage(reactant, null, true, product, 2);
 			i2 = getImage(product, null, true, null, 2);
@@ -218,138 +173,146 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 		imagePanel = new ImagePanel(i1,i2,null);
 	}
 
-	/**
-	 * 
-	 * @param reactionSet
-	 * @return true if both smarts match in rectant and product
-	 * @throws CDKException
-	 */
-	private boolean isMatchingBothSmarts(IReactionSet reactionSet) throws CDKException{
+//	/**
+//	 * 
+//	 * @param reactionSet
+//	 * @return true if both smarts match in rectant and product
+//	 * @throws CDKException
+//	 */
+//	private boolean isMatchingBothSmarts(IReactionSet reactionSet) throws CDKException{
+//
+//		if (true)
+//			return true;
+//		
+//		String reactantQuery = text.getText().trim();
+//		String productQuery = text2.getText().trim();
+//		ReactionSmartsQueryTool sqt = new ReactionSmartsQueryTool(reactantQuery,productQuery);
+//		
+//		//We know we only have one reaction in the reactionset
+//		IReaction reaction = reactionSet.getReaction(0);
+//		
+//		//It seems we need to do atom typing for SMARTS matching to work. TODO: Confirm
+//		IAtomContainer reactant = (IAtomContainer) reaction.getReactants().getMolecule(0);
+//		SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher.getInstance(reactant.getBuilder());
+//		reactantMatcher.findMatchingAtomType(reactant);
+//
+//		IAtomContainer product = (IAtomContainer) reaction.getProducts().getMolecule(0);
+//		SybylAtomTypeMatcher productMatcher = SybylAtomTypeMatcher.getInstance(product.getBuilder());
+//		reactantMatcher.findMatchingAtomType(product);
+//
+//		//If we have a match in both reactant and products
+//		if(sqt.matches(reaction)){
+//			return true;
+//		}
+//		else
+//			return false;
+//	}
 
-		if (true)
-			return true;
-		
-		String reactantQuery = text.getText().trim();
-		String productQuery = text2.getText().trim();
-		ReactionSmartsQueryTool sqt = new ReactionSmartsQueryTool(reactantQuery,productQuery);
-		
-		//We know we only have one reaction in the reactionset
-		IReaction reaction = reactionSet.getReaction(0);
-		
-		//It seems we need to do atom typing for SMARTS matching to work. TODO: Confirm
-		IAtomContainer reactant = (IAtomContainer) reaction.getReactants().getMolecule(0);
-		SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher.getInstance(reactant.getBuilder());
-		reactantMatcher.findMatchingAtomType(reactant);
-
-		IAtomContainer product = (IAtomContainer) reaction.getProducts().getMolecule(0);
-		SybylAtomTypeMatcher productMatcher = SybylAtomTypeMatcher.getInstance(product.getBuilder());
-		reactantMatcher.findMatchingAtomType(product);
-
-		//If we have a match in both reactant and products
-		if(sqt.matches(reaction)){
-			return true;
-		}
-		else
-			return false;
-	}
-
-	private void establishNextFilteredItem() throws ReaccsFileEndedException, CDKException{
-		int i = 0;
-		int targetRireg = this.currentRireg;
-		while(true){
-			currentReactionSet = (IReactionSet)reader.read(new NNReactionSet());
-			targetRireg++;
-			System.out.println(""+targetRireg);
-			if(isMatchingBothSmarts(currentReactionSet) == true){
-				riregMap.add(targetRireg);
-				break;
-			}
-		}
-	}
+//	private void establishNextFilteredItem() throws ReaccsFileEndedException, CDKException{
+//		int i = 0;
+//		int targetRireg = this.currentRireg;
+//		while(true){
+//			currentReactionSet = (IReactionSet)reader.read(new NNReactionSet());
+//			targetRireg++;
+//			System.out.println(""+targetRireg);
+//			if(isMatchingBothSmarts(currentReactionSet) == true){
+//				riregMap.add(targetRireg);
+//				break;
+//			}
+//		}
+//	}
 	
 	public void actionPerformed(ActionEvent e) {
-		currentReactionSet = null;
-		String cmd = e.getActionCommand();
-		int tempCurrentRireg = 0;
-		try{
-			if (PREVIOUS.equals(cmd)) { //first button clicked
-				if(currentItemIndex == 0){
-					JOptionPane.showMessageDialog(this, "This is the first structure.");
-					return;
-				}
-				tempCurrentRireg = riregMap.get(currentItemIndex - 1);
-				currentItemIndex -= 1;
-			} else if (NEXT.equals(cmd)) { 
-				if(currentItemIndex == (reactionList.size()-1)){
-					JOptionPane.showMessageDialog(this, "This is the last structure.");
-					return;
-				}
-				currentItemIndex++;
-				if(currentItemIndex >= riregMap.size()){
-					establishNextFilteredItem();
-					currentItemIndex = riregMap.size() -1;
-					tempCurrentRireg = riregMap.get(currentItemIndex);
-				}else{
-					tempCurrentRireg = riregMap.get(currentItemIndex);
-					tryToReset();
-					reader.setInitialRiregNo(tempCurrentRireg);
-				}
-			} else if (GOTO.equals(cmd)) { // third button clicked
-				currentItemIndex = -1;
-				riregMap.clear();
-				tryToReset();
-				currentRireg = 0;
-				establishNextFilteredItem();
-				currentItemIndex = riregMap.size() -1;
-				tempCurrentRireg = riregMap.get(currentItemIndex);
-			}
-		}catch(ReaccsFileEndedException reaccsFileEndedException){
-			final Writer result = new StringWriter();
-			final PrintWriter printWriter = new PrintWriter(result);
-			reaccsFileEndedException.printStackTrace(printWriter);
-			JOptionPane.showMessageDialog(this, result.toString());
-			try{
-				try {
-					reader.close();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}finally{
-				if(this.readerFileName != null){
-					currentItemIndex = -1;
-					riregMap.clear();
-					currentRireg = 0;
-					text.setText("[#6]Br");
-					text2.setText("[#6]Br");
-					try {
-						this.reader = getReaccsReader(this.readerFileName);
-						establishNextFilteredItem();
-						currentItemIndex = riregMap.size() -1;
-						tempCurrentRireg = riregMap.get(currentItemIndex);
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-						System.exit(0);
-					}
-				}
-			}
-		}catch (Exception e1) {
-			final Writer result = new StringWriter();
-			final PrintWriter printWriter = new PrintWriter(result);
-			e1.printStackTrace(printWriter);
-			JOptionPane.showMessageDialog(this, result.toString());
-			throw new RuntimeException(e1);
+		if(!CANCEL.equals(e.getActionCommand())){
+			cancelButton.setEnabled(true);
+			swingWorker = new ReactSmartsMoleculeViewerWorker(this, e.getActionCommand());
+	    	swingWorker.execute();
+		}else{
+			swingWorker.cancel(true);
+			cancelButton.setEnabled(false);
 		}
-		try {
-			setRireg(tempCurrentRireg);
-		} catch (Exception e1) {
-			final Writer result = new StringWriter();
-			final PrintWriter printWriter = new PrintWriter(result);
-			e1.printStackTrace(printWriter);
-			JOptionPane.showMessageDialog(this, result.toString());
-			throw new RuntimeException(e1);
-		}
+//		currentReactionSet = null;
+//		String cmd = e.getActionCommand();
+//		int tempCurrentRireg = 0;
+//		try{
+//			if (PREVIOUS.equals(cmd)) { //first button clicked
+//				if(currentItemIndex == 0){
+//					JOptionPane.showMessageDialog(this, "This is the first structure.");
+//					return;
+//				}
+//				tempCurrentRireg = riregMap.get(currentItemIndex - 1);
+//				currentItemIndex -= 1;
+//			} else if (NEXT.equals(cmd)) { 
+//				if(currentItemIndex == (reactionList.size()-1)){
+//					JOptionPane.showMessageDialog(this, "This is the last structure.");
+//					return;
+//				}
+//				currentItemIndex++;
+//				if(currentItemIndex >= riregMap.size()){
+//					establishNextFilteredItem();
+//					currentItemIndex = riregMap.size() -1;
+//					tempCurrentRireg = riregMap.get(currentItemIndex);
+//				}else{
+//					tempCurrentRireg = riregMap.get(currentItemIndex);
+//					tryToReset();
+//					reader.setInitialRiregNo(tempCurrentRireg);
+//				}
+//			} else if (GOTO.equals(cmd)) { // third button clicked
+//				currentItemIndex = -1;
+//				riregMap.clear();
+//				tryToReset();
+//				currentRireg = 0;
+//				establishNextFilteredItem();
+//				currentItemIndex = riregMap.size() -1;
+//				tempCurrentRireg = riregMap.get(currentItemIndex);
+//			}
+//		}catch(ReaccsFileEndedException reaccsFileEndedException){
+//			final Writer result = new StringWriter();
+//			final PrintWriter printWriter = new PrintWriter(result);
+//			reaccsFileEndedException.printStackTrace(printWriter);
+//			JOptionPane.showMessageDialog(this, result.toString());
+//			try{
+//				try {
+//					reader.close();
+//				} catch (IOException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+//			}finally{
+//				if(this.readerFileName != null){
+//					currentItemIndex = -1;
+//					riregMap.clear();
+//					currentRireg = 0;
+//					text.setText("[#6]Br");
+//					text2.setText("[#6]Br");
+//					try {
+//						this.reader = getReaccsReader(this.readerFileName);
+//						establishNextFilteredItem();
+//						currentItemIndex = riregMap.size() -1;
+//						tempCurrentRireg = riregMap.get(currentItemIndex);
+//					} catch (Exception e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//						System.exit(0);
+//					}
+//				}
+//			}
+//		}catch (Exception e1) {
+//			final Writer result = new StringWriter();
+//			final PrintWriter printWriter = new PrintWriter(result);
+//			e1.printStackTrace(printWriter);
+//			JOptionPane.showMessageDialog(this, result.toString());
+//			throw new RuntimeException(e1);
+//		}
+//		try {
+//			setRireg(tempCurrentRireg);
+//		} catch (Exception e1) {
+//			final Writer result = new StringWriter();
+//			final PrintWriter printWriter = new PrintWriter(result);
+//			e1.printStackTrace(printWriter);
+//			JOptionPane.showMessageDialog(this, result.toString());
+//			throw new RuntimeException(e1);
+//		}
 	}
 
 	public static void main(String[] args) throws Exception, IOException{
@@ -361,7 +324,7 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 		fileName = args[0];
 		MoleculeViewer gui = new ReactSmartsMoleculeViewer(fileName);
 		//gui.setRireg(1);
-		showGUI(gui);
+		showGUI(gui,false);
 	}
 
 }
