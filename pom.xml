@@ -14,6 +14,28 @@
         </configuration>
       </plugin>
       <plugin>
+      		<groupId>org.apache.maven.plugins</groupId>
+	      	<artifactId>maven-assembly-plugin</artifactId>
+	      	<executions>
+	      		<execution>
+	      			<goals>
+	      				<goal>attached</goal>
+	      			</goals>
+	      			<phase>package</phase>
+	      			<configuration>
+						<descriptorRefs>
+				        	<descriptorRef>jar-with-dependencies</descriptorRef>
+				   		</descriptorRefs>
+				        <archive>
+				        	<manifest>
+				            	<mainClass>org.mp2dbuilder.viewer.ReactSmartsMoleculeViewer</mainClass>
+				            </manifest>
+				        </archive>
+	      			</configuration>
+	      		</execution>
+	      	</executions>
+      </plugin>
+      <!--plugin>
 	      <groupId>org.apache.maven.plugins</groupId>
 	      <artifactId>maven-jar-plugin</artifactId>
 	      <configuration>
@@ -30,21 +52,21 @@
               <executions>
                       <execution>
                               <id>unpack-dependencies</id>
-                              <phase>package</phase>
+                              <phase>prepare-package</phase>
                               <goals>
                                       <goal>unpack-dependencies</goal>
                               </goals>
                       </execution>
               </executions>
-      </plugin>
+      </plugin-->
   	</plugins>
   	<resources>
   			<resource>
 		        <directory>src/main/resources</directory>
 		    </resource>
-            <resource>
+            <!--resource>
             	<directory>${basedir}/target/dependency</directory>
-            </resource>
+            </resource-->
     </resources>
   </build>
   <dependencies>
