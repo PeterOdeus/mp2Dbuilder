@@ -21,26 +21,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import org.mp2dbuilder.builder.MetaboliteHandler;
@@ -60,6 +54,7 @@ import org.openscience.cdk.renderer.generators.ExtendedAtomGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
+import org.openscience.cdk.renderer.visitor.SVGGenerator;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 
@@ -258,6 +253,10 @@ public class MoleculeViewer extends JPanel
 		// the paint method also needs a toolkit-specific renderer
 		renderer.paintMolecule(molecule, new AWTDrawVisitor(g2), new Rectangle(0,0,WIDTH,HEIGHT),true);
 
+//		SVGGenerator svgGenerator = new SVGGenerator();
+//		renderer.paintMolecule(molecule, svgGenerator, new Rectangle(0,0,WIDTH,HEIGHT),true);
+//		logger.info(svgGenerator.getResult());
+		
 		return image;
 	}
 

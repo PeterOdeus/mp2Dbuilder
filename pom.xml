@@ -35,30 +35,6 @@
 	      		</execution>
 	      	</executions>
       </plugin>
-      <!--plugin>
-	      <groupId>org.apache.maven.plugins</groupId>
-	      <artifactId>maven-jar-plugin</artifactId>
-	      <configuration>
-	        <archive>
-	              <manifest>
-	                <addClasspath>true</addClasspath>
-	                <mainClass>org.mp2dbuilder.viewer.ReactSmartsMoleculeViewer</mainClass>
-	              </manifest>
-	        </archive>
-	      </configuration>
-      </plugin>
-      <plugin>
-              <artifactId>maven-dependency-plugin</artifactId>
-              <executions>
-                      <execution>
-                              <id>unpack-dependencies</id>
-                              <phase>prepare-package</phase>
-                              <goals>
-                                      <goal>unpack-dependencies</goal>
-                              </goals>
-                      </execution>
-              </executions>
-      </plugin-->
   	</plugins>
   	<resources>
   			<resource>
@@ -158,6 +134,11 @@
   	<dependency>
   		<groupId>org.openscience.cdk</groupId>
 		<artifactId>cdk-smiles</artifactId>
+		<version>bioclipse-2.1.x</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.openscience.cdk</groupId>
+		<artifactId>cdk-rendersvg</artifactId>
 		<version>bioclipse-2.1.x</version>
   	</dependency>
   	<dependency>

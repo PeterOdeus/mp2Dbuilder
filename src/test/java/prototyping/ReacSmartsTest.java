@@ -47,6 +47,22 @@ public class ReacSmartsTest {
 		//setSimpleChemObjectReader(new MDLRXNReader(), "data/mdl/reaction-1.rxn");
 	}
 	
+	@Test 
+	public void testMCSSOverlaps() throws Exception {
+		String f = "data/mdl/firstRiReg.rdf";
+		ReaccsMDLRXNReader reader = getReaccsReader(f);
+		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+		IReaction reaction = reactionSet.getReaction(0);
+		String reactantQuery = HYDROXYLATION_REACTANT_SMARTS;
+		String productQuery = "[*:1]";
+		ReactionSmartsQueryTool sqt = new ReactionSmartsQueryTool(reactantQuery,productQuery);
+		
+		//We also know we only have one reactant and one product
+		IAtomContainer reactant = (IAtomContainer) reaction.getReactants().getMolecule(0);
+		IAtomContainer product = (IAtomContainer) reaction.getProducts().getMolecule(0);
+		assertTrue(sqt.matches(reaction));
+	}
+	
 
 	@Test public void testN_Dealkylation() throws Exception {
 		

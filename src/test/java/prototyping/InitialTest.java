@@ -561,18 +561,18 @@ public class InitialTest {
 //		showGUI(gui);
 //	}
 
-	@Test public void testFilteringMoleculeViewer() throws Exception {
-		String f = "data/mdl/First500DB2005AllFields.rdf";
-		ReaccsMDLRXNReader reader = getReaccsReader(f);
-		//		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
-		//		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
-		//		IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
-		//		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
-		URL url = this.getClass().getClassLoader().getResource(f);
-		File file = new File(url.toURI());
-		FilteringMoleculeViewer gui = new FilteringMoleculeViewer(reader, file.getAbsolutePath());
-		showGUI(gui, false);
-	}
+//	@Test public void testFilteringMoleculeViewer() throws Exception {
+//		String f = "data/mdl/First500DB2005AllFields.rdf";
+//		ReaccsMDLRXNReader reader = getReaccsReader(f);
+//		//		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+//		//		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
+//		//		IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
+//		//		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
+//		URL url = this.getClass().getClassLoader().getResource(f);
+//		File file = new File(url.toURI());
+//		FilteringMoleculeViewer gui = new FilteringMoleculeViewer(reader, file.getAbsolutePath());
+//		showGUI(gui, false);
+//	}
 	
 	
 	public void showGUI(final MoleculeViewer gui, final boolean showFirstRireg){

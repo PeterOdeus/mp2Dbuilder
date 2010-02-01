@@ -301,3 +301,19 @@ mvn install:install-file \
   -Dversion=bioclipse-2.1.x \
   -Dpackaging=sources \
   -DgeneratePom=true
+
+  mvn install:install-file \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-rendersvg.jar \
+  -DgroupId=org.openscience.cdk \
+  -DartifactId=cdk-rendersvg \
+  -Dversion=bioclipse-2.1.x \
+  -Dpackaging=jar \
+  -DgeneratePom=true
+
+mvn install:install-file \
+  -Dfile=../jchempaint-primary/dist/jar/cdk-rendersvg-sources.jar \
+  -DgroupId=org.openscience.cdk \
+  -DartifactId=cdk-rendersvg \
+  -Dversion=bioclipse-2.1.x \
+  -Dpackaging=sources \
+  -DgeneratePom=true
