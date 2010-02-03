@@ -29,7 +29,7 @@ public class MCSOverlayAtomGenerator extends ExtendedAtomGenerator {
 		IRenderingElement renderingElement = super.generate(ac, atom, model);
 		Point2d p = atom.getPoint2d();
 		if(renderingElement== null){
-			Color c = getColorForAtom(atom, model);
+			Color c = getAtomColor(atom); //getColorForAtom(atom, model);
 			TextGroupElement textGroup = new TextGroupElement(p.x, p.y, "", c);
 			decorate(textGroup, ac, atom, model);
 			renderingElement = textGroup;

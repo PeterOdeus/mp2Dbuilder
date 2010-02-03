@@ -31,7 +31,7 @@ public class ReactionCentreGenerator implements IGenerator {
 		ElementGroup group = new ElementGroup();
 		for(IAtom atom : reactionCentreAtoms){
 			Point2d p = atom.getPoint2d();
-			double r = model.getAtomRadius() / model.getScale();
+			double r = model.getHighlightDistance() / model.getScale(); //model.getAtomRadius() / model.getScale();
 			OvalElement textGroup = new OvalElement(p.x, p.y, r, new Color(255,140,0,150));
 			group.add(textGroup);
 		}

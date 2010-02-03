@@ -30,13 +30,15 @@ Apply jchempaint patches
 Add jchempaint jars to local Maven repo
 
 	cd mp2Dbuilder/.. (jchempaint directory is assumed to be placed parallel with this project)
-	git clone http://pele.farmbio.uu.se/git/jchempaint-primary.git/
-	cd jchempaint-primary
-	git checkout -b bc-2.1.x origin/bioclipse-2.1.x
+	git clone http://pele.farmbio.uu.se/git/cdk-jchempaint.git/
+	cd cdk-jchempaint
+	git checkout origin/13-bioclipse2.1.x -b bioclipse
+	ant clean (as a precaution)
 	ant dist-all
-	../mp2Dbuilder/installCDKIntoMaven
+	../mp2Dbuilder/installCDKIntoMaven (TODO: make Maven install script fail early if any jar installation fails)
 	
 Maven build
+	In Eclipse, right-clicking on mp2dBuilder project, choose "Run As"-> Maven clean, followed by "Run As"->Maven package.
 	In its current incarnation, when performing the "package" goal of Maven, a jar will be built specifically 
 	for the ReactSmartsMoleculeViewer being the main class.
 	The resulting jar can be found in the target directory and can be executed by issuing the following command:

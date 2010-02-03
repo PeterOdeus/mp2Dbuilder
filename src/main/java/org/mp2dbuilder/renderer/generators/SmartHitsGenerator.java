@@ -31,7 +31,7 @@ public class SmartHitsGenerator implements IGenerator {
 		ElementGroup group = new ElementGroup();
 		for(IAtom atom : reactionCentreAtoms){
 			Point2d p = atom.getPoint2d();
-			double r = (model.getAtomRadius() + 2.0) / model.getScale();
+			double r = (model.getHighlightDistance() + 2.0) / model.getScale(); //(model.getAtomRadius() + 2.0) / model.getScale();
 			OvalElement textGroup = new OvalElement(p.x, p.y, r, new Color(140,255,0,150));
 			group.add(textGroup);
 		}
