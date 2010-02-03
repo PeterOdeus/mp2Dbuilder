@@ -133,7 +133,7 @@ public class InitialTest {
 	}
 
 	@Test public void testReactantAndProductWithoutMCS() throws Exception {
-		//doTestCommonIdEquality(311);		
+		doTestCommonIdEquality(311);		
 	}
 
 	@SuppressWarnings("unchecked")
