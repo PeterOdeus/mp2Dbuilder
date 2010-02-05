@@ -1,6 +1,5 @@
 package org.mp2dbuilder.viewer;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -10,7 +9,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import org.mp2dbuilder.builder.MetaboliteHandler;
-import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
+import org.mp2dbuilder.smiles.smarts.ReactionSmartsQueryTool;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -18,8 +17,6 @@ import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.io.ReaccsFileEndedException;
 import org.openscience.cdk.nonotify.NNReactionSet;
-import org.openscience.cdk.smiles.smarts.ReactionSmartsQueryTool;
-import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 

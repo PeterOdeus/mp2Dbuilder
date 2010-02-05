@@ -25,7 +25,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mp2dbuilder.builder.MetaboliteHandler;
-import org.mp2dbuilder.viewer.FilteringMoleculeViewer;
+import org.mp2dbuilder.mcss.AtomMapperUtil;
 import org.mp2dbuilder.viewer.MoleculeViewer;
 import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
 import org.openscience.cdk.config.AtomTypeFactory;
@@ -94,6 +94,7 @@ public class InitialTest {
 		IMolecule product = reactionSet.getReaction(0).getProducts().getMolecule(0);
 		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
 		Assert.assertEquals(1, mcsList.size());
+		Assert.assertEquals(9, mcsList.get(0).getAtomCount());
 	}
 
 	private List getAtomContainersForReaction(int reactionId) throws Exception{
@@ -142,10 +143,10 @@ public class InitialTest {
 		IAtomContainer reactant = (IAtomContainer)returnList.get(0);
 		IAtomContainer product = (IAtomContainer)returnList.get(1);
 		IAtomContainer mcs = (IAtomContainer)returnList.get(2);
-		MetaboliteHandler metaboliteHandler = new MetaboliteHandler();
-		Map<Integer,Integer> mappedReactantAtoms = metaboliteHandler.getAtomMappings(reactant, mcs);
+		AtomMapperUtil atomMapperUtil = new AtomMapperUtil();
+		Map<Integer,Integer> mappedReactantAtoms = atomMapperUtil.getAtomMappings(reactant, mcs);
 		//AtomMappingTools.mapAtomsOfAlignedStructures(reactant, mcs, mappedReactantAtoms);
-		Map<Integer,Integer> mappedProductAtoms = metaboliteHandler.getAtomMappings(product, mcs);
+		Map<Integer,Integer> mappedProductAtoms = atomMapperUtil.getAtomMappings(product, mcs);
 		//AtomMappingTools.mapAtomsOfAlignedStructures(product, mcs, mappedProductAtoms);
 
 		returnList.add(mappedReactantAtoms); //index 4
@@ -159,8 +160,8 @@ public class InitialTest {
 		for(int id: mcsIds){
 			mcs.getAtom(id).setProperty(MetaboliteHandler.COMMON_ID_FIELD_NAME, Integer.toString(id));
 		}
-		metaboliteHandler.setIds(MetaboliteHandler.COMMON_ID_FIELD_NAME, reactant, mappedReactantAtoms);
-		metaboliteHandler.setIds(MetaboliteHandler.COMMON_ID_FIELD_NAME, product, mappedProductAtoms);
+		atomMapperUtil.setIds(MetaboliteHandler.COMMON_ID_FIELD_NAME, reactant, mappedReactantAtoms);
+		atomMapperUtil.setIds(MetaboliteHandler.COMMON_ID_FIELD_NAME, product, mappedProductAtoms);
 		return returnList;
 	}
 

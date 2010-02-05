@@ -1,6 +1,7 @@
 package prototyping;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -9,26 +10,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.List;
 
 import javax.swing.JFrame;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mp2dbuilder.viewer.FilteringMoleculeViewer;
+import org.mp2dbuilder.smiles.smarts.ReactionSmartsQueryTool;
 import org.mp2dbuilder.viewer.MoleculeViewer;
 import org.mp2dbuilder.viewer.ReactSmartsMoleculeViewer;
 import org.openscience.cdk.exception.CDKException;
-import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.io.ReaccsMDLRXNReader;
-import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
-import org.openscience.cdk.smiles.smarts.ReactionSmartsQueryTool;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 
@@ -60,6 +58,26 @@ public class ReacSmartsTest {
 		//We also know we only have one reactant and one product
 		IAtomContainer reactant = (IAtomContainer) reaction.getReactants().getMolecule(0);
 		IAtomContainer product = (IAtomContainer) reaction.getProducts().getMolecule(0);
+		Assert.assertEquals(15, reactant.getAtomCount());
+		Assert.assertEquals(11, product.getAtomCount());
+		assertTrue(sqt.matches(reaction));
+	}
+	
+	@Test 
+	public void testMCSSOverlapsForSecondRiReg() throws Exception {
+		String f = "data/mdl/2ndRiReg.rdf";
+		ReaccsMDLRXNReader reader = getReaccsReader(f);
+		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+		IReaction reaction = reactionSet.getReaction(0);
+		String reactantQuery = HYDROXYLATION_REACTANT_SMARTS;
+		String productQuery = "[*:1]";
+		ReactionSmartsQueryTool sqt = new ReactionSmartsQueryTool(reactantQuery,productQuery);
+		
+		//We also know we only have one reactant and one product
+		IAtomContainer reactant = (IAtomContainer) reaction.getReactants().getMolecule(0);
+		IAtomContainer product = (IAtomContainer) reaction.getProducts().getMolecule(0);
+		Assert.assertEquals(15, reactant.getAtomCount());
+		Assert.assertEquals(12, product.getAtomCount());
 		assertTrue(sqt.matches(reaction));
 	}
 	
@@ -132,10 +150,10 @@ SMARTS:
 	 * @param reactionQuery
 	 * @param productQuery
 	 * @return
-	 * @throws CDKException 
+	 * @throws Exception 
 	 */
 	private boolean isDoubleMatch(String rsmiles, String reactionQuery,
-			String productQuery) throws CDKException {
+			String productQuery) throws Exception {
 
 		System.out.println("**************");
 		System.out.println("* Testing smiles: " + rsmiles);

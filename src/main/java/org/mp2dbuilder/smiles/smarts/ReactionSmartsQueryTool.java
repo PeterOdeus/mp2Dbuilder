@@ -1,4 +1,4 @@
-package org.openscience.cdk.smiles.smarts;
+package org.mp2dbuilder.smiles.smarts;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -10,12 +10,14 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.mp2dbuilder.mcss.AtomMapperUtil;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
-import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.isomorphism.mcss.RMap;
+import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 /**
@@ -27,6 +29,7 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 public class ReactionSmartsQueryTool {
 	
 	
+	public static final String COMMON_ID_FIELD_NAME = "ReactionSmartsCommonId";
 	private List<List<Integer>> reactionAtomNumbers;
 	private List<List<Integer>> productAtomNumbers;
 	private String reactionQuery;
@@ -105,9 +108,9 @@ public class ReactionSmartsQueryTool {
 	 * @param reaction The reaction to be queried
 	 * @return true if there is a match in reactant and product molecules, 
 	 * and all atoms marked with class are conserved in reactant and product.
-	 * @throws CDKException 
+	 * @throws Exception 
 	 */
-	public boolean matches(IReaction reaction) throws CDKException {
+	public boolean matches(IReaction reaction) throws Exception {
 		
 		//Assert only one reactant and one product, this is all we can handle for now
 		//TODO: Extend this to be more generic
@@ -156,17 +159,26 @@ public class ReactionSmartsQueryTool {
 		CDKHueckelAromaticityDetector.detectAromaticity(product);
 
 		//We now need an MCSS to link atoms
-		List<RMap> mcss = UniversalIsomorphismTester.getSubgraphAtomsMap(reactant, product);		
-		if (mcss==null || mcss.size()<=0){
+		
+		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
+		
+		//How many overlaps can we get? Anyway, pick largest for now TODO: Verify this
+		IAtomContainer mcs = getFirstMCSHavingMostAtoms(mcsList);
+		
+		//List<RMap> mcss = UniversalIsomorphismTester.getSubgraphAtomsMap(reactant, product);		
+		if (mcs==null || mcs != null && mcs.getAtomCount()<=0){
 			System.out.println("No overlaps in MCSS. Exiting.");
 			return false;
 		}
-
-		//How many overlaps can we get? Anyway, pick largest for now TODO: Verify this
-		System.out.println("MCSS has " + mcss.size() + " atoms.");
+		
+		System.out.println("MCSS has " + mcs.getAtomCount() + " atoms.");
+		
+		//Add identifier fields used to map atoms from reactant to product.
+		AtomMapperUtil mapperUtil = new AtomMapperUtil();
+		mapperUtil.setCommonIds(COMMON_ID_FIELD_NAME, mcs, reactant, product);
 		
 		//Verify conservation on this point or fail
-		if (!(areAtomsConserved(mcss,fullReactionQueryIndices, fullProductQueryIndices))){
+		if (!(areAtomsConserved(reactant,fullReactionQueryIndices, product, fullProductQueryIndices))){
 			System.out.println("== All reactant atoms not conserved. Exiting. ==");
 			return false;
 		}
@@ -216,7 +228,7 @@ public class ReactionSmartsQueryTool {
 				System.out.println("  Product hits:\n" + debugHits(workingProductIndices));
 
 				//Verify conservation on this point
-				if (!(areAtomsConserved(mcss,workingReactionIndices, workingProductIndices))){
+				if (!(areAtomsConserved(reactant,workingReactionIndices, product,workingProductIndices))){
 					System.out.println("== All reaction atoms not conserved. Exiting. ==");
 					return false;
 				}
@@ -245,11 +257,12 @@ public class ReactionSmartsQueryTool {
 	 * @param mcss
 	 * @param reactionIndices
 	 * @param productIndices
-	 * @return true if all atoms in reactionIndices are present in productIndices linked via MCSS
+	 * @return true if all atoms in reactionIndices are present in productIndices linked via 
+	 * COMMON_ID_FIELD_NAME constant
 	 */
-	private boolean areAtomsConserved(List<RMap> mcss,
-			List<List<Integer>> reactionIndices,
-			List<List<Integer>> productIndices) {
+	private boolean areAtomsConserved(
+			IAtomContainer reactant, List<List<Integer>> reactionIndices,
+			IAtomContainer product, List<List<Integer>> productIndices) {
 		
 		//We do not care about individual matches so merge all in atom index lists
 		Set<Integer> rlist=new HashSet<Integer>();
@@ -263,21 +276,44 @@ public class ReactionSmartsQueryTool {
 		
 		//Check conservation for each reaction index
 		
+		String commonId = null;
+		boolean tempMatch = false;
 		for (Integer ratom : rlist){
-			System.out.println("+ checking reaction atom index=" + ratom);
-			for (RMap rmap : mcss){
-//				System.out.println("++ rmap.getId1()=" + rmap.getId1());
-				if (ratom==rmap.getId1()){
-					System.out.println("+++ Found in mcs.getID1");
-					//verify that rmap.getId2() is present in plist
-					if (!(plist.contains(rmap.getId2()))){
-						System.out.println("+++ NOT-CONSERVED, since rmap.getId2()=" + rmap.getId2() + " NOT present in productlist");
-						return false; //Found a non-conserved atom
-					}else{
-						System.out.println("+++ CONSERVED, since rmap.getId2()=" + rmap.getId2() + " present in productlist");
-					}
+			System.out.println("+ checking reactant atom index=" + ratom);
+			
+			//get the common id from the reactant atom having index value of ratom
+			commonId = (String) reactant.getAtom(ratom).getProperty(COMMON_ID_FIELD_NAME);
+			tempMatch = false;
+			
+			for(IAtom productAtom : product.atoms()){
+				if(	commonId.equals((String)productAtom.getProperty(COMMON_ID_FIELD_NAME))
+						&&
+					plist.contains(product.getAtomNumber(productAtom))
+				){
+					tempMatch = true;
+					break;
 				}
 			}
+			
+			if(tempMatch == false){
+				System.out.println("+++ NOT-CONSERVED, since reactant index" + ratom + " is NOT present in productlist");
+				return false; //Found a non-conserved atom
+			}
+			System.out.println("+++ CONSERVED, since reactant index " + ratom + " is present in productlist");
+			
+//			for (RMap rmap : mcss){
+////				System.out.println("++ rmap.getId1()=" + rmap.getId1());
+//				if (ratom==rmap.getId1()){
+//					System.out.println("+++ Found in mcs.getID1");
+//					//verify that rmap.getId2() is present in plist
+//					if (!(plist.contains(rmap.getId2()))){
+//						System.out.println("+++ NOT-CONSERVED, since rmap.getId2()=" + rmap.getId2() + " NOT present in productlist");
+//						return false; //Found a non-conserved atom
+//					}else{
+//						System.out.println("+++ CONSERVED, since rmap.getId2()=" + rmap.getId2() + " present in productlist");
+//					}
+//				}
+//			}
 		}
 		
 		return true;
