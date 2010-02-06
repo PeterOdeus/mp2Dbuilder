@@ -276,17 +276,25 @@ public class ReactionSmartsQueryTool {
 		
 		//Check conservation for each reaction index
 		
-		String commonId = null;
+		String reactantCommonId = null;
+		String productCommonId = null;
 		boolean tempMatch = false;
 		for (Integer ratom : rlist){
 			System.out.println("+ checking reactant atom index=" + ratom);
 			
 			//get the common id from the reactant atom having index value of ratom
-			commonId = (String) reactant.getAtom(ratom).getProperty(COMMON_ID_FIELD_NAME);
+			reactantCommonId = (String) reactant.getAtom(ratom).getProperty(COMMON_ID_FIELD_NAME);
+			if(reactantCommonId == null){
+				System.out.println("Skipping reactant having index " + ratom + " because it lacks a common id field.");
+				continue;
+			}
 			tempMatch = false;
 			
 			for(IAtom productAtom : product.atoms()){
-				if(	commonId.equals((String)productAtom.getProperty(COMMON_ID_FIELD_NAME))
+				productCommonId = (String) productAtom.getProperty(COMMON_ID_FIELD_NAME); 
+				if(	productCommonId != null
+						&&
+					reactantCommonId.equals(productCommonId)
 						&&
 					plist.contains(product.getAtomNumber(productAtom))
 				){
