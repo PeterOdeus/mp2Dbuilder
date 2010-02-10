@@ -35,6 +35,9 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 	public static String N_DEALKYLATION_REACTANT_SMARTS="[$([CH3][NH0;X3:1]([CH3])[*:2])]";
 	public static String N_DEALKYLATION_PRODUCT_SMARTS="[CH3][NH:1][*:2]";
 	
+	public static String SIMPLE_REACTANT_SMARTS="[$([*:1])]";
+	public static String SIMPLE_PRODUCT_SMARTS="[*:1]";
+	
 	private static final long serialVersionUID = 1L;
 
 	List<Integer> riregMap = new ArrayList<Integer>();
@@ -75,8 +78,8 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 		toolBar.add(new JLabel("Start @ RIREG#"));
 		toolBar.add(riregNoText);
 		riregNoText.setText("1");
-		text.setText(N_DEALKYLATION_REACTANT_SMARTS);
-		text2.setText(N_DEALKYLATION_PRODUCT_SMARTS);
+		text.setText(SIMPLE_REACTANT_SMARTS);
+		text2.setText(SIMPLE_PRODUCT_SMARTS);
 	}
 
 	@Override

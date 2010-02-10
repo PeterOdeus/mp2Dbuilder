@@ -28,18 +28,18 @@ public class MetaboliteFileReader
 			private MetaboliteHandler handler;
 /*    */   private boolean skipMultistep;
 /*    */ 
-/*    */   public MetaboliteFileReader(InputStream is)
+/*    */   public MetaboliteFileReader(InputStream is, MetaboliteHandler metaboliteHandler)
 /*    */     throws IOException
 /*    */   { 
 	 			reader = new ReaccsMDLRXNReader(is);
-	 			handler = new MetaboliteHandler();
+	 			handler = metaboliteHandler;
 ///* 17 */     this.reader = new MetaboliteEntryReader();
 /*    */ 
 /* 21 */     //this.in = new RDFileReader(is);
 /*    */   }
 /*    */ 
-/*    */   public MetaboliteFileReader(File file) throws FileNotFoundException, IOException {
-/* 25 */     this(new FileInputStream(file));
+/*    */   public MetaboliteFileReader(File file, MetaboliteHandler metaboliteHandler) throws FileNotFoundException, IOException {
+/* 25 */     this(new FileInputStream(file), metaboliteHandler);
 /*    */   }
 /*    */ 
 

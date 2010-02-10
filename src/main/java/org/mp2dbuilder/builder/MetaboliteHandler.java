@@ -1,11 +1,8 @@
 package org.mp2dbuilder.builder;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import metaprint2d.Fingerprint;
@@ -15,13 +12,11 @@ import metaprint2d.analyzer.data.Transformation;
 
 import org.mp2dbuilder.mcss.AtomMapperUtil;
 import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
-import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomType;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
-import org.openscience.cdk.isomorphism.mcss.RMap;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 @SuppressWarnings("unused")
@@ -97,26 +92,42 @@ public class MetaboliteHandler {
 		setReactionCentres(reactant, product, mcs);
 		
 		//and generate a list of atoms to be returned
-		List<AtomData> atomDataList = getProcessedAtoms(fpList, reactant);
+		Set<String> typeOfReactionCentresCandidates = new HashSet<String>();
+		typeOfReactionCentresCandidates.add(REACTION_CENTRE_FIELD_NAME);
+		List<AtomData> atomDataList = getProcessedAtoms(fpList, reactant, typeOfReactionCentresCandidates);
 		returnList.add(atomDataList);
 		
 		return returnList;
 		
 	}
 
-	private List<AtomData> getProcessedAtoms(List<Fingerprint> fpList,
-			IAtomContainer reactant) {
+	protected List<AtomData> getProcessedAtoms(
+			List<Fingerprint> fpList,
+			IAtomContainer reactant,
+			Set<String> typeOfReactionCentresCandidates) {
 		List<AtomData> atomDataList = new ArrayList<AtomData>();
 		int i = 0;
-		Boolean isReactionCentre;
+		Boolean isReactionCentre = null;
+		Boolean tempIsReactionCentre = null;
 		AtomData atomData = null;
+		Set<String> typeOfReactionCentres = null;
 		for(Fingerprint fp: fpList){
 			IAtom atom = reactant.getAtom(i);
-			isReactionCentre = (Boolean) atom.getProperty(REACTION_CENTRE_FIELD_NAME);
+			isReactionCentre = null;
+			for(String reactionCentreCandidate: typeOfReactionCentresCandidates){
+				tempIsReactionCentre = (Boolean) atom.getProperty(reactionCentreCandidate);
+				if(tempIsReactionCentre != null && tempIsReactionCentre.equals(Boolean.TRUE)){
+					isReactionCentre = Boolean.TRUE;
+					if(typeOfReactionCentres == null){
+						typeOfReactionCentres = new HashSet<String>();
+					}
+					typeOfReactionCentres.add(reactionCentreCandidate);
+				}
+			}
 			if(isReactionCentre == null){
 				isReactionCentre = Boolean.FALSE;
 			}
-			atomData = new AtomData(fp, isReactionCentre.booleanValue());
+			atomData = new AtomData(fp, isReactionCentre.booleanValue(), typeOfReactionCentres);
 			atomDataList.add(atomData);
 			i++;
 		}

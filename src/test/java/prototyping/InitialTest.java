@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JFrame;
 
@@ -20,6 +21,7 @@ import metaprint2d.Constants;
 import metaprint2d.Fingerprint;
 import metaprint2d.analyzer.FingerprintGenerator;
 import metaprint2d.analyzer.data.AtomData;
+import metaprint2d.builder.DataBuilderApp;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -510,16 +512,6 @@ public class InitialTest {
 		}
 	}
 
-	@Test public void testCloneAtomData() throws Exception {
-		byte [][] byteMatrix = new byte[1][1];
-		byteMatrix[0][0] = 1;
-		Fingerprint fp = new Fingerprint(byteMatrix);
-		AtomData atomData = new AtomData(fp, true);
-		AtomData clone = atomData.clone();
-		Assert.assertArrayEquals(byteMatrix, clone.getFingerprint().getBytes());
-		Assert.assertEquals(true, clone.getIsReactionCentre());
-	}
-
 	private ReaccsMDLRXNReader getReaccsReader(String fileNameString) throws URISyntaxException, IOException{
 		String filename = fileNameString;
 		logger.info("Testing: " + filename);
@@ -541,6 +533,7 @@ public class InitialTest {
 		//gui.setRireg(1);
 		showGUI(gui, true);
 	}
+	
 	
 //	@Test public void testMoleculeViewerFor73320thRiReg() throws Exception {
 //		ReaccsMDLRXNReader reader = getReaccsReader("data/mdl/73320thRiReg.rdf");

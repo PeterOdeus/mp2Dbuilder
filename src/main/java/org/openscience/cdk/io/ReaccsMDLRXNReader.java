@@ -6,6 +6,10 @@ import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import javax.swing.SwingWorker;
+
+import org.mp2dbuilder.viewer.CancelledException;
+import org.mp2dbuilder.viewer.ReactSmartsMoleculeViewerWorker;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IChemObject;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
@@ -19,6 +23,8 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 	private ILoggingTool logger = null;
 	private String riregNo = "";
 	private long fileLengthLong;
+	private ReactSmartsMoleculeViewerWorker swingWorker;
+	public int swingWorkerCounter;
 
 	public ReaccsMDLRXNReader(Reader in, Mode mode) {
 		super(in, mode);
@@ -34,6 +40,19 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 		this.riregNo = " " + riregNo;
 	}
 
+	public IChemObject read(IChemObject object, 
+			ReactSmartsMoleculeViewerWorker swingWorker,
+			int swingWorkerCounter) throws ReaccsFileEndedException, CDKException {
+		this.swingWorker = swingWorker;
+		this.swingWorkerCounter = swingWorkerCounter;
+		IChemObject returnObject = null;
+		try{
+			returnObject = this.read(object);
+		}finally{
+			this.swingWorker = null;
+		}
+		return returnObject;
+	}
 	/**
 	 * Special treatment to work on .rdf files from Reaccs database.
 	 *
@@ -43,7 +62,7 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 	 * @return                                     The IChemObject read
 	 * @exception  CDKException
 	 */
-	public IChemObject read(IChemObject object) throws ReaccsFileEndedException, CDKException {
+	public IChemObject read(IChemObject object) throws ReaccsFileEndedException, ReadingReaccsFileCancelledException, CDKException {
 		if (object instanceof IReactionSet) {
 			readUntilRXN();
 			Method m = null;
@@ -77,7 +96,7 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 		}
 	}
 
-	private void readUntilRXN() throws CDKException, ReaccsFileEndedException {
+	private void readUntilRXN() throws CDKException, ReadingReaccsFileCancelledException, ReaccsFileEndedException {
 		try {
 			logger.debug("Looking for string \"$RIREG\"" + this.riregNo);
 			String line = null;
@@ -87,11 +106,24 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 					throw new ReaccsFileEndedException("eof");
 				}
 				logger.debug(line);
+				if(line.indexOf("$RFMT $RIREG ") >=0){
+					if(this.swingWorker != null){
+						if(this.swingWorker.isCancelled()){
+							throw new CancelledException();
+						}
+						this.swingWorkerCounter = Integer.valueOf(line.substring("$RFMT $RIREG ".length()));
+						this.swingWorker.publishToSwingWorker("" + this.swingWorkerCounter);
+						System.out.println(""+this.swingWorkerCounter);
+					}
+				}
 			}while(line.indexOf("$RIREG" + this.riregNo) < 0);
 			this.riregNo = "";
 		}
 		catch(ReaccsFileEndedException e){
 			throw e;
+		}
+		catch(CancelledException e){
+			throw new ReadingReaccsFileCancelledException("");
 		}
 		catch (Exception exception) {
 			logger.debug(exception);

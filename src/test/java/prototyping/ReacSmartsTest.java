@@ -37,7 +37,7 @@ public class ReacSmartsTest {
 	
 
 	//Our hydroxylation smarts definition
-	private static String HYDROXYLATION_REACTANT_SMARTS="[$([*:1])]";
+	public static String HYDROXYLATION_REACTANT_SMARTS="[$([*:1])]";
 	private static String HYDROXYLATION_PRODUCT_SMARTS="[*:1][OH]";
 	
 	@BeforeClass public static void setup() {

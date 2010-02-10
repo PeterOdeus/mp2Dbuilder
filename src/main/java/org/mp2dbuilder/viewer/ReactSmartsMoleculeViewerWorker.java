@@ -16,6 +16,7 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.io.ReaccsFileEndedException;
+import org.openscience.cdk.io.ReadingReaccsFileCancelledException;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
@@ -30,6 +31,10 @@ public class ReactSmartsMoleculeViewerWorker extends SwingWorker<Void, String> {
 	public ReactSmartsMoleculeViewerWorker(ReactSmartsMoleculeViewer viewer, String cmd){
 		this._viewer = viewer;
 		this._cmd = cmd;
+	}
+	
+	public void publishToSwingWorker(String s){
+		this.publish(s);
 	}
 	
 	@Override
@@ -129,10 +134,15 @@ public class ReactSmartsMoleculeViewerWorker extends SwingWorker<Void, String> {
 			if(this.isCancelled()){
 				throw new CancelledException();
 			}
-			_viewer.currentReactionSet = (IReactionSet)_viewer.reader.read(new NNReactionSet());
-			targetRireg++;
-			publish(""+targetRireg);
-			System.out.println(""+targetRireg);
+			try{
+				_viewer.currentReactionSet = (IReactionSet)_viewer.reader.read(new NNReactionSet(), this, targetRireg);
+			}catch(ReadingReaccsFileCancelledException r){
+				throw new CancelledException();
+			}
+//			targetRireg++;
+//			publish(""+targetRireg);
+//			System.out.println(""+targetRireg);
+			targetRireg = _viewer.reader.swingWorkerCounter;
 			if(isMatchingBothSmarts(_viewer.currentReactionSet, targetRireg) == true){
 				_viewer.riregMap.add(targetRireg);
 				break;
