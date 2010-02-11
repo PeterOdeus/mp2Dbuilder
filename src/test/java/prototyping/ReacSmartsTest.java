@@ -138,16 +138,35 @@ public class ReacSmartsTest {
 
 	}
 
-	@Test
+//	@Test 
+	public void testERROR() throws Exception {
+		//FIXME: Remove method when all tests passes
+}
+	
+	@Test 
 	public void testHydroxylation() throws Exception {
 
-		// The simplest form of hydroxylation.
-		// Daylight depict and we return true
-		String rsmiles = "CCCCC>>CCCCCO";
-		assertTrue(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS,
-				HYDROXYLATION_PRODUCT_SMARTS));
+		//The simplest form of hydroxylation.
+		//Daylight depict and we return true
+		String rsmiles="CCCCC>>CCCCCO";
+		assertTrue(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
 
-		// TODO: add example to test conservation
+		//OH added, but via a N hence not on a conserved atom. Should return false.
+		rsmiles="CCCCC>>CCCCCNO";
+		assertFalse(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
+		
+		//Hydroxylation on conserved atom. Should return true.
+		rsmiles="C1CCCCC1CCN(CC)CC>>C1CCCCC1CCN(CC)C(O)C";
+		assertTrue(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
+		
+		//Hydroxylation on both ends of a molecule. Should return true.
+		rsmiles="CCCC>>OCCCCO";
+		assertTrue(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
+		
+		//Hydroxylation on both ends of a molecule but add N so no conservation. Should return false.
+		rsmiles="CCCC>>ONCCNO";
+		assertFalse(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
+		
 	}
 
 	/**
