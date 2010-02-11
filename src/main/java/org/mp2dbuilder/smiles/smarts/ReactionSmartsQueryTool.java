@@ -21,8 +21,7 @@ import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 /**
- * ReactionSmartsQueryTool can be used to query a reaction for conserved matches
- * in reactant and product.
+ * ReactionSmartsQueryTool can be used to query a reaction for conserved matches in reactant and product.
  * 
  * @author ola
  * 
@@ -209,13 +208,11 @@ public class ReactionSmartsQueryTool {
 
 		// Add identifier fields used to map atoms from reactant to product.
 		AtomMapperUtil mapperUtil = new AtomMapperUtil();
-		mapperUtil.setCommonIds(COMMON_ID_FIELD_NAME, mcss, reactant, product);
-
-		// Verify conservation on this point or fail
-		if (!(areAtomsConserved(reactant, fullReactionQueryIndices, product,
-				fullProductQueryIndices))) {
-			System.out
-					.println("== All reactant atoms not conserved. Exiting. ==");
+		mapperUtil.setCommonIds(COMMON_ID_FIELD_NAME, mcs, reactant, product);
+		
+		//Verify conservation on this point or fail
+		if (!(areAtomsConserved(reactant,fullReactionQueryIndices, product, fullProductQueryIndices))){
+			System.out.println("== No reactant atoms are conserved on first conservation test. Exiting. ==");
 			return false;
 		}
 
@@ -336,7 +333,8 @@ public class ReactionSmartsQueryTool {
 		String reactantCommonId = null;
 		String productCommonId = null;
 		boolean tempMatch = false;
-		for (Integer ratom : rlist) {
+
+		for (Integer ratom : rlist){
 			System.out.println("+ checking reactant atom index=" + ratom);
 
 			// get the common id from the reactant atom having index value of
@@ -348,45 +346,45 @@ public class ReactionSmartsQueryTool {
 						+ " because it lacks a common id field.");
 				continue;
 			}
-			tempMatch = false;
-
-			for (IAtom productAtom : product.atoms()) {
-				productCommonId = (String) productAtom
-						.getProperty(COMMON_ID_FIELD_NAME);
-				if (productCommonId != null
-						&& reactantCommonId.equals(productCommonId)
-						&& plist.contains(product.getAtomNumber(productAtom))) {
+			
+			for(IAtom productAtom : product.atoms()){
+				productCommonId = (String) productAtom.getProperty(COMMON_ID_FIELD_NAME); 
+				if(	productCommonId != null
+						&&
+					reactantCommonId.equals(productCommonId)
+						&&
+					plist.contains(product.getAtomNumber(productAtom))
+				){
 					tempMatch = true;
 					break;
 				}
 			}
-
-			if (tempMatch == false) {
-				System.out.println("+++ NOT-CONSERVED, since reactant index"
-						+ ratom + " is NOT present in productlist");
-				return false; // Found a non-conserved atom
+			
+			if(tempMatch == false){
+				System.out.println("+++ NOT-CONSERVED, since reactant index" + ratom + " is NOT present in productlist");
+//				return false; //Found a non-conserved atom
+			}else{
+				System.out.println("+++ CONSERVED, since reactant index " + ratom + " is present in productlist");
 			}
-			System.out.println("+++ CONSERVED, since reactant index " + ratom
-					+ " is present in productlist");
-
-			// for (RMap rmap : mcss){
-			// // System.out.println("++ rmap.getId1()=" + rmap.getId1());
-			// if (ratom==rmap.getId1()){
-			// System.out.println("+++ Found in mcs.getID1");
-			// //verify that rmap.getId2() is present in plist
-			// if (!(plist.contains(rmap.getId2()))){
-			// System.out.println("+++ NOT-CONSERVED, since rmap.getId2()=" +
-			// rmap.getId2() + " NOT present in productlist");
-			// return false; //Found a non-conserved atom
-			// }else{
-			// System.out.println("+++ CONSERVED, since rmap.getId2()=" +
-			// rmap.getId2() + " present in productlist");
-			// }
-			// }
-			// }
+			
+//			for (RMap rmap : mcss){
+////				System.out.println("++ rmap.getId1()=" + rmap.getId1());
+//				if (ratom==rmap.getId1()){
+//					System.out.println("+++ Found in mcs.getID1");
+//					//verify that rmap.getId2() is present in plist
+//					if (!(plist.contains(rmap.getId2()))){
+//						System.out.println("+++ NOT-CONSERVED, since rmap.getId2()=" + rmap.getId2() + " NOT present in productlist");
+//						return false; //Found a non-conserved atom
+//					}else{
+//						System.out.println("+++ CONSERVED, since rmap.getId2()=" + rmap.getId2() + " present in productlist");
+//					}
+//				}
+//			}
 		}
-
-		return true;
+		
+		System.out.println("We found at least one conserved atom.");
+		
+		return tempMatch;
 	}
 
 	private String escapeBrackets(String reactGroup) {
