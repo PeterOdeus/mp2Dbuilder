@@ -179,7 +179,7 @@ public class ReactionSmartsQueryTool {
 		
 		//Verify conservation on this point or fail
 		if (!(areAtomsConserved(reactant,fullReactionQueryIndices, product, fullProductQueryIndices))){
-			System.out.println("== All reactant atoms not conserved. Exiting. ==");
+			System.out.println("== No reactant atoms are conserved on first conservation test. Exiting. ==");
 			return false;
 		}
 		
@@ -279,6 +279,7 @@ public class ReactionSmartsQueryTool {
 		String reactantCommonId = null;
 		String productCommonId = null;
 		boolean tempMatch = false;
+
 		for (Integer ratom : rlist){
 			System.out.println("+ checking reactant atom index=" + ratom);
 			
@@ -288,7 +289,6 @@ public class ReactionSmartsQueryTool {
 				System.out.println("Skipping reactant having index " + ratom + " because it lacks a common id field.");
 				continue;
 			}
-			tempMatch = false;
 			
 			for(IAtom productAtom : product.atoms()){
 				productCommonId = (String) productAtom.getProperty(COMMON_ID_FIELD_NAME); 
@@ -305,9 +305,10 @@ public class ReactionSmartsQueryTool {
 			
 			if(tempMatch == false){
 				System.out.println("+++ NOT-CONSERVED, since reactant index" + ratom + " is NOT present in productlist");
-				return false; //Found a non-conserved atom
+//				return false; //Found a non-conserved atom
+			}else{
+				System.out.println("+++ CONSERVED, since reactant index " + ratom + " is present in productlist");
 			}
-			System.out.println("+++ CONSERVED, since reactant index " + ratom + " is present in productlist");
 			
 //			for (RMap rmap : mcss){
 ////				System.out.println("++ rmap.getId1()=" + rmap.getId1());
@@ -324,7 +325,9 @@ public class ReactionSmartsQueryTool {
 //			}
 		}
 		
-		return true;
+		System.out.println("We found at least one conserved atom.");
+		
+		return tempMatch;
 	}
 
 	private String escapeBrackets(String reactGroup) {
