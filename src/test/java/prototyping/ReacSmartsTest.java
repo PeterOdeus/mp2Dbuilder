@@ -132,7 +132,7 @@ SMARTS:
 		
 	}
 	
-//	@Test 
+	@Test 
 	public void testHydroxylation() throws Exception {
 
 		//The simplest form of hydroxylation.
