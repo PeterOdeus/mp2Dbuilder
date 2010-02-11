@@ -32,10 +32,14 @@ Add jchempaint jars to local Maven repo
 	cd mp2Dbuilder/.. (jchempaint directory is assumed to be placed parallel with this project)
 	git clone http://pele.farmbio.uu.se/git/cdk-jchempaint.git/
 	cd cdk-jchempaint
-	git checkout origin/13-bioclipse2.1.x -b bioclipse
+	git fetch origin (if there has been some time since the clone, i.e. resynching so that current branches will be visible)
+	git checkout origin/14-bioclipse2.3.x -b bc14 (where bc14 is the name of your choice)
 	ant clean (as a precaution)
 	ant dist-all
 	../mp2Dbuilder/installCDKIntoMaven (TODO: make Maven install script fail early if any jar installation fails)
+	In Eclipse, do a refresh and "project clean" on mp2Dbuilder.
+	In Eclipse, right-click mp2Dbuilder project and do a "Maven -> Update Dependencies", 
+	 followed by "Run As -> Maven Clean" and "Run As -> Maven Install" 
 	
 Maven build
 	In Eclipse, right-clicking on mp2dBuilder project, choose "Run As"-> Maven clean, followed by "Run As"->Maven package.
