@@ -1,6 +1,7 @@
 package org.mp2dbuilder.smiles.smarts;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -178,10 +179,18 @@ public class ReactionSmartsQueryTool {
 		mapperUtil.setCommonIds(COMMON_ID_FIELD_NAME, mcs, reactant, product);
 		
 		//Verify conservation on this point or fail
-		if (!(areAtomsConserved(reactant,fullReactionQueryIndices, product, fullProductQueryIndices))){
+//		if (!(areAnyAtomConserved(reactant,fullReactionQueryIndices, product, fullProductQueryIndices))){
+//			System.out.println("== No reactant atoms are conserved on first conservation test. Exiting. ==");
+//			return false;
+//		}
+		
+		List<Integer> consReactIndices = getConservedReactantIndices(reactant, fullReactionQueryIndices, product, fullProductQueryIndices);
+		List<Integer> consProductIndices = getConservedProductIndices(reactant, fullReactionQueryIndices, product, fullProductQueryIndices);
+		if (consProductIndices.size()<=0 || consReactIndices.size()<=0){
 			System.out.println("== No reactant atoms are conserved on first conservation test. Exiting. ==");
 			return false;
 		}
+
 		
 
 		//***************************
@@ -228,8 +237,14 @@ public class ReactionSmartsQueryTool {
 				System.out.println("  Product hits:\n" + debugHits(workingProductIndices));
 
 				//Verify conservation on this point
-				if (!(areAtomsConserved(reactant,workingReactionIndices, product,workingProductIndices))){
-					System.out.println("== All reaction atoms not conserved. Exiting. ==");
+//				if (!(areAnyAtomConserved(reactant,workingReactionIndices, product,workingProductIndices))){
+//					System.out.println("== All reaction atoms not conserved. Exiting. ==");
+//					return false;
+//				}
+				consReactIndices = getConservedReactantIndices(reactant, fullReactionQueryIndices, product, fullProductQueryIndices);
+				consProductIndices = getConservedProductIndices(reactant, fullReactionQueryIndices, product, fullProductQueryIndices);
+				if (consProductIndices.size()<=0 || consReactIndices.size()<=0){
+					System.out.println("== No reactant atoms are conserved on first conservation test. Exiting. ==");
 					return false;
 				}
 
@@ -244,7 +259,7 @@ public class ReactionSmartsQueryTool {
 		System.out.println("## DONE ##");
 
 		//So, the reaction hits should be the first stored indices with full query, including dollar
-		reactionAtomNumbers=fullReactionQueryIndices;	
+		reactionAtomNumbers.add(consReactIndices);
 		
 		//Product hits should be conserved hits. TODO: Implement this. For now, show all hits (including non-conserved)
 		productAtomNumbers=fullProductQueryIndices;
@@ -260,7 +275,7 @@ public class ReactionSmartsQueryTool {
 	 * @return true if all atoms in reactionIndices are present in productIndices linked via 
 	 * COMMON_ID_FIELD_NAME constant
 	 */
-	private boolean areAtomsConserved(
+	private boolean areAnyAtomConserved(
 			IAtomContainer reactant, List<List<Integer>> reactionIndices,
 			IAtomContainer product, List<List<Integer>> productIndices) {
 		
@@ -328,6 +343,88 @@ public class ReactionSmartsQueryTool {
 		System.out.println("We found at least one conserved atom.");
 		
 		return tempMatch;
+	}
+	
+	
+	private List<Integer> getConservedProductIndices(
+			IAtomContainer reactant, List<List<Integer>> reactionIndices,
+			IAtomContainer product, List<List<Integer>> productIndices) {
+		
+		//Just swap the inputs I guess...
+		return getConservedReactantIndices(product, productIndices, reactant, reactionIndices);
+	}
+	
+	private List<Integer> getConservedReactantIndices(
+			IAtomContainer reactant, List<List<Integer>> reactionIndices,
+			IAtomContainer product, List<List<Integer>> productIndices) {
+		
+		List<Integer> consReactIndices=new ArrayList<Integer>();
+
+		//We do not care about individual matches so merge all in atom index lists
+		Set<Integer> rlist=new HashSet<Integer>();
+		for (List<Integer> l : reactionIndices){
+			rlist.addAll(l);
+		}
+		Set<Integer> plist=new HashSet<Integer>();
+		for (List<Integer> l : productIndices){
+			plist.addAll(l);
+		}
+		
+		//Check conservation for each reaction index
+		
+		String reactantCommonId = null;
+		String productCommonId = null;
+		boolean tempMatch = false;
+
+		for (Integer ratom : rlist){
+			System.out.println("+ checking reactant atom index=" + ratom);
+			
+			//get the common id from the reactant atom having index value of ratom
+			reactantCommonId = (String) reactant.getAtom(ratom).getProperty(COMMON_ID_FIELD_NAME);
+			if(reactantCommonId == null){
+				System.out.println("Skipping reactant having index " + ratom + " because it lacks a common id field.");
+				continue;
+			}
+			
+			for(IAtom productAtom : product.atoms()){
+				productCommonId = (String) productAtom.getProperty(COMMON_ID_FIELD_NAME); 
+				if(	productCommonId != null
+						&&
+					reactantCommonId.equals(productCommonId)
+						&&
+					plist.contains(product.getAtomNumber(productAtom))
+				){
+					tempMatch = true;
+					break;
+				}
+			}
+			
+			if(tempMatch == false){
+				System.out.println("+++ NOT-CONSERVED, since reactant index" + ratom + " is NOT present in productlist");
+//				return false; //Found a non-conserved atom
+			}else{
+				System.out.println("+++ CONSERVED, since reactant index " + ratom + " is present in productlist");
+				consReactIndices.add(ratom);
+			}
+			
+//			for (RMap rmap : mcss){
+////				System.out.println("++ rmap.getId1()=" + rmap.getId1());
+//				if (ratom==rmap.getId1()){
+//					System.out.println("+++ Found in mcs.getID1");
+//					//verify that rmap.getId2() is present in plist
+//					if (!(plist.contains(rmap.getId2()))){
+//						System.out.println("+++ NOT-CONSERVED, since rmap.getId2()=" + rmap.getId2() + " NOT present in productlist");
+//						return false; //Found a non-conserved atom
+//					}else{
+//						System.out.println("+++ CONSERVED, since rmap.getId2()=" + rmap.getId2() + " present in productlist");
+//					}
+//				}
+//			}
+		}
+		
+		System.out.println("We found at least one conserved atom.");
+		
+		return consReactIndices;
 	}
 
 	private String escapeBrackets(String reactGroup) {
