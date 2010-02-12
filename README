@@ -40,6 +40,14 @@ Add jchempaint jars to local Maven repo
 	In Eclipse, do a refresh and "project clean" on mp2Dbuilder.
 	In Eclipse, right-click mp2Dbuilder project and do a "Maven -> Update Dependencies", 
 	 followed by "Run As -> Maven Clean" and "Run As -> Maven Install" 
+
+Junit memory problem
+	You may encounter a non-responsive GUI (such as a molecule area that remains black after pushing "GO").
+	Firstly, make sure that it isn't a memory related problem by closing the showing window(s), and have
+	a look at the JUnit tab in Eclipse. Should there be a heap space memory problem, please go to
+	"Run As -> Run Configurations" and then look for the JUnit configuration of the failing test. Then
+	choose the Arguments tab, and then fill the VM arguments field with "-Xmx512M" (without the quotes)
+	before trying the JUnit test once again.
 	
 Maven build
 	In Eclipse, right-clicking on mp2dBuilder project, choose "Run As"-> Maven clean, followed by "Run As"->Maven package.
