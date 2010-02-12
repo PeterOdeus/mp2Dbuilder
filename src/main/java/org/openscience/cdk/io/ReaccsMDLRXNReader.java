@@ -35,45 +35,50 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 		super(input, Mode.RELAXED);
 		logger = LoggingToolFactory.createLoggingTool(ReaccsMDLRXNReader.class);
 	}
-	
-	public void setInitialRiregNo(int riregNo){
+
+	public void setInitialRiregNo(int riregNo) {
 		this.riregNo = " " + riregNo;
 	}
 
-	public IChemObject read(IChemObject object, 
-			ReactSmartsMoleculeViewerWorker swingWorker,
-			int swingWorkerCounter) throws ReaccsFileEndedException, CDKException {
+	public IChemObject read(IChemObject object,
+			ReactSmartsMoleculeViewerWorker swingWorker, int swingWorkerCounter)
+			throws ReaccsFileEndedException, CDKException {
 		this.swingWorker = swingWorker;
 		this.swingWorkerCounter = swingWorkerCounter;
 		IChemObject returnObject = null;
-		try{
+		try {
 			returnObject = this.read(object);
-		}finally{
+		} finally {
 			this.swingWorker = null;
 		}
 		return returnObject;
 	}
+
 	/**
 	 * Special treatment to work on .rdf files from Reaccs database.
-	 *
+	 * 
 	 * @see org.openscience.cdk.io.MDLRXNReader#read(IChemObject) read
-	 * @param  object                              The object that subclasses
-	 *      IChemObject
-	 * @return                                     The IChemObject read
-	 * @exception  CDKException
+	 * @param object
+	 *            The object that subclasses IChemObject
+	 * @return The IChemObject read
+	 * @exception CDKException
 	 */
-	public IChemObject read(IChemObject object) throws ReaccsFileEndedException, ReadingReaccsFileCancelledException, CDKException {
+	public IChemObject read(IChemObject object)
+			throws ReaccsFileEndedException,
+			ReadingReaccsFileCancelledException, CDKException {
 		if (object instanceof IReactionSet) {
 			readUntilRXN();
 			Method m = null;
 			try {
-				m = MDLRXNReader.class.getDeclaredMethod("readReaction", IChemObjectBuilder.class);
+				m = MDLRXNReader.class.getDeclaredMethod("readReaction",
+						IChemObjectBuilder.class);
 				m.setAccessible(true);
-				IReaction r = (IReaction) m.invoke((MDLRXNReader)this, object.getBuilder());
+				IReaction r = (IReaction) m.invoke((MDLRXNReader) this, object
+						.getBuilder());
 				if (r != null) {
-					((IReactionSet)object).addReaction(r);
+					((IReactionSet) object).addReaction(r);
 				}
-			}catch (IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
@@ -90,45 +95,45 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 				e.printStackTrace();
 			}
 			return object;
-			//return super.read(object);// readReactionSet((IReactionSet)object);
+			// return super.read(object);//
+			// readReactionSet((IReactionSet)object);
 		} else {
 			return super.read(object);
 		}
 	}
 
-	private void readUntilRXN() throws CDKException, ReadingReaccsFileCancelledException, ReaccsFileEndedException {
+	private void readUntilRXN() throws CDKException,
+			ReadingReaccsFileCancelledException, ReaccsFileEndedException {
 		try {
 			logger.debug("Looking for string \"$RIREG\"" + this.riregNo);
 			String line = null;
-			do{
+			do {
 				line = input.readLine();
-				if(line == null){
+				if (line == null) {
 					throw new ReaccsFileEndedException("eof");
 				}
 				logger.debug(line);
-				if(line.indexOf("$RFMT $RIREG ") >=0){
-					if(this.swingWorker != null){
-						if(this.swingWorker.isCancelled()){
+				if (line.indexOf("$RFMT $RIREG ") >= 0) {
+					if (this.swingWorker != null) {
+						if (this.swingWorker.isCancelled()) {
 							throw new CancelledException();
 						}
-						this.swingWorkerCounter = Integer.valueOf(line.substring("$RFMT $RIREG ".length()));
-						this.swingWorker.publishToSwingWorker("" + this.swingWorkerCounter);
-						System.out.println(""+this.swingWorkerCounter);
+						this.swingWorkerCounter = Integer.valueOf(line
+								.substring("$RFMT $RIREG ".length()));
+						this.swingWorker.publishToSwingWorker(""
+								+ this.swingWorkerCounter);
+						System.out.println("" + this.swingWorkerCounter);
 					}
 				}
-			}while(line.indexOf("$RIREG" + this.riregNo) < 0);
+			} while (line.indexOf("$RIREG" + this.riregNo) < 0);
 			this.riregNo = "";
-		}
-		catch(ReaccsFileEndedException e){
+		} catch (ReaccsFileEndedException e) {
 			throw e;
-		}
-		catch(CancelledException e){
+		} catch (CancelledException e) {
 			throw new ReadingReaccsFileCancelledException("");
-		}
-		catch (Exception exception) {
+		} catch (Exception exception) {
 			logger.debug(exception);
-			throw new CDKException(
-					"Error while reading header (or sub-header)" 
+			throw new CDKException("Error while reading header (or sub-header)"
 					+ " of Reaccs .rdf RXN file", exception);
 		}
 
@@ -136,17 +141,17 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 
 	public void activateReset(long fileLengthLong) throws IOException {
 		this.fileLengthLong = fileLengthLong;
-		if(this.fileLengthLong > Integer.MAX_VALUE){
+		if (this.fileLengthLong > Integer.MAX_VALUE) {
 			logger.info("marking Integer.MAX_VALUE");
 			input.mark(Integer.MAX_VALUE);
-		}else{
-			logger.info("marking " + (int)this.fileLengthLong);
-			input.mark((int)this.fileLengthLong);
+		} else {
+			logger.info("marking " + (int) this.fileLengthLong);
+			input.mark((int) this.fileLengthLong);
 		}
 	}
 
 	public void reset() throws IOException {
-		if(this.fileLengthLong > 0){
+		if (this.fileLengthLong > 0) {
 			input.reset();
 		}
 	}

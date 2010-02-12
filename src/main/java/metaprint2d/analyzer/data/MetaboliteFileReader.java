@@ -1,6 +1,6 @@
-/*    */ package metaprint2d.analyzer.data;
-/*    */ 
-/*    */ import java.io.File;
+ package metaprint2d.analyzer.data;
+ 
+ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -17,42 +17,42 @@ import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 public class MetaboliteFileReader
-/*    */   implements DataSource<Transformation>
-/*    */ {
-/*    */   //public RDFileReader in;
-/*    */   //private MetaboliteEntryReader reader;
+   implements DataSource<Transformation>
+ {
+   //public RDFileReader in;
+   //private MetaboliteEntryReader reader;
 	
 			private static ILoggingTool logger = LoggingToolFactory.createLoggingTool(MetaboliteFileReader.class);
 			private ReaccsMDLRXNReader reader;
 			private IReactionSet currentReactionSet;
 			private MetaboliteHandler handler;
-/*    */   private boolean skipMultistep;
-/*    */ 
-/*    */   public MetaboliteFileReader(InputStream is, MetaboliteHandler metaboliteHandler)
-/*    */     throws IOException
-/*    */   { 
+   private boolean skipMultistep;
+ 
+   public MetaboliteFileReader(InputStream is, MetaboliteHandler metaboliteHandler)
+     throws IOException
+   { 
 	 			reader = new ReaccsMDLRXNReader(is);
 	 			handler = metaboliteHandler;
-///* 17 */     this.reader = new MetaboliteEntryReader();
-/*    */ 
-/* 21 */     //this.in = new RDFileReader(is);
-/*    */   }
-/*    */ 
-/*    */   public MetaboliteFileReader(File file, MetaboliteHandler metaboliteHandler) throws FileNotFoundException, IOException {
-/* 25 */     this(new FileInputStream(file), metaboliteHandler);
-/*    */   }
-/*    */ 
+//     this.reader = new MetaboliteEntryReader();
+ 
+     //this.in = new RDFileReader(is);
+   }
+ 
+   public MetaboliteFileReader(File file, MetaboliteHandler metaboliteHandler) throws FileNotFoundException, IOException {
+     this(new FileInputStream(file), metaboliteHandler);
+   }
+ 
 
 			public void setInitialReaction(int i){
 				this.reader.setInitialRiregNo(i);
 			}
 
-/*    */   public Transformation getNext()
-/*    */     throws Exception
-/*    */   {
-	/*    */     Transformation t;
-	/* 29 */     ensureOpen();
-	/*    */     do{
+   public Transformation getNext()
+     throws Exception
+   {
+	     Transformation t;
+	     ensureOpen();
+	     do{
 					try {
 						currentReactionSet = (IReactionSet)reader.read(new NNReactionSet());
 					} catch (ReaccsFileEndedException e) {
@@ -67,46 +67,41 @@ public class MetaboliteFileReader
 					}
 					t = this.handler.getTransformation(currentReactionSet);
 				}while ((this.skipMultistep) && (t.isMultiStep()));
-	/*    */ 
-	/* 40 */     return t;
-/*    */   }
-/*    */ 
-/*    */   private void ensureOpen()
-/*    */     throws IOException
-/*    */   {
-/* 48 */     if (this.reader == null)
-/* 49 */       throw new IOException("Stream closed");
-/*    */   }
-/*    */ 
-/*    */   public synchronized void close()
-/*    */     throws IOException
-/*    */   {
-/* 58 */     if (this.reader == null) {
-/* 59 */       return;
-/*    */     }
-/* 61 */     this.reader.close();
-/* 62 */     this.reader = null;
-/*    */   }
-/*    */ 
-///*    */   public ReactionAnalyser getAnalyser()
-///*    */   {
-/////* 67 */     return this.reader.getAnalyser();
-///*    */   }
-/*    */ 
-///*    */   public void setAnalyser(ReactionAnalyser analyser) {
-/////* 71 */     this.reader.setAnalyser(analyser);
-///*    */   }
-/*    */ 
-/*    */   public boolean isSkipMultistep() {
-/* 75 */     return this.skipMultistep;
-/*    */   }
-/*    */ 
-/*    */   public void setSkipMultistep(boolean skipMultistep) {
-/* 79 */     this.skipMultistep = skipMultistep;
-/*    */   }
-/*    */ }
-
-// Location:           /home/podeus/az/metaprint2d-builder-app-r16427/ImportedClasses/
-// Qualified Name:     metaprint2d.analyzer.data.MetaboliteFileReader
-// Java Class Version: 5 (49.0)
-// JD-Core Version:    0.5.1
+	 
+	     return t;
+   }
+ 
+   private void ensureOpen()
+     throws IOException
+   {
+     if (this.reader == null)
+       throw new IOException("Stream closed");
+   }
+ 
+   public synchronized void close()
+     throws IOException
+   {
+     if (this.reader == null) {
+       return;
+     }
+     this.reader.close();
+     this.reader = null;
+   }
+ 
+//   public ReactionAnalyser getAnalyser()
+//   {
+////     return this.reader.getAnalyser();
+//   }
+ 
+//   public void setAnalyser(ReactionAnalyser analyser) {
+////     this.reader.setAnalyser(analyser);
+//   }
+ 
+   public boolean isSkipMultistep() {
+     return this.skipMultistep;
+   }
+ 
+   public void setSkipMultistep(boolean skipMultistep) {
+     this.skipMultistep = skipMultistep;
+   }
+ }

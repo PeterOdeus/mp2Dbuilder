@@ -23,16 +23,21 @@ public class SmartHitsGenerator implements IGenerator {
 	@SuppressWarnings("unused")
 	public IRenderingElement generate(IAtomContainer ac, RendererModel model) {
 		Set<IAtom> reactionCentreAtoms = new HashSet<IAtom>();
-		for(IAtom atom: ac.atoms()){
-			if(atom.getProperty(MetaboliteHandler.SMART_HIT_FIELD_NAME) != null){
+		for (IAtom atom : ac.atoms()) {
+			if (atom.getProperty(MetaboliteHandler.SMART_HIT_FIELD_NAME) != null) {
 				reactionCentreAtoms.add(atom);
 			}
 		}
 		ElementGroup group = new ElementGroup();
-		for(IAtom atom : reactionCentreAtoms){
+		for (IAtom atom : reactionCentreAtoms) {
 			Point2d p = atom.getPoint2d();
-			double r = (model.getHighlightDistance() + 2.0) / model.getScale(); //(model.getAtomRadius() + 2.0) / model.getScale();
-			OvalElement textGroup = new OvalElement(p.x, p.y, r, new Color(140,255,0,150));
+			double r = (model.getHighlightDistance() + 2.0) / model.getScale(); // (model.getAtomRadius()
+																				// +
+																				// 2.0)
+																				// /
+																				// model.getScale();
+			OvalElement textGroup = new OvalElement(p.x, p.y, r, new Color(140,
+					255, 0, 150));
 			group.add(textGroup);
 		}
 		return group;

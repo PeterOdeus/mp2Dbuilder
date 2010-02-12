@@ -12,54 +12,52 @@ import org.openscience.cdk.tools.LoggingToolFactory;
 import prototyping.InitialTest;
 
 public class DataBuilderAppTest {
-	
-	private static ILoggingTool logger =  null;
 
-	@BeforeClass public static void setup() {
+	private static ILoggingTool logger = null;
+
+	@BeforeClass
+	public static void setup() {
 		logger = LoggingToolFactory.createLoggingTool(DataBuilderAppTest.class);
 	}
-	
-	@Test public void testDataBuilderAppSimpleIO()throws Exception{
-		URL url = this.getClass().getClassLoader().getResource("data/mdl/firstRiReg.rdf");
+
+	@Test
+	public void testDataBuilderAppSimpleIO() throws Exception {
+		URL url = this.getClass().getClassLoader().getResource(
+				"data/mdl/firstRiReg.rdf");
 		String inFile = url.getPath();
 		url = this.getClass().getClassLoader().getResource("data/mdl");
 		String outFile = url.getPath() + "/out.bin";
-		String [] args = {"-i", 
-		                  inFile,
-		                  "-o",
-		                  outFile};
+		String[] args = { "-i", inFile, "-o", outFile };
 		DataBuilderApp.main(args);
 	}
-	
-	@Test public void testDataBuilderAppSimpleSmirks()throws Exception{
-		URL url = this.getClass().getClassLoader().getResource("data/mdl/firstRiReg.rdf");
+
+	@Test
+	public void testDataBuilderAppSimpleSmirks() throws Exception {
+		URL url = this.getClass().getClassLoader().getResource(
+				"data/mdl/firstRiReg.rdf");
 		String inFile = url.getPath();
 		url = this.getClass().getClassLoader().getResource("data/mdl");
 		String outFile = url.getPath() + "/simpleSMIRKSout.bin";
-		url = this.getClass().getClassLoader().getResource("data/mdl/ReactionSMARTSFilter.simple");
+		url = this.getClass().getClassLoader().getResource(
+				"data/mdl/ReactionSMARTSFilter.simple");
 		String reactionSmartsFilterFile = url.getPath();
-		String [] args = {"-i", 
-		                  inFile,
-		                  "-o",
-		                  outFile,
-		                  "-rfile",
-		                  reactionSmartsFilterFile};
+		String[] args = { "-i", inFile, "-o", outFile, "-rfile",
+				reactionSmartsFilterFile };
 		DataBuilderApp.main(args);
 	}
-	
-	@Test public void testDataBuilderAppTwoSmirks()throws Exception{
-		URL url = this.getClass().getClassLoader().getResource("data/mdl/firstRiReg.rdf");
+
+	@Test
+	public void testDataBuilderAppTwoSmirks() throws Exception {
+		URL url = this.getClass().getClassLoader().getResource(
+				"data/mdl/firstRiReg.rdf");
 		String inFile = url.getPath();
 		url = this.getClass().getClassLoader().getResource("data/mdl");
 		String outFile = url.getPath() + "/simpleSMIRKSout.bin";
-		url = this.getClass().getClassLoader().getResource("data/mdl/ReactionSMARTSFilter.two");
+		url = this.getClass().getClassLoader().getResource(
+				"data/mdl/ReactionSMARTSFilter.two");
 		String reactionSmartsFilterFile = url.getPath();
-		String [] args = {"-i", 
-		                  inFile,
-		                  "-o",
-		                  outFile,
-		                  "-rfile",
-		                  reactionSmartsFilterFile};
+		String[] args = { "-i", inFile, "-o", outFile, "-rfile",
+				reactionSmartsFilterFile };
 		DataBuilderApp.main(args);
 	}
 }

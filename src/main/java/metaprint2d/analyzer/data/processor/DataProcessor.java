@@ -1,88 +1,83 @@
-/*    */ package metaprint2d.analyzer.data.processor;
-/*    */ 
-/*    */ import org.openscience.cdk.tools.ILoggingTool;
+ package metaprint2d.analyzer.data.processor;
+ 
+ import org.openscience.cdk.tools.ILoggingTool;
 
-//import sea36.util.LogTool;
-/*    */ 
-/*    */ public class DataProcessor<T>
-/*    */   implements MonitorableProcess
-/*    */ {
-/*    */   private ILoggingTool LOG;
-/*    */   private DataSource<T> in;
-/*    */   private DataSink<T> out;
-/*    */   private int nn;
-/* 15 */   private boolean started = false;
-/* 16 */   private boolean done = false;
-/*    */ 
-/*    */   public DataProcessor(DataSource<T> in, DataSink<T> out, int nn) {
-/* 19 */     this.in = in;
-/* 20 */     this.out = out;
+
+ 
+ public class DataProcessor<T>
+   implements MonitorableProcess
+ {
+   private ILoggingTool LOG;
+   private DataSource<T> in;
+   private DataSink<T> out;
+   private int nn;
+   private boolean started = false;
+   private boolean done = false;
+ 
+   public DataProcessor(DataSource<T> in, DataSink<T> out, int nn) {
+     this.in = in;
+     this.out = out;
 			this.nn = nn;
-/*    */   }
-/*    */ 
-/*    */   public void run() throws Exception {
-/* 24 */     checkState();
-/* 25 */     this.started = true;
-/*    */     try
-/*    */     {
-/*    */       while (true) {
-/* 29 */         
-/* 30 */         if (this.LOG != null) {
-/* 31 */           this.LOG.debug("Reading #" + Integer.valueOf(this.nn));
-/*    */         }
+   }
+ 
+   public void run() throws Exception {
+     checkState();
+     this.started = true;
+     try
+     {
+       while (true) {
+         
+         if (this.LOG != null) {
+           this.LOG.debug("Reading #" + Integer.valueOf(this.nn));
+         }
 /* TODO changed from Object to T */         T o = this.in.getNext();
-/* 34 */         if (o == null) {
-/*    */           break;
-/*    */         }
-/*    */ 
-/* 38 */         if (this.LOG != null) {
-/* 39 */           this.LOG.debug("Processing #" + Integer.valueOf(this.nn));
-/*    */         }
-/* 41 */         if (acceptPreProcess(o));
-/* 42 */         o = process(o);
-/* 43 */         if (acceptPostProcess(o));
-/* 44 */         this.out.put(o);
+         if (o == null) {
+           break;
+         }
+ 
+         if (this.LOG != null) {
+           this.LOG.debug("Processing #" + Integer.valueOf(this.nn));
+         }
+         if (acceptPreProcess(o));
+         o = process(o);
+         if (acceptPostProcess(o));
+         this.out.put(o);
 					this.nn += 1;
-/*    */       }
-/*    */ 
-/* 48 */       this.out.flush();
-/*    */     } finally {
-/* 50 */       this.done = true;
-/*    */     }
-/*    */   }
-/*    */ 
-/*    */   protected void checkState() {
-/* 55 */     if (this.started)
-/* 56 */       throw new IllegalStateException("Already run");
-/*    */   }
-/*    */ 
-/*    */   protected boolean acceptPreProcess(T o)
-/*    */   {
-/* 61 */     return true;
-/*    */   }
-/*    */ 
-/*    */   protected boolean acceptPostProcess(T o) {
-/* 65 */     return true;
-/*    */   }
-/*    */ 
-/*    */   protected T process(T o) {
-/* 69 */     return o;
-/*    */   }
-/*    */ 
-/*    */   protected void setLogger(ILoggingTool log) {
-/* 73 */     this.LOG = log;
-/*    */   }
-/*    */ 
-/*    */   public int getProgress() {
-/* 77 */     return this.nn;
-/*    */   }
-/*    */ 
-/*    */   public boolean isDone() {
-/* 81 */     return this.done;
-/*    */   }
-/*    */ }
-
-// Location:           /home/podeus/az/metaprint2d-builder-app-r16427/ImportedClasses/
-// Qualified Name:     metaprint2d.analyzer.data.processor.DataProcessor
-// Java Class Version: 5 (49.0)
-// JD-Core Version:    0.5.1
+       }
+ 
+       this.out.flush();
+     } finally {
+       this.done = true;
+     }
+   }
+ 
+   protected void checkState() {
+     if (this.started)
+       throw new IllegalStateException("Already run");
+   }
+ 
+   protected boolean acceptPreProcess(T o)
+   {
+     return true;
+   }
+ 
+   protected boolean acceptPostProcess(T o) {
+     return true;
+   }
+ 
+   protected T process(T o) {
+     return o;
+   }
+ 
+   protected void setLogger(ILoggingTool log) {
+     this.LOG = log;
+   }
+ 
+   public int getProgress() {
+     return this.nn;
+   }
+ 
+   public boolean isDone() {
+     return this.done;
+   }
+ }

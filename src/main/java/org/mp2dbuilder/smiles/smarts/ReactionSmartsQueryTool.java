@@ -21,14 +21,14 @@ import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 /**
- * ReactionSmartsQueryTool can be used to query a reaction for conserved matches in reactant and product.
+ * ReactionSmartsQueryTool can be used to query a reaction for conserved matches
+ * in reactant and product.
  * 
  * @author ola
- *
+ * 
  */
 public class ReactionSmartsQueryTool {
-	
-	
+
 	public static final String COMMON_ID_FIELD_NAME = "ReactionSmartsCommonId";
 	private List<List<Integer>> reactionAtomNumbers;
 	private List<List<Integer>> productAtomNumbers;
@@ -45,31 +45,35 @@ public class ReactionSmartsQueryTool {
 
 	/**
 	 * Constructor.
-	 * @param reactionQuery the SMARTS string for the reactant part of the reaction
-	 * @param productQuery the SMARTS string for the product part of the reaction
+	 * 
+	 * @param reactionQuery
+	 *            the SMARTS string for the reactant part of the reaction
+	 * @param productQuery
+	 *            the SMARTS string for the product part of the reaction
 	 */
 	public ReactionSmartsQueryTool(String reactionQuery, String productQuery) {
-		this.reactionQuery=reactionQuery;
-		this.productQuery=productQuery;
+		this.reactionQuery = reactionQuery;
+		this.productQuery = productQuery;
 
-		//remove the [$( partof reactant
-		reactionQueryNoDollar=removeDollarPart(reactionQuery);
-		
-		//product query must not have [$(
-		productQueryNoDollar=productQuery;
+		// remove the [$( partof reactant
+		reactionQueryNoDollar = removeDollarPart(reactionQuery);
 
-		//Extract classes to map INT > String
+		// product query must not have [$(
+		productQueryNoDollar = productQuery;
+
+		// Extract classes to map INT > String
 		reactClasses = getClasses(reactionQueryNoDollar);
 		prodClasses = getClasses(productQueryNoDollar);
 
-		//Extract full query without dollar and without classes
-		reactionQueryNoClasses=removeAllClasses(reactionQuery);
-		productQueryNoClasses=removeAllClasses(productQuery);
+		// Extract full query without dollar and without classes
+		reactionQueryNoClasses = removeAllClasses(reactionQuery);
+		productQueryNoClasses = removeAllClasses(productQuery);
 
 	}
 
 	/**
 	 * Use a regexp to remove all :X (class information) from a SMARTS string
+	 * 
 	 * @param q
 	 * @return
 	 */
@@ -78,164 +82,203 @@ public class ReactionSmartsQueryTool {
 	}
 
 	/**
-     * Get the atoms in the reactant molecule that match the query pattern. <p/>
-     * Since there may be multiple matches, the return value is a List of List
-     * objects. Each List object contains the unique set of indices of the atoms in the reactant
-     * molecule, that match the query pattern
-     *
-     * @return A List of List of atom indices in the reactant molecule
-     */
+	 * Get the atoms in the reactant molecule that match the query pattern.
+	 * <p/>
+	 * Since there may be multiple matches, the return value is a List of List
+	 * objects. Each List object contains the unique set of indices of the atoms
+	 * in the reactant molecule, that match the query pattern
+	 * 
+	 * @return A List of List of atom indices in the reactant molecule
+	 */
 	public List<List<Integer>> getUniqueReactantMatchingAtoms() {
-		//TODO: Ensure unique
+		// TODO: Ensure unique
 		return reactionAtomNumbers;
 	}
 
-    /**
-     * Get the atoms in the product molecule that match the query pattern. <p/>
-     * Since there may be multiple matches, the return value is a List of List
-     * objects. Each List object contains the unique set of indices of the atoms in the product
-     * molecule, that match the query pattern
-     *
-     * @return A List of List of atom indices in the product molecule
-     */
+	/**
+	 * Get the atoms in the product molecule that match the query pattern.
+	 * <p/>
+	 * Since there may be multiple matches, the return value is a List of List
+	 * objects. Each List object contains the unique set of indices of the atoms
+	 * in the product molecule, that match the query pattern
+	 * 
+	 * @return A List of List of atom indices in the product molecule
+	 */
 	public List<List<Integer>> getUniqueProductMatchingAtoms() {
-		//TODO: Ensure unique
+		// TODO: Ensure unique
 		return productAtomNumbers;
 	}
 
 	/**
 	 * Do matching in reaction and product.
-	 * @param reaction The reaction to be queried
-	 * @return true if there is a match in reactant and product molecules, 
-	 * and all atoms marked with class are conserved in reactant and product.
-	 * @throws Exception 
+	 * 
+	 * @param reaction
+	 *            The reaction to be queried
+	 * @return true if there is a match in reactant and product molecules, and
+	 *         all atoms marked with class are conserved in reactant and
+	 *         product.
+	 * @throws Exception
 	 */
 	public boolean matches(IReaction reaction) throws Exception {
-		
-		//Assert only one reactant and one product, this is all we can handle for now
-		//TODO: Extend this to be more generic
-		
-		assert(reaction.getReactantCount()==1);
-		assert(reaction.getProductCount()==1);
-		
-		IAtomContainer reactant = (IAtomContainer) reaction.getReactants().getMolecule(0);
-		IAtomContainer product = (IAtomContainer) reaction.getProducts().getMolecule(0);
-		
-		assert(reactant!=null);
-		assert(product!=null);
-		
-		reactionAtomNumbers=new ArrayList<List<Integer>>();
-		productAtomNumbers=new ArrayList<List<Integer>>();
-		
-		//Count number of classes in reactant and product and require identical
+
+		// Assert only one reactant and one product, this is all we can handle
+		// for now
+		// TODO: Extend this to be more generic
+
+		assert (reaction.getReactantCount() == 1);
+		assert (reaction.getProductCount() == 1);
+
+		IAtomContainer reactant = (IAtomContainer) reaction.getReactants()
+				.getMolecule(0);
+		IAtomContainer product = (IAtomContainer) reaction.getProducts()
+				.getMolecule(0);
+
+		assert (reactant != null);
+		assert (product != null);
+
+		reactionAtomNumbers = new ArrayList<List<Integer>>();
+		productAtomNumbers = new ArrayList<List<Integer>>();
+
+		// Count number of classes in reactant and product and require identical
 		assertEqualClasses(reactClasses, prodClasses);
 
 		// If no matches in reactant, fail early
-		SMARTSQueryTool reactQueryTool = new SMARTSQueryTool(reactionQueryNoClasses);
-		if (!reactQueryTool.matches(reactant)){
-			System.out.println("== No match in first reactant query: " + reactionQueryNoClasses);
+		SMARTSQueryTool reactQueryTool = new SMARTSQueryTool(
+				reactionQueryNoClasses);
+		if (!reactQueryTool.matches(reactant)) {
+			System.out.println("== No match in first reactant query: "
+					+ reactionQueryNoClasses);
 			return false;
 		}
 
 		// If no matches in product, fail early
-		SMARTSQueryTool prodtQueryTool = new SMARTSQueryTool(productQueryNoClasses);
-		if (!prodtQueryTool.matches(product)){
-			System.out.println("== No match in first product query: " + productQueryNoClasses);
+		SMARTSQueryTool prodtQueryTool = new SMARTSQueryTool(
+				productQueryNoClasses);
+		if (!prodtQueryTool.matches(product)) {
+			System.out.println("== No match in first product query: "
+					+ productQueryNoClasses);
 			return false;
 		}
 
-		//We have at least one match in reactant and one in product.
-		//Save these indices in list
-		List<List<Integer>> fullReactionQueryIndices = reactQueryTool.getUniqueMatchingAtoms();
-		System.out.println("Reaction hits:\n" + debugHits(fullReactionQueryIndices));
+		// We have at least one match in reactant and one in product.
+		// Save these indices in list
+		List<List<Integer>> fullReactionQueryIndices = reactQueryTool
+				.getUniqueMatchingAtoms();
+		System.out.println("Reaction hits:\n"
+				+ debugHits(fullReactionQueryIndices));
 
-		List<List<Integer>> fullProductQueryIndices = prodtQueryTool.getUniqueMatchingAtoms();
-		System.out.println("Product hits:\n" + debugHits(fullProductQueryIndices));
+		List<List<Integer>> fullProductQueryIndices = prodtQueryTool
+				.getUniqueMatchingAtoms();
+		System.out.println("Product hits:\n"
+				+ debugHits(fullProductQueryIndices));
 
-		//Preprocess AC for MCSS (TODO: Verify if this is needed)
+		// Preprocess AC for MCSS (TODO: Verify if this is needed)
 		AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(reactant);
 		AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(product);
 		CDKHueckelAromaticityDetector.detectAromaticity(reactant);
 		CDKHueckelAromaticityDetector.detectAromaticity(product);
 
-		//We now need an MCSS to link atoms
-		
-		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
-		
-		//How many overlaps can we get? Anyway, pick largest for now TODO: Verify this
+		// We now need an MCSS to link atoms
+
+		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(
+				reactant, product);
+
+		// How many overlaps can we get? Anyway, pick largest for now TODO:
+		// Verify this
 		IAtomContainer mcs = getFirstMCSHavingMostAtoms(mcsList);
-		
-		//List<RMap> mcss = UniversalIsomorphismTester.getSubgraphAtomsMap(reactant, product);		
-		if (mcs==null || mcs != null && mcs.getAtomCount()<=0){
+
+		// List<RMap> mcss =
+		// UniversalIsomorphismTester.getSubgraphAtomsMap(reactant, product);
+		if (mcs == null || mcs != null && mcs.getAtomCount() <= 0) {
 			System.out.println("No overlaps in MCSS. Exiting.");
 			return false;
 		}
-		
+
 		System.out.println("MCSS has " + mcs.getAtomCount() + " atoms.");
-		
-		//Add identifier fields used to map atoms from reactant to product.
+
+		// Add identifier fields used to map atoms from reactant to product.
 		AtomMapperUtil mapperUtil = new AtomMapperUtil();
 		mapperUtil.setCommonIds(COMMON_ID_FIELD_NAME, mcs, reactant, product);
-		
-		//Verify conservation on this point or fail
-		if (!(areAtomsConserved(reactant,fullReactionQueryIndices, product, fullProductQueryIndices))){
-			System.out.println("== All reactant atoms not conserved. Exiting. ==");
+
+		// Verify conservation on this point or fail
+		if (!(areAtomsConserved(reactant, fullReactionQueryIndices, product,
+				fullProductQueryIndices))) {
+			System.out
+					.println("== All reactant atoms not conserved. Exiting. ==");
 			return false;
 		}
-		
 
-		//***************************
-		//Ok, now extract one class at a time for reactant and product and verify class conservation.
-		//Start with highest class (from the right of String) and stepwise cut away query parts.
-		//***************************
+		// ***************************
+		// Ok, now extract one class at a time for reactant and product and
+		// verify class conservation.
+		// Start with highest class (from the right of String) and stepwise cut
+		// away query parts.
+		// ***************************
 
-		//The starting values, dollar parts removed from reactant part (product query has no such constraint)
-		String workingReactQuery=reactionQueryNoDollar;
-		String workingProductQuery=productQuery;
-		
+		// The starting values, dollar parts removed from reactant part (product
+		// query has no such constraint)
+		String workingReactQuery = reactionQueryNoDollar;
+		String workingProductQuery = productQuery;
+
 		System.out.println("** Extracting subclasses **");
 
-		//Loop over all available classes in descending order
-		for (int classid : reactClasses.keySet()){
-			
-			System.out.println("Processing REAC=" + workingReactQuery + " and PROD=" + workingProductQuery);
-			
-			String reactGroup=reactClasses.get(classid);
-			String prodGroup=prodClasses.get(classid);
-			System.out.println("   Removing last class: " + classid + 
-					" which is R=" + reactGroup + " and P=" + prodGroup);
+		// Loop over all available classes in descending order
+		for (int classid : reactClasses.keySet()) {
 
-			//We require classes in incrementing order in query String, hence just cut away from last class part's index in string
-			workingReactQuery=workingReactQuery.substring(0,workingReactQuery.indexOf(reactGroup));
-			workingProductQuery=workingProductQuery.substring(0,workingProductQuery.indexOf(prodGroup));	
+			System.out.println("Processing REAC=" + workingReactQuery
+					+ " and PROD=" + workingProductQuery);
 
-			//Verify that we have more classes to process
-			if (!(workingProductQuery==null || workingReactQuery==null || workingProductQuery.equals("") || workingReactQuery.equals(""))){
+			String reactGroup = reactClasses.get(classid);
+			String prodGroup = prodClasses.get(classid);
+			System.out.println("   Removing last class: " + classid
+					+ " which is R=" + reactGroup + " and P=" + prodGroup);
 
-				System.out.println("   Class extraction result: REACT=" + workingReactQuery + " and PROD=" + workingProductQuery);
+			// We require classes in incrementing order in query String, hence
+			// just cut away from last class part's index in string
+			workingReactQuery = workingReactQuery.substring(0,
+					workingReactQuery.indexOf(reactGroup));
+			workingProductQuery = workingProductQuery.substring(0,
+					workingProductQuery.indexOf(prodGroup));
 
-				//Look up smarts matches for these subqueries with class=classid removed
+			// Verify that we have more classes to process
+			if (!(workingProductQuery == null || workingReactQuery == null
+					|| workingProductQuery.equals("") || workingReactQuery
+					.equals(""))) {
+
+				System.out.println("   Class extraction result: REACT="
+						+ workingReactQuery + " and PROD="
+						+ workingProductQuery);
+
+				// Look up smarts matches for these subqueries with
+				// class=classid removed
 				reactQueryTool.setSmarts(removeAllClasses(workingReactQuery));
-				if (!reactQueryTool.matches(reactant)) 
-					throw new IllegalArgumentException("No hits for reactant query " + workingReactQuery);
-				List<List<Integer>> workingReactionIndices = reactQueryTool.getUniqueMatchingAtoms();
-				System.out.println("  Reaction hits:\n" + debugHits(workingReactionIndices));
+				if (!reactQueryTool.matches(reactant))
+					throw new IllegalArgumentException(
+							"No hits for reactant query " + workingReactQuery);
+				List<List<Integer>> workingReactionIndices = reactQueryTool
+						.getUniqueMatchingAtoms();
+				System.out.println("  Reaction hits:\n"
+						+ debugHits(workingReactionIndices));
 
 				prodtQueryTool.setSmarts(removeAllClasses(workingProductQuery));
-				if (!prodtQueryTool.matches(product)) 
-					throw new IllegalArgumentException("No hits for reactant query " + workingReactQuery);
-				List<List<Integer>> workingProductIndices = prodtQueryTool.getUniqueMatchingAtoms();
-				System.out.println("  Product hits:\n" + debugHits(workingProductIndices));
+				if (!prodtQueryTool.matches(product))
+					throw new IllegalArgumentException(
+							"No hits for reactant query " + workingReactQuery);
+				List<List<Integer>> workingProductIndices = prodtQueryTool
+						.getUniqueMatchingAtoms();
+				System.out.println("  Product hits:\n"
+						+ debugHits(workingProductIndices));
 
-				//Verify conservation on this point
-				if (!(areAtomsConserved(reactant,workingReactionIndices, product,workingProductIndices))){
-					System.out.println("== All reaction atoms not conserved. Exiting. ==");
+				// Verify conservation on this point
+				if (!(areAtomsConserved(reactant, workingReactionIndices,
+						product, workingProductIndices))) {
+					System.out
+							.println("== All reaction atoms not conserved. Exiting. ==");
 					return false;
 				}
 
-
 				System.out.println("  END OF CLASS " + classid + " loop");
-			}else{
+			} else {
 				System.out.println("No more classes available.");
 			}
 
@@ -243,105 +286,113 @@ public class ReactionSmartsQueryTool {
 
 		System.out.println("## DONE ##");
 
-		//So, the reaction hits should be the first stored indices with full query, including dollar
-		reactionAtomNumbers=fullReactionQueryIndices;	
-		
-		//Product hits should be conserved hits. TODO: Implement this. For now, show all hits (including non-conserved)
-		productAtomNumbers=fullProductQueryIndices;
+		// So, the reaction hits should be the first stored indices with full
+		// query, including dollar
+		reactionAtomNumbers = fullReactionQueryIndices;
+
+		// Product hits should be conserved hits. TODO: Implement this. For now,
+		// show all hits (including non-conserved)
+		productAtomNumbers = fullProductQueryIndices;
 
 		return true;
 	}
-	
+
 	/**
 	 * 
 	 * @param mcss
 	 * @param reactionIndices
 	 * @param productIndices
-	 * @return true if all atoms in reactionIndices are present in productIndices linked via 
-	 * COMMON_ID_FIELD_NAME constant
+	 * @return true if all atoms in reactionIndices are present in
+	 *         productIndices linked via COMMON_ID_FIELD_NAME constant
 	 */
-	private boolean areAtomsConserved(
-			IAtomContainer reactant, List<List<Integer>> reactionIndices,
-			IAtomContainer product, List<List<Integer>> productIndices) {
-		
-		//We do not care about individual matches so merge all in atom index lists
-		Set<Integer> rlist=new HashSet<Integer>();
-		for (List<Integer> l : reactionIndices){
+	private boolean areAtomsConserved(IAtomContainer reactant,
+			List<List<Integer>> reactionIndices, IAtomContainer product,
+			List<List<Integer>> productIndices) {
+
+		// We do not care about individual matches so merge all in atom index
+		// lists
+		Set<Integer> rlist = new HashSet<Integer>();
+		for (List<Integer> l : reactionIndices) {
 			rlist.addAll(l);
 		}
-		Set<Integer> plist=new HashSet<Integer>();
-		for (List<Integer> l : productIndices){
+		Set<Integer> plist = new HashSet<Integer>();
+		for (List<Integer> l : productIndices) {
 			plist.addAll(l);
 		}
-		
-		//Check conservation for each reaction index
-		
+
+		// Check conservation for each reaction index
+
 		String reactantCommonId = null;
 		String productCommonId = null;
 		boolean tempMatch = false;
-		for (Integer ratom : rlist){
+		for (Integer ratom : rlist) {
 			System.out.println("+ checking reactant atom index=" + ratom);
-			
-			//get the common id from the reactant atom having index value of ratom
-			reactantCommonId = (String) reactant.getAtom(ratom).getProperty(COMMON_ID_FIELD_NAME);
-			if(reactantCommonId == null){
-				System.out.println("Skipping reactant having index " + ratom + " because it lacks a common id field.");
+
+			// get the common id from the reactant atom having index value of
+			// ratom
+			reactantCommonId = (String) reactant.getAtom(ratom).getProperty(
+					COMMON_ID_FIELD_NAME);
+			if (reactantCommonId == null) {
+				System.out.println("Skipping reactant having index " + ratom
+						+ " because it lacks a common id field.");
 				continue;
 			}
 			tempMatch = false;
-			
-			for(IAtom productAtom : product.atoms()){
-				productCommonId = (String) productAtom.getProperty(COMMON_ID_FIELD_NAME); 
-				if(	productCommonId != null
-						&&
-					reactantCommonId.equals(productCommonId)
-						&&
-					plist.contains(product.getAtomNumber(productAtom))
-				){
+
+			for (IAtom productAtom : product.atoms()) {
+				productCommonId = (String) productAtom
+						.getProperty(COMMON_ID_FIELD_NAME);
+				if (productCommonId != null
+						&& reactantCommonId.equals(productCommonId)
+						&& plist.contains(product.getAtomNumber(productAtom))) {
 					tempMatch = true;
 					break;
 				}
 			}
-			
-			if(tempMatch == false){
-				System.out.println("+++ NOT-CONSERVED, since reactant index" + ratom + " is NOT present in productlist");
-				return false; //Found a non-conserved atom
+
+			if (tempMatch == false) {
+				System.out.println("+++ NOT-CONSERVED, since reactant index"
+						+ ratom + " is NOT present in productlist");
+				return false; // Found a non-conserved atom
 			}
-			System.out.println("+++ CONSERVED, since reactant index " + ratom + " is present in productlist");
-			
-//			for (RMap rmap : mcss){
-////				System.out.println("++ rmap.getId1()=" + rmap.getId1());
-//				if (ratom==rmap.getId1()){
-//					System.out.println("+++ Found in mcs.getID1");
-//					//verify that rmap.getId2() is present in plist
-//					if (!(plist.contains(rmap.getId2()))){
-//						System.out.println("+++ NOT-CONSERVED, since rmap.getId2()=" + rmap.getId2() + " NOT present in productlist");
-//						return false; //Found a non-conserved atom
-//					}else{
-//						System.out.println("+++ CONSERVED, since rmap.getId2()=" + rmap.getId2() + " present in productlist");
-//					}
-//				}
-//			}
+			System.out.println("+++ CONSERVED, since reactant index " + ratom
+					+ " is present in productlist");
+
+			// for (RMap rmap : mcss){
+			// // System.out.println("++ rmap.getId1()=" + rmap.getId1());
+			// if (ratom==rmap.getId1()){
+			// System.out.println("+++ Found in mcs.getID1");
+			// //verify that rmap.getId2() is present in plist
+			// if (!(plist.contains(rmap.getId2()))){
+			// System.out.println("+++ NOT-CONSERVED, since rmap.getId2()=" +
+			// rmap.getId2() + " NOT present in productlist");
+			// return false; //Found a non-conserved atom
+			// }else{
+			// System.out.println("+++ CONSERVED, since rmap.getId2()=" +
+			// rmap.getId2() + " present in productlist");
+			// }
+			// }
+			// }
 		}
-		
+
 		return true;
 	}
 
 	private String escapeBrackets(String reactGroup) {
 		String s = reactGroup.replaceAll("\\[", "\\\\[");
 		s = s.replaceAll("\\*", "\\\\*");
-		s=s.replaceAll("\\]", "\\\\]");
+		s = s.replaceAll("\\]", "\\\\]");
 		return s;
 	}
 
 	private String debugHits(List<List<Integer>> hits) {
-		
-		int c=0;
-		StringBuffer buf=new StringBuffer();
-		for (List<Integer> in : hits){
+
+		int c = 0;
+		StringBuffer buf = new StringBuffer();
+		for (List<Integer> in : hits) {
 			buf.append("   Hit: " + c + ": atoms=");
-			for (int i : in){
-				buf.append(i+",");
+			for (int i : in) {
+				buf.append(i + ",");
 			}
 			buf.append("\n");
 			c++;
@@ -350,182 +401,187 @@ public class ReactionSmartsQueryTool {
 	}
 
 	/**
-	 * Assert equal number of classes and same ID of classes in two smart queries with colon notation
+	 * Assert equal number of classes and same ID of classes in two smart
+	 * queries with colon notation
+	 * 
 	 * @param reactClasses2
 	 * @param prodClasses2
 	 */
 	private void assertEqualClasses(Map<Integer, String> reactClasses,
 			Map<Integer, String> prodClasses) {
 
-		//Assert equal number of classes
-		if (reactClasses.size()!=prodClasses.size())
-			throw new IllegalArgumentException("Number of classes not equal. " +
-					"Reaction query has " + reactClasses.size() + 
-					" but product query has " + prodClasses.size());
-		
-		//Assert classes exist in both lists
-		for (int c : reactClasses.keySet()){
-			if (!prodClasses.containsKey(c)) throw new IllegalArgumentException(
-					"Class " + c + " exists in reactant querybut not in product.");
+		// Assert equal number of classes
+		if (reactClasses.size() != prodClasses.size())
+			throw new IllegalArgumentException("Number of classes not equal. "
+					+ "Reaction query has " + reactClasses.size()
+					+ " but product query has " + prodClasses.size());
+
+		// Assert classes exist in both lists
+		for (int c : reactClasses.keySet()) {
+			if (!prodClasses.containsKey(c))
+				throw new IllegalArgumentException("Class " + c
+						+ " exists in reactant querybut not in product.");
 		}
-		String classes="";
-		for (int c : prodClasses.keySet()){
-			if (!reactClasses.containsKey(c)) throw new IllegalArgumentException(
-					"Class " + c + " exists in product query but not in reactant.");
-			classes=classes + c + ",";
+		String classes = "";
+		for (int c : prodClasses.keySet()) {
+			if (!reactClasses.containsKey(c))
+				throw new IllegalArgumentException("Class " + c
+						+ " exists in product query but not in reactant.");
+			classes = classes + c + ",";
 		}
 
-		System.out.println("Product and Reactant have the following classes: " + classes);
+		System.out.println("Product and Reactant have the following classes: "
+				+ classes);
 
 	}
 
 	/**
 	 * Get classes for a smarts query with colon notaion
+	 * 
 	 * @param smarts
-	 * @return Map<Integer, String> linking a class ID to a group [xxx:ID] with brackets and ID within
+	 * @return Map<Integer, String> linking a class ID to a group [xxx:ID] with
+	 *         brackets and ID within
 	 */
 	private Map<Integer, String> getClasses(String smarts) {
 
-		//Create a descending sorted map to get classes in descending order
-		Map<Integer, String> classes= new TreeMap<Integer, String>(new Comparator<Integer>() {
-			public int compare(Integer o1, Integer o2) {
-				return o2.compareTo(o1);
-			}
-		});
+		// Create a descending sorted map to get classes in descending order
+		Map<Integer, String> classes = new TreeMap<Integer, String>(
+				new Comparator<Integer>() {
+					public int compare(Integer o1, Integer o2) {
+						return o2.compareTo(o1);
+					}
+				});
 
-		//RegExp to find all groups (surrounded by [ and ])
-		String regx="\\[([^\\]]*)\\]";
+		// RegExp to find all groups (surrounded by [ and ])
+		String regx = "\\[([^\\]]*)\\]";
 		Pattern groupPattern = Pattern.compile(regx);
 
-		String nregx=":(\\d)";
+		String nregx = ":(\\d)";
 		Pattern classPattern = Pattern.compile(nregx);
-		
-		//Extract all groups from input
+
+		// Extract all groups from input
 		Matcher matcher = groupPattern.matcher(smarts);
 
 		System.out.println("Extracting classes from query: " + smarts);
 
 		while (matcher.find()) {
-			String group=matcher.group();
+			String group = matcher.group();
 
-			//Extract the number from the group
+			// Extract the number from the group
 			Matcher classMatcher = classPattern.matcher(group);
-			if (classMatcher.find()){
-				String classString=classMatcher.group();
+			if (classMatcher.find()) {
+				String classString = classMatcher.group();
 
-				//Remove first colon
-				String classnumber=classString.substring(1);
-				Integer clazz=Integer.parseInt(classnumber);
+				// Remove first colon
+				String classnumber = classString.substring(1);
+				Integer clazz = Integer.parseInt(classnumber);
 
-				System.out.println("     Found class=" + clazz + ", group=" + group);
+				System.out.println("     Found class=" + clazz + ", group="
+						+ group);
 
-				//add to list
+				// add to list
 				classes.put(clazz, group);
 			}
 
-		}		
+		}
 
 		return classes;
 	}
 
 	/**
 	 * Remove the starting [$( and trailing )] from a string
+	 * 
 	 * @param q
 	 * @return new string without the [$( and )] parts.
 	 */
 	private String removeDollarPart(String q) {
 
-		q=q.trim();
-		
-		if (!q.startsWith("[$(")) 
-			throw new IllegalArgumentException("The SMARTS query '"+ q + "' does not start with [$( ");
-		if (!q.endsWith(")]")) 
-			throw new IllegalArgumentException("The SMARTS query '"+ q + "' does not end with )] ");
+		q = q.trim();
 
-		return q.substring(3,q.length()-2);
-		
+		if (!q.startsWith("[$("))
+			throw new IllegalArgumentException("The SMARTS query '" + q
+					+ "' does not start with [$( ");
+		if (!q.endsWith(")]"))
+			throw new IllegalArgumentException("The SMARTS query '" + q
+					+ "' does not end with )] ");
+
+		return q.substring(3, q.length() - 2);
+
 	}
-	
+
 	/**
 	 * Sort out the AC having most atoms from a list of ACs and return it.
+	 * 
 	 * @param acList
 	 * @return
 	 */
-	public IAtomContainer getFirstMCSHavingMostAtoms(List<IAtomContainer> acList){
-    	IAtomContainer chosenAtomContainer = null;
+	public IAtomContainer getFirstMCSHavingMostAtoms(List<IAtomContainer> acList) {
+		IAtomContainer chosenAtomContainer = null;
 		int maxCount = -1;
-		for(IAtomContainer atoms: acList){
-			if(atoms.getAtomCount() > maxCount){
+		for (IAtomContainer atoms : acList) {
+			if (atoms.getAtomCount() > maxCount) {
 				maxCount = atoms.getAtomCount();
-				if(chosenAtomContainer == null){
-					System.out.println("Choosing AC from MCSS having " + atoms.getAtomCount() + ".");
-				}else{
-					System.out.println("No, wait... Choosing AC from MCSS having " + atoms.getAtomCount() + " instead.");
+				if (chosenAtomContainer == null) {
+					System.out.println("Choosing AC from MCSS having "
+							+ atoms.getAtomCount() + ".");
+				} else {
+					System.out
+							.println("No, wait... Choosing AC from MCSS having "
+									+ atoms.getAtomCount() + " instead.");
 				}
 				chosenAtomContainer = atoms;
 			}
 		}
 		return chosenAtomContainer;
-    }
+	}
 
 	/*
-    private Map<Integer, Integer> extractClasses(String smarts, IAtomContainer ac) throws CDKException {
-
-    	Map<Integer, Integer> retmap = new HashMap<Integer, Integer>();
-    	
-//    	String s="[CH3:1]=[N:2]";
-
-    	//RegExp to find all groups (surrounded by [ and ])
-    	String regx="\\[([^\\]]*)\\]";
-    	Pattern groupPattern = Pattern.compile(regx);
-    	
-    	String nregx=":(\\d)";
-    	Pattern classPattern = Pattern.compile(nregx);
-
-    	//Extract all groups from input
-    	Matcher matcher = groupPattern.matcher(smarts);
-        
-        while (matcher.find()) {
-        	String group=matcher.group();
-        	
-        	//Do SMARTS matching to get the atom number of this group
-        	SMARTSQueryTool sm = new SMARTSQueryTool(group);
-        	if (sm.matches(ac)){
-        		//Assert only one atom matched
-        		assert(sm.getMatchingAtoms().size()==1);
-        		
-        		//Assign the atom to the correct class
-//        		int atomno=sm.getMatchingAtoms().get(0);
-        		//TODO
-        		
-        	}
-
-        	//Extract the number from the group
-            Matcher classMatcher = classPattern.matcher(group);
-            if (classMatcher.find()){
-            	String classString=classMatcher.group();
-            	
-            	//Remove first colon
-            	String classnumber=classString.substring(1);
-            	Integer clazz=Integer.parseInt(classnumber);
-            	
-            	group=removeAllClasses(group);
-            	
-            	int groupint=0;//BOGUS
-            	
-            	//DO smarts matching here?
-
-            	System.out.println("class="+classnumber + ", group=" + group);
-            	
-            	//Add to map
-            	retmap.put(clazz,groupint);
-            }
-        	
-        }		
-		
-		return retmap;
-	}
-	*/
-
+	 * private Map<Integer, Integer> extractClasses(String smarts,
+	 * IAtomContainer ac) throws CDKException {
+	 * 
+	 * Map<Integer, Integer> retmap = new HashMap<Integer, Integer>();
+	 * 
+	 * // String s="[CH3:1]=[N:2]";
+	 * 
+	 * //RegExp to find all groups (surrounded by [ and ]) String
+	 * regx="\\[([^\\]]*)\\]"; Pattern groupPattern = Pattern.compile(regx);
+	 * 
+	 * String nregx=":(\\d)"; Pattern classPattern = Pattern.compile(nregx);
+	 * 
+	 * //Extract all groups from input Matcher matcher =
+	 * groupPattern.matcher(smarts);
+	 * 
+	 * while (matcher.find()) { String group=matcher.group();
+	 * 
+	 * //Do SMARTS matching to get the atom number of this group SMARTSQueryTool
+	 * sm = new SMARTSQueryTool(group); if (sm.matches(ac)){ //Assert only one
+	 * atom matched assert(sm.getMatchingAtoms().size()==1);
+	 * 
+	 * //Assign the atom to the correct class // int
+	 * atomno=sm.getMatchingAtoms().get(0); //TODO
+	 * 
+	 * }
+	 * 
+	 * //Extract the number from the group Matcher classMatcher =
+	 * classPattern.matcher(group); if (classMatcher.find()){ String
+	 * classString=classMatcher.group();
+	 * 
+	 * //Remove first colon String classnumber=classString.substring(1); Integer
+	 * clazz=Integer.parseInt(classnumber);
+	 * 
+	 * group=removeAllClasses(group);
+	 * 
+	 * int groupint=0;//BOGUS
+	 * 
+	 * //DO smarts matching here?
+	 * 
+	 * System.out.println("class="+classnumber + ", group=" + group);
+	 * 
+	 * //Add to map retmap.put(clazz,groupint); }
+	 * 
+	 * }
+	 * 
+	 * return retmap; }
+	 */
 
 }

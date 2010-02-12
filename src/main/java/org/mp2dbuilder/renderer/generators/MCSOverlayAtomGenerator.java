@@ -19,17 +19,17 @@ public class MCSOverlayAtomGenerator extends ExtendedAtomGenerator {
 
 	private IAtomContainer mcsContainer;
 
-	public MCSOverlayAtomGenerator(IAtomContainer mcsContainer){
+	public MCSOverlayAtomGenerator(IAtomContainer mcsContainer) {
 		this.mcsContainer = mcsContainer;
 	}
 
-	public IRenderingElement generate(
-			IAtomContainer ac, IAtom atom, RendererModel model) {
+	public IRenderingElement generate(IAtomContainer ac, IAtom atom,
+			RendererModel model) {
 		ElementGroup elementGroup = new ElementGroup();
 		IRenderingElement renderingElement = super.generate(ac, atom, model);
 		Point2d p = atom.getPoint2d();
-		if(renderingElement== null){
-			Color c = getAtomColor(atom); //getColorForAtom(atom, model);
+		if (renderingElement == null) {
+			Color c = getAtomColor(atom); // getColorForAtom(atom, model);
 			TextGroupElement textGroup = new TextGroupElement(p.x, p.y, "", c);
 			decorate(textGroup, ac, atom, model);
 			renderingElement = textGroup;
@@ -38,36 +38,35 @@ public class MCSOverlayAtomGenerator extends ExtendedAtomGenerator {
 		return elementGroup;
 	}
 
-	public void decorate(TextGroupElement textGroup, 
-			IAtomContainer ac, 
-			IAtom atom, 
-			RendererModel model) {
+	public void decorate(TextGroupElement textGroup, IAtomContainer ac,
+			IAtom atom, RendererModel model) {
 		Stack<Position> unused = getUnusedPositions(ac, atom);
 
 		Position position = getNextPosition(unused);
 		String id = atom.getID();
-		if(id == null){
+		if (id == null) {
 			boolean idIsNull = true;
-			//TODO is this a problem?
+			// TODO is this a problem?
 		}
 		IAtom mcsAtom = getMCSAtomById(id);
-		if(mcsAtom != null){
-			String number = String.valueOf(this.mcsContainer.getAtomNumber(mcsAtom) + 1 );
+		if (mcsAtom != null) {
+			String number = String.valueOf(this.mcsContainer
+					.getAtomNumber(mcsAtom) + 1);
 			textGroup.addChild(number, position);
 		}
 
 		super.decorate(textGroup, ac, atom, model);
 	}
 
-	private IAtom getMCSAtomById(String id){
+	private IAtom getMCSAtomById(String id) {
 		IAtom matchedAtom = null;
 		String currId = null;
-		for(int i = 0; i < this.mcsContainer.getAtomCount(); i++){
+		for (int i = 0; i < this.mcsContainer.getAtomCount(); i++) {
 			currId = this.mcsContainer.getAtom(i).getID();
-			if(currId == null){
+			if (currId == null) {
 				boolean currIdIsNull = true;
-				//TODO is this a problem?
-			}else if(currId.equals(id)){
+				// TODO is this a problem?
+			} else if (currId.equals(id)) {
 				matchedAtom = this.mcsContainer.getAtom(i);
 				break;
 			}

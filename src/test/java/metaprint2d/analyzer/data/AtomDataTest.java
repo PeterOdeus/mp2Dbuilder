@@ -14,15 +14,17 @@ import org.openscience.cdk.tools.LoggingToolFactory;
 import prototyping.InitialTest;
 
 public class AtomDataTest {
-	
-	private static ILoggingTool logger =  null;
 
-	@BeforeClass public static void setup() {
+	private static ILoggingTool logger = null;
+
+	@BeforeClass
+	public static void setup() {
 		logger = LoggingToolFactory.createLoggingTool(AtomDataTest.class);
 	}
 
-	@Test public void testCloneAtomData() throws Exception {
-		byte [][] byteMatrix = new byte[1][1];
+	@Test
+	public void testCloneAtomData() throws Exception {
+		byte[][] byteMatrix = new byte[1][1];
 		byteMatrix[0][0] = 1;
 		Fingerprint fp = new Fingerprint(byteMatrix);
 		Set<String> reactionNames = new HashSet<String>();
@@ -32,9 +34,10 @@ public class AtomDataTest {
 		Assert.assertArrayEquals(byteMatrix, clone.getFingerprint().getBytes());
 		Assert.assertEquals(true, clone.getIsReactionCentre());
 	}
-	
-	@Test public void testAtomDataWithNullReactionNames() throws Exception {
-		byte [][] byteMatrix = new byte[1][1];
+
+	@Test
+	public void testAtomDataWithNullReactionNames() throws Exception {
+		byte[][] byteMatrix = new byte[1][1];
 		byteMatrix[0][0] = 1;
 		Fingerprint fp = new Fingerprint(byteMatrix);
 		AtomData atomData = new AtomData(fp, true, null);

@@ -23,16 +23,19 @@ public class ReactionCentreGenerator implements IGenerator {
 	@SuppressWarnings("unused")
 	public IRenderingElement generate(IAtomContainer ac, RendererModel model) {
 		Set<IAtom> reactionCentreAtoms = new HashSet<IAtom>();
-		for(IAtom atom: ac.atoms()){
-			if(atom.getProperty(MetaboliteHandler.REACTION_CENTRE_FIELD_NAME) != null){
+		for (IAtom atom : ac.atoms()) {
+			if (atom.getProperty(MetaboliteHandler.REACTION_CENTRE_FIELD_NAME) != null) {
 				reactionCentreAtoms.add(atom);
 			}
 		}
 		ElementGroup group = new ElementGroup();
-		for(IAtom atom : reactionCentreAtoms){
+		for (IAtom atom : reactionCentreAtoms) {
 			Point2d p = atom.getPoint2d();
-			double r = model.getHighlightDistance() / model.getScale(); //model.getAtomRadius() / model.getScale();
-			OvalElement textGroup = new OvalElement(p.x, p.y, r, new Color(255,140,0,150));
+			double r = model.getHighlightDistance() / model.getScale(); // model.getAtomRadius()
+																		// /
+																		// model.getScale();
+			OvalElement textGroup = new OvalElement(p.x, p.y, r, new Color(255,
+					140, 0, 150));
 			group.add(textGroup);
 		}
 		return group;
@@ -42,7 +45,5 @@ public class ReactionCentreGenerator implements IGenerator {
 		// TODO Auto-generated method stub
 		return new ArrayList<IGeneratorParameter<?>>();
 	}
-
-	
 
 }

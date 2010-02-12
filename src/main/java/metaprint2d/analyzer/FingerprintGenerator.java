@@ -1,70 +1,61 @@
-/*    */ package metaprint2d.analyzer;
-/*    */ 
-/*    */ import java.util.HashMap;
-/*    */ import java.util.Iterator;
-/*    */ import java.util.List;
-/*    */ import java.util.Map;
-/*    */ import metaprint2d.Fingerprint;
-/*    */ import metaprint2d.mol2.Atom;
-/*    */ import metaprint2d.mol2.Fingerprinter;
-/*    */ import metaprint2d.mol2.Molecule;
-/*    */ import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
-/*    */ import org.openscience.cdk.exception.CDKException;
-/*    */ import org.openscience.cdk.interfaces.IAtom;
-import org.openscience.cdk.interfaces.IAtomContainer;
-/*    */ import org.openscience.cdk.interfaces.IAtomType;
-/*    */ import org.openscience.cdk.interfaces.IMolecule;
-/*    */// import sea36.chem.core.CMLMolecule;
-//import sea36.chemkit.cdk.CDKAdaptor;
-/*    */ 
-/*    */ public class FingerprintGenerator
-/*    */ {
-/* 24 */   private Fingerprinter fingerprinter = new Fingerprinter();
-/*    */ 
-/*    */   public List<Fingerprint> generateFingerprints(IAtomContainer mol, IAtomType[] types)
-/*    */   {
-/*    */     Molecule cmol;
-/*    */     try {
-/* 30 */       cmol = getAtomTypedMolecule(mol, types);
-/*    */     } catch (CDKException e) {
-/* 32 */       throw new RuntimeException(e);
-/*    */     }
-/*    */ 
-/* 35 */     return this.fingerprinter.fingerprint(cmol, 5);
-/*    */   }
-/*    */ 
-/*    */   public static Molecule getAtomTypedMolecule(IAtomContainer m, IAtomType[] types)
-/*    */     throws CDKException
-/*    */   {
-/*    */     Atom atom;
-/* 41 */     //IMolecule ac = CDKAdaptor.getDefaultInstance().getCDKMolecule(m);
-/*    */ 
-/* 59 */     Molecule mol = new Molecule();
-/* 60 */     Map map = new HashMap();
-/* 61 */     for (int i = 0; i < types.length; ++i) {
-/* 62 */       IAtom cdkAtom = m.getAtom(i);
-/*    */ 
-/* 64 */       if (types[i] == null)
-/* 65 */         atom = new Atom("Du");
-/*    */       else {
-/* 67 */         atom = new Atom(types[i].getAtomTypeName());
-/*    */       }
-/* 69 */       mol.addAtom(atom);
-/* 70 */       map.put(cdkAtom, atom);
-/*    */     }
-/* 72 */     for (Iterator it = m.atoms().iterator(); it.hasNext(); ) {
-/* 73 */       IAtom cdkAt = (IAtom)it.next();
-/* 74 */       atom = (Atom)map.get(cdkAt);
-/* 75 */       for (IAtom an : m.getConnectedAtomsList(cdkAt)) {
-/* 76 */         atom.addNeighbour((Atom)map.get(an));
-/*    */       }
-/*    */     }
-/*    */ 
-/* 80 */     return mol;
-/*    */   }
-/*    */ }
+package metaprint2d.analyzer;
 
-// Location:           /home/podeus/az/metaprint2d-builder-app-r16427/ImportedClasses/
-// Qualified Name:     metaprint2d.analyzer.FingerprintGenerator
-// Java Class Version: 5 (49.0)
-// JD-Core Version:    0.5.1
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import metaprint2d.Fingerprint;
+import metaprint2d.mol2.Atom;
+import metaprint2d.mol2.Fingerprinter;
+import metaprint2d.mol2.Molecule;
+import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
+import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.interfaces.IAtom;
+import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IAtomType;
+import org.openscience.cdk.interfaces.IMolecule;
+
+public class FingerprintGenerator {
+	private Fingerprinter fingerprinter = new Fingerprinter();
+
+	public List<Fingerprint> generateFingerprints(IAtomContainer mol,
+			IAtomType[] types) {
+		Molecule cmol;
+		try {
+			cmol = getAtomTypedMolecule(mol, types);
+		} catch (CDKException e) {
+			throw new RuntimeException(e);
+		}
+
+		return this.fingerprinter.fingerprint(cmol, 5);
+	}
+
+	public static Molecule getAtomTypedMolecule(IAtomContainer m,
+			IAtomType[] types) throws CDKException {
+		Atom atom;
+		// IMolecule ac = CDKAdaptor.getDefaultInstance().getCDKMolecule(m);
+
+		Molecule mol = new Molecule();
+		Map map = new HashMap();
+		for (int i = 0; i < types.length; ++i) {
+			IAtom cdkAtom = m.getAtom(i);
+
+			if (types[i] == null)
+				atom = new Atom("Du");
+			else {
+				atom = new Atom(types[i].getAtomTypeName());
+			}
+			mol.addAtom(atom);
+			map.put(cdkAtom, atom);
+		}
+		for (Iterator it = m.atoms().iterator(); it.hasNext();) {
+			IAtom cdkAt = (IAtom) it.next();
+			atom = (Atom) map.get(cdkAt);
+			for (IAtom an : m.getConnectedAtomsList(cdkAt)) {
+				atom.addNeighbour((Atom) map.get(an));
+			}
+		}
+
+		return mol;
+	}
+}
