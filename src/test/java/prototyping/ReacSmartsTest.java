@@ -138,10 +138,13 @@ public class ReacSmartsTest {
 
 	}
 
-//	@Test 
+	@Test 
 	public void testERROR() throws Exception {
-		//FIXME: Remove method when all tests passes
-}
+		String rsmiles="CCCCCCCN(C)C>>CCCCCCCNC";
+		assertTrue(isDoubleMatch(rsmiles, 
+				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
+				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
+	}
 	
 	@Test 
 	public void testHydroxylation() throws Exception {
