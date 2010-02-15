@@ -31,14 +31,14 @@ public class ReactionSmartsQueryTool {
 	
 	
 	public static final String COMMON_ID_FIELD_NAME = "ReactionSmartsCommonId";
-	private List<List<Integer>> reactionAtomNumbers;
+	private List<List<Integer>> reactantAtomNumbers;
 	private List<List<Integer>> productAtomNumbers;
-	private String reactionQuery;
+	private String reactantQuery;
 	private String productQuery;
-	private String reactionQueryNoClasses;
+	private String reactantQueryNoClasses;
 	private String productQueryNoClasses;
 
-	private String reactionQueryNoDollar;
+	private String reactantQueryNoDollar;
 	private String productQueryNoDollar;
 
 	private Map<Integer, String> reactClasses;
@@ -46,27 +46,30 @@ public class ReactionSmartsQueryTool {
 
 	/**
 	 * Constructor.
-	 * @param reactionQuery the SMARTS string for the reactant part of the reaction
+	 * @param reactantQuery the SMARTS string for the reactant part of the reaction
 	 * @param productQuery the SMARTS string for the product part of the reaction
 	 */
-	public ReactionSmartsQueryTool(String reactionQuery, String productQuery) {
-		this.reactionQuery=reactionQuery;
+	public ReactionSmartsQueryTool(String reactantQuery, String productQuery) {
+		this.reactantQuery=reactantQuery;
 		this.productQuery=productQuery;
 
-		//remove the [$( partof reactant
-		reactionQueryNoDollar=removeDollarPart(reactionQuery);
 		
+		//remove the [$( partof reactant
+		reactantQueryNoDollar=removeDollarPart(reactantQuery);
+
 		//product query must not have [$(
 		productQueryNoDollar=productQuery;
 
 		//Extract classes to map INT > String
-		reactClasses = getClasses(reactionQueryNoDollar);
+		reactClasses = getClasses(reactantQueryNoDollar);
 		prodClasses = getClasses(productQueryNoDollar);
 
 		//Extract full query without dollar and without classes
-		reactionQueryNoClasses=removeAllClasses(reactionQuery);
+		reactantQueryNoClasses=removeAllClasses(reactantQuery);
 		productQueryNoClasses=removeAllClasses(productQuery);
 
+		//remove the [$( partof reactant. Assign it again to get it without classes.
+		reactantQueryNoDollar=removeDollarPart(reactantQueryNoClasses);
 	}
 
 	/**
@@ -88,7 +91,7 @@ public class ReactionSmartsQueryTool {
      */
 	public List<List<Integer>> getUniqueReactantMatchingAtoms() {
 		//TODO: Ensure unique
-		return reactionAtomNumbers;
+		return reactantAtomNumbers;
 	}
 
     /**
@@ -125,7 +128,7 @@ public class ReactionSmartsQueryTool {
 		assert(reactant!=null);
 		assert(product!=null);
 		
-		reactionAtomNumbers=new ArrayList<List<Integer>>();
+		reactantAtomNumbers=new ArrayList<List<Integer>>();
 		productAtomNumbers=new ArrayList<List<Integer>>();
 		
 		//Count number of classes in reactant and product and require identical
@@ -133,9 +136,216 @@ public class ReactionSmartsQueryTool {
 
 		// If no matches in reactant, fail early
 		//We have cut away class part but kept the dollar part
-		SMARTSQueryTool reactQueryTool = new SMARTSQueryTool(reactionQueryNoClasses);
+		SMARTSQueryTool rcQueryTool = new SMARTSQueryTool(reactantQueryNoClasses);
+		if (!rcQueryTool.matches(reactant)){
+			System.out.println("== No match in first reactant query: " + reactantQueryNoClasses);
+			return false;
+		}
+
+		//
+		SMARTSQueryTool reactQueryTool = new SMARTSQueryTool(reactantQueryNoDollar);
+
+		// If no matches in product, fail early
+		SMARTSQueryTool prodQueryTool = new SMARTSQueryTool(productQueryNoClasses);
+		if (!prodQueryTool.matches(product)){
+			System.out.println("== No match in first product query: " + productQueryNoClasses);
+			return false;
+		}
+
+		//We have at least one match in reactant and one in product.
+		//Save these indices in list
+		List<List<Integer>> putativeRC_Atomlist = rcQueryTool.getUniqueMatchingAtoms();
+		for (List<Integer> list : putativeRC_Atomlist){
+			System.out.println("Put rc list" + list.toString());
+			for (Integer rc : list){
+				System.out.println("rc: " + rc);
+			}
+		}
+		System.out.println(reactantQueryNoDollar);
+		List<List<Integer>> fullReactantHit_AtomList = reactQueryTool.getUniqueMatchingAtoms();//It might be needed to associate the reactant hits with the rc.
+		for (List<Integer> list : fullReactantHit_AtomList){
+			System.out.println("Reactant list" + list.toString());
+			for (Integer rc : list){
+				System.out.println("rc: " + rc);
+			}
+		}
+
+		
+		List<List<Integer>> fullProductHit_AtomList = prodQueryTool.getUniqueMatchingAtoms();
+
+		//Generate and pick largest MCS. Since there are only one structure as a reactant and one structure as a product the largest MCS should be ok.
+		IAtomContainer mcs = getMCS(reactant, product);
+		if (mcs==null || mcs != null && mcs.getAtomCount()<=0){
+			System.out.println("No overlaps in MCSS. Exiting.");
+			return false;
+		}
+		System.out.println("MCSS has " + mcs.getAtomCount() + " atoms.");
+
+		//Old CDK code, bug filed w/ junit test.
+		//TODO: use this later maybe.
+		//List<RMap> mcss = UniversalIsomorphismTester.getSubgraphAtomsMap(reactant, product);		
+
+		//Workaround for CDK bug. Makes use of property to link atoms.
+		//Add identifier fields used to map atoms from reactant to product.
+		AtomMapperUtil mapperUtil = new AtomMapperUtil();
+		mapperUtil.setCommonIds(COMMON_ID_FIELD_NAME, mcs, reactant, product);
+
+		for (IAtom atom : reactant.atoms()){
+				if (atom.getProperty(COMMON_ID_FIELD_NAME)!=null){
+					System.out.println(atom.getProperty(COMMON_ID_FIELD_NAME));
+			}
+		}
+
+		
+		String mcsstr="";
+		for (IAtom atom : mcs.atoms()){
+			mcsstr=mcsstr + mcs.getAtomNumber(atom) + ",";
+		}
+		System.out.println("MCS contains: " + mcsstr);
+		
+		System.out.println("Reaction hits:\n" + debugHits(putativeRC_Atomlist));
+		System.out.println("Product hits:\n" + debugHits(fullProductHit_AtomList));
+		
+		//Remove all indices which are not available in MCS. If this makes some hits
+		//or RC empty, remove the empty lists.
+		putativeRC_Atomlist=removeIndicesWithoutCommonId(putativeRC_Atomlist, reactant);
+		fullProductHit_AtomList=removeIndicesWithoutCommonId(fullProductHit_AtomList, product);
+		System.out.println("Reaction hits pruned by MCS:\n" + debugHits(putativeRC_Atomlist));
+		System.out.println("Product hits pruned by MCS:\n" + debugHits(fullProductHit_AtomList));
+			
+		//Verify conservation per RC and class
+		//Start with reactant
+		System.out.println("** Starting conservation checking **");
+		int rcno=0; //0-based index is easiest
+		Set<Integer> rcToRemove=new HashSet<Integer>();  //Add non-conserved RCs here
+		for (List<Integer> Ratoms : putativeRC_Atomlist){
+			System.out.println(" %% Current RC: " + rcno + " with hits: " + Ratoms.get(0));
+			
+			//Assign classes to the RC hit
+			for (int i : reactClasses.keySet()){
+				
+				//REACTION PART
+				String rclass = reactClasses.get(i);
+				String rclass_noclass=removeAllClasses(rclass);
+				System.out.println("\n## Reaction class: " + i + "=" + rclass + "=" + rclass_noclass);
+				Set<Integer> reactHitsconcat=null;
+				Set<Integer> reactHitsconcat_pruned=null;
+				reactQueryTool.setSmarts(rclass_noclass);
+				if (!reactQueryTool.matches(reactant)){
+					System.out.println("   Produced no hits.");
+				}else{
+					List<List<Integer>> reactHits = reactQueryTool.getUniqueMatchingAtoms();
+					reactHitsconcat=concatIndices(reactHits);
+					System.out.println("   Produced hits: " + debugHits(reactHitsconcat));
+					List<List<Integer>> reactHits_pruned = removeIndicesWithoutCommonId(reactHits, reactant);
+					reactHitsconcat_pruned = concatIndices(reactHits_pruned);
+					System.out.println("   Produced hits pruned by MCS: " + debugHits(reactHitsconcat_pruned));
+
+				}
+					
+				//PRODUCT PART
+				String pclass = prodClasses.get(i);
+				String pclass_noclass=removeAllClasses(pclass);
+				System.out.println("Product class: " + i + "=" + pclass + "=" + pclass_noclass);
+				Set<Integer> prodHitsconcat=null;
+				Set<Integer> prodHitsconcat_pruned=null;
+				prodQueryTool.setSmarts(pclass_noclass);
+				if (!prodQueryTool.matches(product)){
+					//no hit. How to deal with this?
+					//TODO
+					System.out.println("   Produced no hits.");
+				}else{
+					List<List<Integer>> prodHits = prodQueryTool.getUniqueMatchingAtoms();
+					prodHitsconcat=concatIndices(prodHits);
+					System.out.println("   Produced hits: " + debugHits(prodHitsconcat));
+
+					List<List<Integer>> prodHits_pruned = removeIndicesWithoutCommonId(prodHits, product);
+					prodHitsconcat_pruned = concatIndices(prodHits_pruned);
+					System.out.println("   Produced hits pruned by MCS: " + debugHits(prodHitsconcat_pruned));
+
+				}
+				
+				//Check conservation between result sets via MCS
+				if (isConserved(reactant, reactHitsconcat_pruned, product, prodHitsconcat_pruned)){
+					System.out.println(" ==> RC: " + rcno + " IS CONSERVED");
+				}else{
+					System.out.println(" ==> RC: " + rcno + " IS NOT CONSERVED");
+					
+					//Remove this RC
+					rcToRemove.add(rcno);
+				}
+
+//				//FIXME
+//				Set<Integer> inter=new HashSet<Integer>(reactHitsconcat);
+//				inter.retainAll(prodHitsconcat);
+				
+			}
+			
+			rcno++;
+		}
+		
+		//Remove all non-conserved RCs
+		List<List<Integer>> istorem=new ArrayList<List<Integer>>();
+		for (int i : rcToRemove){
+			istorem.add(putativeRC_Atomlist.get(i));
+		}
+		
+		for (List<Integer> l : istorem){
+			putativeRC_Atomlist.remove(l);
+		}
+		
+
+		//Return conserved RCs
+		reactantAtomNumbers=putativeRC_Atomlist;
+		
+		System.out.println("Resulting RC (conserved):\n" + debugHits(reactantAtomNumbers));
+
+		//For product, return all matches for now (
+		productAtomNumbers=fullProductHit_AtomList;
+		System.out.println("Resulting Product hits (not conserved (yet)):\n" + debugHits(productAtomNumbers));
+		
+		if (reactantAtomNumbers.size()<=0){
+			System.out.println("No RC found. Return false.");
+			return false;
+		}
+				
+		return true;
+
+	}
+	
+	
+	/**
+	 * Do matching in reaction and product.
+	 * @param reaction The reaction to be queried
+	 * @return true if there is a match in reactant and product molecules, 
+	 * and all atoms marked with class are conserved in reactant and product.
+	 * @throws Exception 
+	 */
+	public boolean matchesOla(IReaction reaction) throws Exception {
+		
+		//Assert only one reactant and one product, this is all we can handle for now
+		//TODO: Extend this to be more generic
+		
+		assert(reaction.getReactantCount()==1);
+		assert(reaction.getProductCount()==1);
+		
+		IAtomContainer reactant = (IAtomContainer) reaction.getReactants().getMolecule(0);
+		IAtomContainer product = (IAtomContainer) reaction.getProducts().getMolecule(0);
+		
+		assert(reactant!=null);
+		assert(product!=null);
+		
+		reactantAtomNumbers=new ArrayList<List<Integer>>();
+		productAtomNumbers=new ArrayList<List<Integer>>();
+		
+		//Count number of classes in reactant and product and require identical
+		assertEqualClasses(reactClasses, prodClasses);
+
+		// If no matches in reactant, fail early
+		//We have cut away class part but kept the dollar part
+		SMARTSQueryTool reactQueryTool = new SMARTSQueryTool(reactantQueryNoClasses);
 		if (!reactQueryTool.matches(reactant)){
-			System.out.println("== No match in first reactant query: " + reactionQueryNoClasses);
+			System.out.println("== No match in first reactant query: " + reactantQueryNoClasses);
 			return false;
 		}
 
@@ -176,7 +386,7 @@ public class ReactionSmartsQueryTool {
 
 //		allRC - Determine possible RC //putativeRCs
 //		Determine atom mappings between reactant and product //mcs
-//		reactantHits = get list of of lists of smarts hits for $-removed reaction smarts. One list for each possible rc.//fullReactionQueryIndices 
+//		reactantHits = get list of of lists of smarts hits for $-removed reaction smarts. One list for each possible rc.//fullreactantQueryIndices 
 //		productHits = getList of product smarts hits //fullProductQueryIndices
 //		remove atoms from the reactantHits and productHits that don't exist in the MCS.
 
@@ -279,15 +489,15 @@ public class ReactionSmartsQueryTool {
 		
 
 		//Return conserved RCs
-		reactionAtomNumbers=putativeRC_Atomlist;
+		reactantAtomNumbers=putativeRC_Atomlist;
 		
-		System.out.println("Resulting RC (conserved):\n" + debugHits(reactionAtomNumbers));
+		System.out.println("Resulting RC (conserved):\n" + debugHits(reactantAtomNumbers));
 
 		//For product, return all matches for now (
 		productAtomNumbers=fullProductHit_AtomList;
 		System.out.println("Resulting Product hits (not conserved (yet)):\n" + debugHits(productAtomNumbers));
 		
-		if (reactionAtomNumbers.size()<=0){
+		if (reactantAtomNumbers.size()<=0){
 			System.out.println("No RC found. Return false.");
 			return false;
 		}
@@ -308,13 +518,13 @@ public class ReactionSmartsQueryTool {
 		//***************************
 
 		//The starting values, dollar parts removed from reactant part (product query has no such constraint)
-		String workingReactQuery=reactionQueryNoDollar;
+		String workingReactQuery=reactantQueryNoDollar;
 		String workingProductQuery=productQuery;
 		
 		System.out.println("** Extracting subclasses **");
 
 		//Concat indices for hits in full SMARTS with no classes. This is start of algo.
-		Set<Integer> previousRI=concatIndices(fullReactionQueryIndices);
+		Set<Integer> previousRI=concatIndices(fullreactantQueryIndices);
 		Set<Integer> previousPI=concatIndices(fullProductQueryIndices);
 		System.out.println("  Reactant full indices: " + debugHits(previousRI));
 		System.out.println("  Product full indices: " + debugHits(previousPI));
@@ -400,8 +610,8 @@ public class ReactionSmartsQueryTool {
 
 				
 				
-//				consReactIndices = getConservedReactantIndices(reactant, fullReactionQueryIndices, product, fullProductQueryIndices);
-//				consProductIndices = getConservedProductIndices(reactant, fullReactionQueryIndices, product, fullProductQueryIndices);
+//				consReactIndices = getConservedReactantIndices(reactant, fullreactantQueryIndices, product, fullProductQueryIndices);
+//				consProductIndices = getConservedProductIndices(reactant, fullreactantQueryIndices, product, fullProductQueryIndices);
 //				if (consProductIndices.size()<=0 || consReactIndices.size()<=0){
 //					System.out.println("== No reactant atoms are conserved on first conservation test. Exiting. ==");
 //					return false;
@@ -418,7 +628,7 @@ public class ReactionSmartsQueryTool {
 		System.out.println("## DONE ##");
 
 		//So, the reaction hits should be the first stored indices with full query, including dollar
-		reactionAtomNumbers.add(consReactIndices);
+		reactantAtomNumbers.add(consReactIndices);
 		
 		//Product hits should be conserved hits. TODO: Implement this. For now, show all hits (including non-conserved)
 		productAtomNumbers=fullProductQueryIndices;
