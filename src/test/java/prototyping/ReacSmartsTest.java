@@ -141,8 +141,8 @@ SMARTS:
 		
 		//OH added, but via a N hence not on a conserved atom. Should return false.
 		String rsmiles;
-		rsmiles="CCCCC>>CCCCCNO";
-		assertFalse(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
+//		rsmiles="CCCCC>>CCCCCNO";
+//		assertFalse(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
 
 		rsmiles="CNC(CC=OC)CCCCN(C)C>>CNC(CC=OC)CCCCN(C)C";
 		assertFalse(isDoubleMatch(rsmiles, 
