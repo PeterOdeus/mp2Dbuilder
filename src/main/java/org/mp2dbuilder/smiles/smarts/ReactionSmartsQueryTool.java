@@ -216,6 +216,15 @@ public class ReactionSmartsQueryTool {
 		fullProductHit_AtomList=removeIndicesWithoutCommonId(fullProductHit_AtomList, product);
 		System.out.println("Reaction hits pruned by MCS:\n" + debugHits(putativeRC_Atomlist));
 		System.out.println("Product hits pruned by MCS:\n" + debugHits(fullProductHit_AtomList));
+		
+		if (putativeRC_Atomlist.size()<=0){
+			System.out.println("No putative RC. Returning false.");
+			return false;
+		}
+		if (fullProductHit_AtomList.size()<=0){
+			System.out.println("No putative result matches. Returning false.");
+			return false;
+		}
 	
 		//Verify conservation per RC and class
 		//Start with reactant
@@ -240,6 +249,9 @@ public class ReactionSmartsQueryTool {
 					List<List<Integer>> reactHits = reactQueryTool.getUniqueMatchingAtoms();
 					reactHitsconcat=concatIndices(reactHits);
 					System.out.println("   Produced hits: " + debugHits(reactHitsconcat));
+					List<List<Integer>> reactHits_pruned = removeIndicesWithoutCommonId(reactHits, reactant);
+					Set<Integer> reactHitsconcat_pruned = concatIndices(reactHits_pruned);
+					System.out.println("   Produced hits pruned by MCS: " + debugHits(reactHitsconcat_pruned));
 
 				}
 					
@@ -257,6 +269,10 @@ public class ReactionSmartsQueryTool {
 					List<List<Integer>> prodHits = prodQueryTool.getUniqueMatchingAtoms();
 					prodHitsconcat=concatIndices(prodHits);
 					System.out.println("   Produced hits: " + debugHits(prodHitsconcat));
+
+					List<List<Integer>> prodHits_pruned = removeIndicesWithoutCommonId(prodHits, product);
+					Set<Integer> prodHitsconcat_pruned = concatIndices(prodHits_pruned);
+					System.out.println("   Produced hits pruned by MCS: " + debugHits(prodHitsconcat_pruned));
 
 				}
 				
@@ -280,7 +296,15 @@ public class ReactionSmartsQueryTool {
 		}
 		
 		//Remove all non-conserved RCs
-		putativeRC_Atomlist.removeAll(rcToRemove);
+		List<List<Integer>> istorem=new ArrayList<List<Integer>>();
+		for (int i : rcToRemove){
+			istorem.add(putativeRC_Atomlist.get(i));
+		}
+		
+		for (List<Integer> l : istorem){
+			putativeRC_Atomlist.remove(l);
+		}
+		
 
 		//Return conserved RCs
 		reactionAtomNumbers=putativeRC_Atomlist;
@@ -734,11 +758,13 @@ public class ReactionSmartsQueryTool {
 		StringBuffer buf = new StringBuffer();
 		for (List<Integer> in : hits) {
 			buf.append("   Hit: " + c + ": atoms=");
-			for (int i : in) {
-				buf.append(i + ",");
+			if (in!=null){
+				for (int i : in){
+					buf.append(i+",");
+				}
+				buf.append("\n");
+				c++;
 			}
-			buf.append("\n");
-			c++;
 		}
 		return buf.toString();
 	}
