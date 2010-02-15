@@ -25,14 +25,14 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
  * ReactionSmartsQueryTool can be used to query a reaction for conserved matches in reactant and product.
  * 
  * @author ola
- * 
+ *
  */
 public class ReactionSmartsQueryTool {
-
+	
+	
 	public static final String COMMON_ID_FIELD_NAME = "ReactionSmartsCommonId";
 	private List<List<Integer>> reactionAtomNumbers;
 	private List<List<Integer>> productAtomNumbers;
-	private IAtomContainer mcss;
 	private String reactionQuery;
 	private String productQuery;
 	private String reactionQueryNoClasses;
@@ -46,35 +46,31 @@ public class ReactionSmartsQueryTool {
 
 	/**
 	 * Constructor.
-	 * 
-	 * @param reactionQuery
-	 *            the SMARTS string for the reactant part of the reaction
-	 * @param productQuery
-	 *            the SMARTS string for the product part of the reaction
+	 * @param reactionQuery the SMARTS string for the reactant part of the reaction
+	 * @param productQuery the SMARTS string for the product part of the reaction
 	 */
 	public ReactionSmartsQueryTool(String reactionQuery, String productQuery) {
-		this.reactionQuery = reactionQuery;
-		this.productQuery = productQuery;
+		this.reactionQuery=reactionQuery;
+		this.productQuery=productQuery;
 
-		// remove the [$( partof reactant
-		reactionQueryNoDollar = removeDollarPart(reactionQuery);
+		//remove the [$( partof reactant
+		reactionQueryNoDollar=removeDollarPart(reactionQuery);
+		
+		//product query must not have [$(
+		productQueryNoDollar=productQuery;
 
-		// product query must not have [$(
-		productQueryNoDollar = productQuery;
-
-		// Extract classes to map INT > String
+		//Extract classes to map INT > String
 		reactClasses = getClasses(reactionQueryNoDollar);
 		prodClasses = getClasses(productQueryNoDollar);
 
-		// Extract full query without dollar and without classes
-		reactionQueryNoClasses = removeAllClasses(reactionQuery);
-		productQueryNoClasses = removeAllClasses(productQuery);
+		//Extract full query without dollar and without classes
+		reactionQueryNoClasses=removeAllClasses(reactionQuery);
+		productQueryNoClasses=removeAllClasses(productQuery);
 
 	}
 
 	/**
 	 * Use a regexp to remove all :X (class information) from a SMARTS string
-	 * 
 	 * @param q
 	 * @return
 	 */
@@ -83,16 +79,15 @@ public class ReactionSmartsQueryTool {
 	}
 
 	/**
-	 * Get the atoms in the reactant molecule that match the query pattern.
-	 * <p/>
-	 * Since there may be multiple matches, the return value is a List of List
-	 * objects. Each List object contains the unique set of indices of the atoms
-	 * in the reactant molecule, that match the query pattern
-	 * 
-	 * @return A List of List of atom indices in the reactant molecule
-	 */
+     * Get the atoms in the reactant molecule that match the query pattern. <p/>
+     * Since there may be multiple matches, the return value is a List of List
+     * objects. Each List object contains the unique set of indices of the atoms in the reactant
+     * molecule, that match the query pattern
+     *
+     * @return A List of List of atom indices in the reactant molecule
+     */
 	public List<List<Integer>> getUniqueReactantMatchingAtoms() {
-		// TODO: Ensure unique
+		//TODO: Ensure unique
 		return reactionAtomNumbers;
 	}
 
@@ -106,7 +101,7 @@ public class ReactionSmartsQueryTool {
 	 * @return A List of List of atom indices in the product molecule
 	 */
 	public List<List<Integer>> getUniqueProductMatchingAtoms() {
-		// TODO: Ensure unique
+		//TODO: Ensure unique
 		return productAtomNumbers;
 	}
 	
@@ -154,11 +149,10 @@ public class ReactionSmartsQueryTool {
 		assertEqualClasses(reactClasses, prodClasses);
 
 		// If no matches in reactant, fail early
-		SMARTSQueryTool reactQueryTool = new SMARTSQueryTool(
-				reactionQueryNoClasses);
-		if (!reactQueryTool.matches(reactant)) {
-			System.out.println("== No match in first reactant query: "
-					+ reactionQueryNoClasses);
+		//We have cut away class part but kept the dollar part
+		SMARTSQueryTool reactQueryTool = new SMARTSQueryTool(reactionQueryNoClasses);
+		if (!reactQueryTool.matches(reactant)){
+			System.out.println("== No match in first reactant query: " + reactionQueryNoClasses);
 			return false;
 		}
 
@@ -191,6 +185,8 @@ public class ReactionSmartsQueryTool {
 		AtomMapperUtil mapperUtil = new AtomMapperUtil();
 		mapperUtil.setCommonIds(COMMON_ID_FIELD_NAME, mcs, reactant, product);
 
+		
+		
 		//***************************
 		// REWORKED conservation
 		//***************************
@@ -206,7 +202,7 @@ public class ReactionSmartsQueryTool {
 			mcsstr=mcsstr + mcs.getAtomNumber(atom) + ",";
 		}
 		System.out.println("MCS contains: " + mcsstr);
-
+		
 		System.out.println("Reaction hits:\n" + debugHits(putativeRC_Atomlist));
 		System.out.println("Product hits:\n" + debugHits(fullProductHit_AtomList));
 		
@@ -216,16 +212,7 @@ public class ReactionSmartsQueryTool {
 		fullProductHit_AtomList=removeIndicesWithoutCommonId(fullProductHit_AtomList, product);
 		System.out.println("Reaction hits pruned by MCS:\n" + debugHits(putativeRC_Atomlist));
 		System.out.println("Product hits pruned by MCS:\n" + debugHits(fullProductHit_AtomList));
-		
-		if (putativeRC_Atomlist.size()<=0){
-			System.out.println("No putative RC. Returning false.");
-			return false;
-		}
-		if (fullProductHit_AtomList.size()<=0){
-			System.out.println("No putative result matches. Returning false.");
-			return false;
-		}
-	
+			
 		//Verify conservation per RC and class
 		//Start with reactant
 		System.out.println("** Starting conservation checking **");
