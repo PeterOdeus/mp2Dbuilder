@@ -132,6 +132,7 @@ public class ReactionSmartsQueryTool {
 		assertEqualClasses(reactClasses, prodClasses);
 
 		// If no matches in reactant, fail early
+		//We have cut away class part but kept the dollar part
 		SMARTSQueryTool reactQueryTool = new SMARTSQueryTool(reactionQueryNoClasses);
 		if (!reactQueryTool.matches(reactant)){
 			System.out.println("== No match in first reactant query: " + reactionQueryNoClasses);
@@ -167,6 +168,8 @@ public class ReactionSmartsQueryTool {
 		AtomMapperUtil mapperUtil = new AtomMapperUtil();
 		mapperUtil.setCommonIds(COMMON_ID_FIELD_NAME, mcs, reactant, product);
 
+		
+		
 		//***************************
 		// REWORKED conservation
 		//***************************
@@ -182,7 +185,7 @@ public class ReactionSmartsQueryTool {
 			mcsstr=mcsstr + mcs.getAtomNumber(atom) + ",";
 		}
 		System.out.println("MCS contains: " + mcsstr);
-
+		
 		System.out.println("Reaction hits:\n" + debugHits(putativeRC_Atomlist));
 		System.out.println("Product hits:\n" + debugHits(fullProductHit_AtomList));
 		
@@ -192,16 +195,7 @@ public class ReactionSmartsQueryTool {
 		fullProductHit_AtomList=removeIndicesWithoutCommonId(fullProductHit_AtomList, product);
 		System.out.println("Reaction hits pruned by MCS:\n" + debugHits(putativeRC_Atomlist));
 		System.out.println("Product hits pruned by MCS:\n" + debugHits(fullProductHit_AtomList));
-		
-		if (putativeRC_Atomlist.size()<=0){
-			System.out.println("No putative RC. Returning false.");
-			return false;
-		}
-		if (fullProductHit_AtomList.size()<=0){
-			System.out.println("No putative result matches. Returning false.");
-			return false;
-		}
-	
+			
 		//Verify conservation per RC and class
 		//Start with reactant
 		System.out.println("** Starting conservation checking **");
