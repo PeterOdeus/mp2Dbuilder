@@ -27,6 +27,7 @@ import java.util.zip.GZIPInputStream;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -48,11 +49,11 @@ import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.renderer.Renderer;
 import org.openscience.cdk.renderer.font.AWTFontManager;
+import org.openscience.cdk.renderer.generators.AtomNumberGenerator;
 import org.openscience.cdk.renderer.generators.ExtendedAtomGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
 import org.openscience.cdk.renderer.visitor.AWTDrawVisitor;
-import org.openscience.cdk.renderer.visitor.SVGGenerator;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 
@@ -82,6 +83,7 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 	public JButton cancelButton;
 	public JButton goButton;
 	public JTextArea logTextArea;
+	public JPanel topPanel;
 
 	public MoleculeViewer(ReaccsMDLRXNReader reader, String fileName)
 			throws Exception {
@@ -89,12 +91,20 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 		this.reader = reader;
 		this.readerFileName = fileName;
 		// Create the toolbar.
-		JToolBar toolBar = new JToolBar("Still draggable");
+		JToolBar toolBar = new JToolBar();
 		addButtons(toolBar);
 
 		initImagePanel();
-
-		add(toolBar, BorderLayout.PAGE_START);
+		
+		topPanel = new JPanel();
+		topPanel.setLayout(new BorderLayout());
+		topPanel.add(toolBar,BorderLayout.NORTH);
+		
+		JToolBar optionsBar = new JToolBar();
+		addOptions(optionsBar);
+		topPanel.add(optionsBar,BorderLayout.SOUTH);
+		
+		add(topPanel, BorderLayout.NORTH);
 		add(imagePanel, BorderLayout.CENTER);
 
 		logTextArea = new JTextArea(5, 20);
@@ -104,15 +114,20 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 
 	}
 
+	protected void addOptions(JToolBar optionsBar) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	public MoleculeViewer(String fileName) throws Exception {
 		this(getReaccsReader(fileName), fileName);
 		this.readerFileName = fileName;
 	}
 
 	protected void initImagePanel() throws CDKException {
-		Image i1 = getImage(null, null, false, null, 3);
-		Image i2 = getImage(null, null, false, null, 3);
-		Image i3 = getImage(null, null, false, null, 3);
+		Image i1 = getImage(null, null, false, null, 3, false);
+		Image i2 = getImage(null, null, false, null, 3, false);
+		Image i3 = getImage(null, null, false, null, 3, false);
 		imagePanel = new ImagePanel(i1, i2, i3);
 	}
 
@@ -181,20 +196,21 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 			// metaboliteHandler.getFirstMCSHavingMostAtoms(mcsList);
 			// metaboliteHandler.setReactionCentres(reactant, product, mcs);
 
-			i1 = getImage(reactant, mcs, true, product, 3);
-			i2 = getImage(product, mcs, false, null, 3);
-			i3 = getImage(mcs, mcs, false, null, 3);
+			i1 = getImage(reactant, mcs, true, product, 3, false);
+			i2 = getImage(product, mcs, false, null, 3, false);
+			i3 = getImage(mcs, mcs, false, null, 3, false);
 		} catch (ReaccsFileEndedException e) {
-			i1 = getImage(null, null, false, null, 3);
-			i2 = getImage(null, null, false, null, 3);
-			i3 = getImage(null, null, false, null, 3);
+			i1 = getImage(null, null, false, null, 3, false);
+			i2 = getImage(null, null, false, null, 3, false);
+			i3 = getImage(null, null, false, null, 3, false);
 		}
 		imagePanel.setImages(i1, i2, i3);
 	}
 
 	protected Image getImage(IAtomContainer atomContainer,
 			IAtomContainer mcsContainer, boolean renderReactionCentre,
-			IAtomContainer productContainer, int numberOfGraphs)
+			IAtomContainer productContainer, int numberOfGraphs,
+			boolean drawNumbers)
 			throws CDKException {
 
 		int WIDTH = 400;
@@ -232,6 +248,7 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 
 		// generators.add(new BasicAtomGenerator());
 		// generators.add(new MCSOverlayAtomGenerator(mcsContainer));
+		//generators.add(new AtomNumberGenerator());
 		generators.add(new ExtendedAtomGenerator());
 		generators.add(new RingGenerator());
 		if (renderReactionCentre == true) {
@@ -239,13 +256,11 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 			generators.add(new ReactionCentreGenerator());
 		}
 
-		// generators.add(new AtomNumberGenerator());
-
 		// the renderer needs to have a toolkit-specific font manager
 		Renderer renderer = new Renderer(generators, new AWTFontManager());
 
-		// renderer.getRenderer2DModel().setDrawNumbers(true);
-		// renderer.getRenderer2DModel().setIsCompact(true);
+		renderer.getRenderer2DModel().setDrawNumbers(drawNumbers);
+		renderer.getRenderer2DModel().setIsCompact(false);
 		// the call to 'setup' only needs to be done on the first paint
 		renderer.setup(molecule, drawArea);
 
