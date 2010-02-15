@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import org.mp2dbuilder.mcss.AtomMapperUtil;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
+import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IReaction;
@@ -138,60 +139,149 @@ public class ReactionSmartsQueryTool {
 		}
 
 		// If no matches in product, fail early
-		SMARTSQueryTool prodtQueryTool = new SMARTSQueryTool(productQueryNoClasses);
-		if (!prodtQueryTool.matches(product)){
+		SMARTSQueryTool prodQueryTool = new SMARTSQueryTool(productQueryNoClasses);
+		if (!prodQueryTool.matches(product)){
 			System.out.println("== No match in first product query: " + productQueryNoClasses);
 			return false;
 		}
 
 		//We have at least one match in reactant and one in product.
 		//Save these indices in list
-		List<List<Integer>> fullReactionQueryIndices = reactQueryTool.getUniqueMatchingAtoms();
-		System.out.println("Reaction hits:\n" + debugHits(fullReactionQueryIndices));
+		List<List<Integer>> putativeRC_Atomlist = reactQueryTool.getUniqueMatchingAtoms();
+		List<List<Integer>> fullProductHit_AtomList = prodQueryTool.getUniqueMatchingAtoms();
 
-		List<List<Integer>> fullProductQueryIndices = prodtQueryTool.getUniqueMatchingAtoms();
-		System.out.println("Product hits:\n" + debugHits(fullProductQueryIndices));
-
-		//Preprocess AC for MCSS (TODO: Verify if this is needed)
-		AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(reactant);
-		AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(product);
-		CDKHueckelAromaticityDetector.detectAromaticity(reactant);
-		CDKHueckelAromaticityDetector.detectAromaticity(product);
-
-		//We now need an MCSS to link atoms
-		
-		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
-		
-		//How many overlaps can we get? Anyway, pick largest for now TODO: Verify this
-		IAtomContainer mcs = getFirstMCSHavingMostAtoms(mcsList);
-		
-		//List<RMap> mcss = UniversalIsomorphismTester.getSubgraphAtomsMap(reactant, product);		
+		//Generate and pick largest MCS.
+		IAtomContainer mcs = getMCS(reactant, product);
 		if (mcs==null || mcs != null && mcs.getAtomCount()<=0){
 			System.out.println("No overlaps in MCSS. Exiting.");
 			return false;
 		}
-		
 		System.out.println("MCSS has " + mcs.getAtomCount() + " atoms.");
-		
+
+		//Old CDK code, bug filed w/ junit test.
+		//TODO: use this later maybe.
+		//List<RMap> mcss = UniversalIsomorphismTester.getSubgraphAtomsMap(reactant, product);		
+
+		//Workaround for CDK bug. Makes use of property to link atoms.
 		//Add identifier fields used to map atoms from reactant to product.
 		AtomMapperUtil mapperUtil = new AtomMapperUtil();
 		mapperUtil.setCommonIds(COMMON_ID_FIELD_NAME, mcs, reactant, product);
+
+		//***************************
+		// REWORKED conservation
+		//***************************
+
+//		allRC - Determine possible RC //putativeRCs
+//		Determine atom mappings between reactant and product //mcs
+//		reactantHits = get list of of lists of smarts hits for $-removed reaction smarts. One list for each possible rc.//fullReactionQueryIndices 
+//		productHits = getList of product smarts hits //fullProductQueryIndices
+//		remove atoms from the reactantHits and productHits that don't exist in the MCS.
+
+		String mcsstr="";
+		for (IAtom atom : mcs.atoms()){
+			mcsstr=mcsstr + mcs.getAtomNumber(atom) + ",";
+		}
+		System.out.println("MCS contains: " + mcsstr);
+
+		System.out.println("Reaction hits:\n" + debugHits(putativeRC_Atomlist));
+		System.out.println("Product hits:\n" + debugHits(fullProductHit_AtomList));
 		
-		//Verify conservation on this point or fail
-//		if (!(areAnyAtomConserved(reactant,fullReactionQueryIndices, product, fullProductQueryIndices))){
-//			System.out.println("== No reactant atoms are conserved on first conservation test. Exiting. ==");
-//			return false;
-//		}
+		//Remove all indices which are not available in MCS. If this makes some hits
+		//or RC empty, remove the empty lists.
+		putativeRC_Atomlist=removeIndicesWithoutCommonId(putativeRC_Atomlist, reactant);
+		fullProductHit_AtomList=removeIndicesWithoutCommonId(fullProductHit_AtomList, product);
+		System.out.println("Reaction hits pruned by MCS:\n" + debugHits(putativeRC_Atomlist));
+		System.out.println("Product hits pruned by MCS:\n" + debugHits(fullProductHit_AtomList));
+	
+		//Verify conservation per RC and class
+		//Start with reactant
+		System.out.println("** Starting conservation checking **");
+		int rcno=0; //0-based index is easiest
+		Set<Integer> rcToRemove=new HashSet<Integer>();  //Add non-conserved RCs here
+		for (List<Integer> Ratoms : putativeRC_Atomlist){
+			System.out.println(" %% Current RC: " + rcno + " with hits: " + Ratoms.get(0));
+			
+			//Assign classes to the RC hit
+			for (int i : reactClasses.keySet()){
+				
+				//REACTION PART
+				String rclass = reactClasses.get(i);
+				String rclass_noclass=removeAllClasses(rclass);
+				System.out.println("\n## Reaction class: " + i + "=" + rclass + "=" + rclass_noclass);
+				Set<Integer> reactHitsconcat=null;
+				reactQueryTool.setSmarts(rclass_noclass);
+				if (!reactQueryTool.matches(reactant)){
+					System.out.println("   Produced no hits.");
+				}else{
+					List<List<Integer>> reactHits = reactQueryTool.getUniqueMatchingAtoms();
+					reactHitsconcat=concatIndices(reactHits);
+					System.out.println("   Produced hits: " + debugHits(reactHitsconcat));
+
+				}
+					
+				//PRODUCT PART
+				String pclass = prodClasses.get(i);
+				String pclass_noclass=removeAllClasses(pclass);
+				System.out.println("Product class: " + i + "=" + pclass + "=" + pclass_noclass);
+				Set<Integer> prodHitsconcat=null;
+				prodQueryTool.setSmarts(pclass_noclass);
+				if (!prodQueryTool.matches(product)){
+					//no hit. How to deal with this?
+					//TODO
+					System.out.println("   Produced no hits.");
+				}else{
+					List<List<Integer>> prodHits = prodQueryTool.getUniqueMatchingAtoms();
+					prodHitsconcat=concatIndices(prodHits);
+					System.out.println("   Produced hits: " + debugHits(prodHitsconcat));
+
+				}
+				
+				//Check conservation between result sets via MCS
+				if (isConserved(reactant, reactHitsconcat, product, prodHitsconcat)){
+					System.out.println(" ==> RC: " + rcno + " IS CONSERVED");
+				}else{
+					System.out.println(" ==> RC: " + rcno + " IS NOT CONSERVED");
+					
+					//Remove this RC
+					rcToRemove.add(rcno);
+				}
+
+//				//FIXME
+//				Set<Integer> inter=new HashSet<Integer>(reactHitsconcat);
+//				inter.retainAll(prodHitsconcat);
+				
+			}
+			
+			rcno++;
+		}
 		
-		List<Integer> consReactIndices = getConservedReactantIndices(reactant, fullReactionQueryIndices, product, fullProductQueryIndices);
-		List<Integer> consProductIndices = getConservedProductIndices(reactant, fullReactionQueryIndices, product, fullProductQueryIndices);
-		if (consProductIndices.size()<=0 || consReactIndices.size()<=0){
-			System.out.println("== No reactant atoms are conserved on first conservation test. Exiting. ==");
+		//Remove all non-conserved RCs
+		putativeRC_Atomlist.removeAll(rcToRemove);
+
+		//Return conserved RCs
+		reactionAtomNumbers=putativeRC_Atomlist;
+		
+		System.out.println("Resulting RC (conserved):\n" + debugHits(reactionAtomNumbers));
+
+		//For product, return all matches for now (
+		productAtomNumbers=fullProductHit_AtomList;
+		System.out.println("Resulting Product hits (not conserved (yet)):\n" + debugHits(productAtomNumbers));
+		
+		if (reactionAtomNumbers.size()<=0){
+			System.out.println("No RC found. Return false.");
 			return false;
 		}
-
 		
-
+//
+//		for rc in allRC
+//		    pick the list of smart hits (reactant hits) corresponding to the rc
+//		    assign classes to the reactantHits and productHits using individual atom properties
+//		    if we have a simulataneous mapping of all classes in the hits shared between the reactant and the product
+//		        add rc to list of established rc:s
+		
+		return true;
+/*		
+		//TODO: remove
 		//***************************
 		//Ok, now extract one class at a time for reactant and product and verify class conservation.
 		//Start with highest class (from the right of String) and stepwise cut away query parts.
@@ -314,9 +404,53 @@ public class ReactionSmartsQueryTool {
 		productAtomNumbers=fullProductQueryIndices;
 
 		return true;
+		*/
 	}
 	
 	
+	private IAtomContainer getMCS(IAtomContainer reactant,
+			IAtomContainer product) throws CDKException {
+
+		//Preprocess AC for MCSS (TODO: Verify if this is needed)
+		AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(reactant);
+		AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(product);
+		CDKHueckelAromaticityDetector.detectAromaticity(reactant);
+		CDKHueckelAromaticityDetector.detectAromaticity(product);
+
+		//We now need an MCSS to link atoms
+		
+		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
+		
+		//How many overlaps can we get? Anyway, pick largest for now TODO: Verify this
+		return getFirstMCSHavingMostAtoms(mcsList);
+		
+	}
+
+	private List<List<Integer>> removeIndicesWithoutCommonId(
+			List<List<Integer>> rclist,
+			IAtomContainer mol) {
+		
+		for (IAtom atom : mol.atoms()){
+			for (List<Integer> rc : rclist){
+				if (atom.getProperty(COMMON_ID_FIELD_NAME)==null){
+					//REMOVE
+					Integer i = mol.getAtomNumber(atom);
+					rc.remove(i);
+				}
+			}
+		}
+		
+		//remove empty lists
+		Set<List<Integer>> toRemove=new HashSet<List<Integer>>();
+		for (List<Integer> rc : rclist){
+			if (rc.size()==0)
+				toRemove.add(rc);
+		}
+		rclist.removeAll(toRemove);
+
+		return rclist;
+	}
+
 	private boolean isConserved(IAtomContainer reactant, Set<Integer> reactionIndices, IAtomContainer product, Set<Integer> productIndices) {
 		List<Integer> consReactIndices=new ArrayList<Integer>();
 
@@ -334,7 +468,7 @@ public class ReactionSmartsQueryTool {
 		//Confirm at least one reactant atom conserved
 		//=========
 		for (Integer ratom : reactionIndices){
-			System.out.println("+ checking atom index=" + ratom);
+//			System.out.println("+ checking atom index=" + ratom);
 			
 			//get the common id from the reactant atom having index value of ratom
 			reactantCommonId = (String) reactant.getAtom(ratom).getProperty(COMMON_ID_FIELD_NAME);
@@ -357,10 +491,9 @@ public class ReactionSmartsQueryTool {
 			}
 			
 			if(tempMatch == false){
-				System.out.println("+++ NOT-CONSERVED, since index" + ratom + " is NOT present in target list");
-//				return false; //Found a non-conserved atom
+				System.out.println("  --- atom index=" + ratom + " is NOT-CONSERVED");
 			}else{
-				System.out.println("+++ CONSERVED, since index " + ratom + " is present in target list");
+				System.out.println("  --- atom index=" + ratom + " is CONSERVED");
 				consReactIndices.add(ratom);
 			}
 			

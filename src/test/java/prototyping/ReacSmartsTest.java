@@ -134,10 +134,21 @@ SMARTS:
 
 	@Test 
 	public void testERROR() throws Exception {
-		String rsmiles="CCCCCCCN(C)C>>CCCCCCCNC";
-		assertTrue(isDoubleMatch(rsmiles, 
+//		String rsmiles="CCCCCCCN(C)C>>CCCCCCCNC";
+//		assertTrue(isDoubleMatch(rsmiles, 
+//				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
+//				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
+		
+		//OH added, but via a N hence not on a conserved atom. Should return false.
+		String rsmiles;
+		rsmiles="CCCCC>>CCCCCNO";
+		assertFalse(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
+
+		rsmiles="CNC(CC=OC)CCCCN(C)C>>CNC(CC=OC)CCCCN(C)C";
+		assertFalse(isDoubleMatch(rsmiles, 
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
+
 	}
 	
 	@Test 
