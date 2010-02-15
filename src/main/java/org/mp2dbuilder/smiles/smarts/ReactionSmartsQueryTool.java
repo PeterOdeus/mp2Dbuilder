@@ -242,6 +242,7 @@ public class ReactionSmartsQueryTool {
 				String rclass_noclass=removeAllClasses(rclass);
 				System.out.println("\n## Reaction class: " + i + "=" + rclass + "=" + rclass_noclass);
 				Set<Integer> reactHitsconcat=null;
+				Set<Integer> reactHitsconcat_pruned=null;
 				reactQueryTool.setSmarts(rclass_noclass);
 				if (!reactQueryTool.matches(reactant)){
 					System.out.println("   Produced no hits.");
@@ -250,7 +251,7 @@ public class ReactionSmartsQueryTool {
 					reactHitsconcat=concatIndices(reactHits);
 					System.out.println("   Produced hits: " + debugHits(reactHitsconcat));
 					List<List<Integer>> reactHits_pruned = removeIndicesWithoutCommonId(reactHits, reactant);
-					Set<Integer> reactHitsconcat_pruned = concatIndices(reactHits_pruned);
+					reactHitsconcat_pruned = concatIndices(reactHits_pruned);
 					System.out.println("   Produced hits pruned by MCS: " + debugHits(reactHitsconcat_pruned));
 
 				}
@@ -260,6 +261,7 @@ public class ReactionSmartsQueryTool {
 				String pclass_noclass=removeAllClasses(pclass);
 				System.out.println("Product class: " + i + "=" + pclass + "=" + pclass_noclass);
 				Set<Integer> prodHitsconcat=null;
+				Set<Integer> prodHitsconcat_pruned=null;
 				prodQueryTool.setSmarts(pclass_noclass);
 				if (!prodQueryTool.matches(product)){
 					//no hit. How to deal with this?
@@ -271,13 +273,13 @@ public class ReactionSmartsQueryTool {
 					System.out.println("   Produced hits: " + debugHits(prodHitsconcat));
 
 					List<List<Integer>> prodHits_pruned = removeIndicesWithoutCommonId(prodHits, product);
-					Set<Integer> prodHitsconcat_pruned = concatIndices(prodHits_pruned);
+					prodHitsconcat_pruned = concatIndices(prodHits_pruned);
 					System.out.println("   Produced hits pruned by MCS: " + debugHits(prodHitsconcat_pruned));
 
 				}
 				
 				//Check conservation between result sets via MCS
-				if (isConserved(reactant, reactHitsconcat, product, prodHitsconcat)){
+				if (isConserved(reactant, reactHitsconcat_pruned, product, prodHitsconcat_pruned)){
 					System.out.println(" ==> RC: " + rcno + " IS CONSERVED");
 				}else{
 					System.out.println(" ==> RC: " + rcno + " IS NOT CONSERVED");
