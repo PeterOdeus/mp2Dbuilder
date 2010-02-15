@@ -1,9 +1,11 @@
 package org.mp2dbuilder.smiles.smarts;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +22,8 @@ import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.isomorphism.mcss.RMap;
 import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
+
+import com.sun.tools.jdi.LinkedHashMap;
 
 /**
  * ReactionSmartsQueryTool can be used to query a reaction for conserved matches in reactant and product.
@@ -204,6 +208,12 @@ public class ReactionSmartsQueryTool {
 		
 		System.out.println("** Extracting subclasses **");
 
+		//Concat indices for hits in full SMARTS with no classes. This is start of algo.
+		Set<Integer> previousRI=concatIndices(fullReactionQueryIndices);
+		Set<Integer> previousPI=concatIndices(fullProductQueryIndices);
+		System.out.println("  Reactant full indices: " + debugHits(previousRI));
+		System.out.println("  Product full indices: " + debugHits(previousPI));
+
 		//Loop over all available classes in descending order
 		for (int classid : reactClasses.keySet()){
 			
@@ -224,32 +234,76 @@ public class ReactionSmartsQueryTool {
 				System.out.println("   Class extraction result: REACT=" + workingReactQuery + " and PROD=" + workingProductQuery);
 
 				//Look up smarts matches for these subqueries with class=classid removed
+				
+				//REACTION QUERY
+			    //==============
 				reactQueryTool.setSmarts(removeAllClasses(workingReactQuery));
 				if (!reactQueryTool.matches(reactant)) 
 					throw new IllegalArgumentException("No hits for reactant query " + workingReactQuery);
 				List<List<Integer>> workingReactionIndices = reactQueryTool.getUniqueMatchingAtoms();
-				System.out.println("  Reaction hits:\n" + debugHits(workingReactionIndices));
 
+				//Concatenate and find differences from previous round
+				Set<Integer> concatRI=concatIndices(workingReactionIndices);
+				System.out.println("  Reaction hits: " + debugHits(concatRI));
+				
+			    //Get the difference, i.e. what we have cut away by removing this class
+			    Set<Integer> Rdifference = new HashSet<Integer>(previousRI);
+			    Rdifference.removeAll(concatRI);
+				System.out.println("  Reaction difference: " + debugHits(Rdifference));
+
+			    //Extract and store intersection for next round.
+			    previousRI.retainAll(concatRI);
+				System.out.println("  Product intersection: " + debugHits(previousRI));
+
+			    
+				//PRODUCT QUERY
+			    //==============
 				prodtQueryTool.setSmarts(removeAllClasses(workingProductQuery));
 				if (!prodtQueryTool.matches(product)) 
 					throw new IllegalArgumentException("No hits for reactant query " + workingReactQuery);
 				List<List<Integer>> workingProductIndices = prodtQueryTool.getUniqueMatchingAtoms();
-				System.out.println("  Product hits:\n" + debugHits(workingProductIndices));
+				
+				//Concatenate and find differences from previous round
+				Set<Integer> concatPI=concatIndices(workingProductIndices);
+				System.out.println("  Product hits: " + debugHits(concatPI));
+				
+			    Set<Integer> Pdifference = new HashSet<Integer>(previousPI);
+			    Pdifference.removeAll(concatPI);
+				System.out.println("  Product difference: " + debugHits(Pdifference));
 
-				//Verify conservation on this point
-//				if (!(areAnyAtomConserved(reactant,workingReactionIndices, product,workingProductIndices))){
-//					System.out.println("== All reaction atoms not conserved. Exiting. ==");
+			    //Extract and store intersection for next round.
+			    previousPI.retainAll(concatPI);
+				System.out.println("  Product intersection: " + debugHits(previousRI));
+
+
+			    //Confirm reactant and product differences are conserved for this class
+			    //==================
+			    System.out.println("  == Testing reactant conservation");
+			    if (!isConserved(reactant,Rdifference,product,Pdifference)){
+					System.out.println("  == Failed conservation test. This ends matching. ==");
+					return false;
+			    }
+
+			    System.out.println("  == Testing product conservation");
+			    if (!isConserved(product,Pdifference,reactant,Rdifference)){
+					System.out.println("  == Failed conservation test. This ends matching. ==");
+					return false;
+			    }
+	
+			    System.out.println("  Conservation test OK. Continue to next class.");
+			    //TODO: continue here. We have not stored the conserved part yet.
+
+				
+				
+//				consReactIndices = getConservedReactantIndices(reactant, fullReactionQueryIndices, product, fullProductQueryIndices);
+//				consProductIndices = getConservedProductIndices(reactant, fullReactionQueryIndices, product, fullProductQueryIndices);
+//				if (consProductIndices.size()<=0 || consReactIndices.size()<=0){
+//					System.out.println("== No reactant atoms are conserved on first conservation test. Exiting. ==");
 //					return false;
 //				}
-				consReactIndices = getConservedReactantIndices(reactant, fullReactionQueryIndices, product, fullProductQueryIndices);
-				consProductIndices = getConservedProductIndices(reactant, fullReactionQueryIndices, product, fullProductQueryIndices);
-				if (consProductIndices.size()<=0 || consReactIndices.size()<=0){
-					System.out.println("== No reactant atoms are conserved on first conservation test. Exiting. ==");
-					return false;
-				}
 
 
-				System.out.println("  END OF CLASS " + classid + " loop");
+				System.out.println("  END OF loop for CLASS: " + classid);
 			}else{
 				System.out.println("No more classes available.");
 			}
@@ -267,6 +321,73 @@ public class ReactionSmartsQueryTool {
 		return true;
 	}
 	
+	
+	private boolean isConserved(IAtomContainer reactant, Set<Integer> reactionIndices, IAtomContainer product, Set<Integer> productIndices) {
+		List<Integer> consReactIndices=new ArrayList<Integer>();
+
+		//Check conservation for each reaction index
+		
+		String reactantCommonId = null;
+		String productCommonId = null;
+		boolean tempMatch = false;
+		
+		if (reactionIndices== null || reactionIndices.size()<=0){
+			System.out.println("  No indices to test conservation for. Ending TRUE.");
+			return true;
+		}
+
+		//Confirm at least one reactant atom conserved
+		//=========
+		for (Integer ratom : reactionIndices){
+			System.out.println("+ checking atom index=" + ratom);
+			
+			//get the common id from the reactant atom having index value of ratom
+			reactantCommonId = (String) reactant.getAtom(ratom).getProperty(COMMON_ID_FIELD_NAME);
+			if(reactantCommonId == null){
+				System.out.println("Skipping index " + ratom + " because it lacks a common id field.");
+				continue;
+			}
+			
+			for(IAtom productAtom : product.atoms()){
+				productCommonId = (String) productAtom.getProperty(COMMON_ID_FIELD_NAME); 
+				if(	productCommonId != null
+						&&
+					reactantCommonId.equals(productCommonId)
+						&&
+					productIndices.contains(product.getAtomNumber(productAtom))
+				){
+					tempMatch = true;
+					break;
+				}
+			}
+			
+			if(tempMatch == false){
+				System.out.println("+++ NOT-CONSERVED, since index" + ratom + " is NOT present in target list");
+//				return false; //Found a non-conserved atom
+			}else{
+				System.out.println("+++ CONSERVED, since index " + ratom + " is present in target list");
+				consReactIndices.add(ratom);
+			}
+			
+		}
+		
+		return tempMatch;
+	}
+
+	private Set<Integer> concatIndices(
+			List<List<Integer>> hits) {
+
+		LinkedHashSet<Integer> lp=new LinkedHashSet<Integer>();
+		
+		for (List<Integer> in : hits){
+			for (int i : in){
+				lp.add(i);
+			}
+		}
+		//Remove duplicates
+		return lp;
+	}
+
 	/**
 	 * 
 	 * @param mcss
@@ -434,6 +555,13 @@ public class ReactionSmartsQueryTool {
 		return s;
 	}
 
+	private String debugHits(Set<Integer> hits) {
+		String s="";
+		for (Integer hit : hits){
+			s=s+hit+",";
+		}
+		return s;
+	}
 	private String debugHits(List<List<Integer>> hits) {
 		
 		int c=0;
