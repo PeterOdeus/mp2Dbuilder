@@ -175,7 +175,7 @@ public class ReactionSmartsQueryTool {
 				System.out.println("rc: " + rc);
 			}
 		}
-		System.out.println(reactantQueryNoDollar);
+		System.out.println(":"+reactantQueryNoDollar+":");
 		List<List<Integer>> fullReactantHit_AtomList = reactQueryTool.getUniqueMatchingAtoms();//It might be needed to associate the reactant hits with the rc.
 		for (List<Integer> list : fullReactantHit_AtomList){
 			System.out.println("Reactant list" + list.toString());
