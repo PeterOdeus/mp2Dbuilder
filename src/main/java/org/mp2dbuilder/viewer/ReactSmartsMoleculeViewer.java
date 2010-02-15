@@ -38,6 +38,8 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 
 	public static String SIMPLE_REACTANT_SMARTS = "[$([*:1])]";
 	public static String SIMPLE_PRODUCT_SMARTS = "[*:1]";
+	
+	private IAtomContainer mcss;
 
 	private static final long serialVersionUID = 1L;
 
@@ -47,6 +49,7 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 	IReactionSet currentReactionSet;
 	public List<IReaction> reactionList;
 	protected JCheckBox chkShouldDrawNumbers;
+	protected JCheckBox chkShouldShowMCSS;
 
 	JTextArea riregNoText;
 
@@ -93,6 +96,9 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 	protected void addOptions(JToolBar optionsBar) {
 		chkShouldDrawNumbers = new JCheckBox("Show Atom Numbers");
 		optionsBar.add(chkShouldDrawNumbers);
+		chkShouldShowMCSS = new JCheckBox("Show MCSS");
+		chkShouldShowMCSS.setSelected(true);
+		optionsBar.add(chkShouldShowMCSS);
 	}
 
 	@Override
@@ -109,7 +115,7 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 	protected void generateImage() throws Exception {
 		Image i1 = null;
 		Image i2 = null;
-
+		Image i3 = null;
 		try {
 
 			IReactionSet reactionSet = getNextReactionSetForRendering();
@@ -119,13 +125,21 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 			IAtomContainer product = (IAtomContainer) reactionSet
 					.getReaction(0).getProducts().getMolecule(0);
 
-			i1 = getImage(reactant, null, true, product, 2, chkShouldDrawNumbers.isSelected());
-			i2 = getImage(product, null, true, null, 2, chkShouldDrawNumbers.isSelected());
+			int numberOfImages = 2;
+			if(chkShouldShowMCSS.isSelected()){
+				numberOfImages = 3;
+			}
+			i1 = getImage(reactant, null, true, product, numberOfImages, chkShouldDrawNumbers.isSelected());
+			i2 = getImage(product, null, true, null, numberOfImages, chkShouldDrawNumbers.isSelected());
+			if(chkShouldShowMCSS.isSelected()){
+				i3 = getImage(this.mcss, this.mcss, false, null, numberOfImages, false);
+			}
 		} catch (ReaccsFileEndedException e) {
-			i1 = getImage(null, null, false, null, 2, false);
-			i2 = getImage(null, null, false, null, 2, false);
+			i1 = getImage(null, null, false, null, 3, false);
+			i2 = getImage(null, null, false, null, 3, false);
+			i3 = getImage(null, null, false, null, 3, false);
 		}
-		imagePanel.setImages(i1, i2, null);
+		imagePanel.setImages(i1, i2, i3);
 	}
 
 	/**
@@ -196,9 +210,10 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 
 	@Override
 	protected void initImagePanel() throws CDKException {
-		Image i1 = getImage(null, null, false, null, 2, false);
-		Image i2 = getImage(null, null, false, null, 2, false);
-		imagePanel = new ImagePanel(i1, i2, null);
+		Image i1 = getImage(null, null, false, null, 3, false);
+		Image i2 = getImage(null, null, false, null, 3, false);
+		Image i3 = getImage(null, null, false, null, 3, false);
+		imagePanel = new ImagePanel(i1, i2, i3);
 	}
 
 
@@ -225,6 +240,10 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 		MoleculeViewer gui = new ReactSmartsMoleculeViewer(fileName);
 		// gui.setRireg(1);
 		showGUI(gui, false);
+	}
+
+	public void setCurrentMCSS(IAtomContainer mcss) {
+		this.mcss = mcss;
 	}
 
 }

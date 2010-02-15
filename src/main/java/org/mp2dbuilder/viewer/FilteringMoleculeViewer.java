@@ -96,17 +96,7 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 					.prepareForTransformation(reactionSet);
 			IAtomContainer reactant = (IAtomContainer) returnList.get(0);
 			IAtomContainer product = (IAtomContainer) returnList.get(1);
-			// IAtomContainer mcs = (IAtomContainer)returnList.get(2);
-			//
-			// IAtomContainer reactant =
-			// reactionSet.getReaction(0).getReactants().getMolecule(0);
-			// SybylAtomTypeMatcher reactantMatcher =
-			// SybylAtomTypeMatcher.getInstance(reactant.getBuilder());
-			// reactantMatcher.findMatchingAtomType(reactant);
-			// QueryAtomContainer query =
-			// SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
-			// QueryAtomContainer query =
-			// null;//SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
+			
 			String q = text.getText().trim();
 			SMARTSQueryTool sqt = new SMARTSQueryTool(q);
 			if (sqt.matches(reactant)) {
@@ -122,16 +112,7 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 					}
 				}
 			}
-
-			// IAtomContainer product =
-			// reactionSet.getReaction(0).getProducts().getMolecule(0);
-			// SybylAtomTypeMatcher productMatcher =
-			// SybylAtomTypeMatcher.getInstance(product.getBuilder());
-			// // we don't care about the types result,just the transformation
-			// the product goes through.
-			// reactantMatcher.findMatchingAtomType(product);
-			// //query =
-			// null;//SMARTSParser.parse(text.getText().trim());//"[#6][#7]"
+			
 			q = text2.getText().trim();
 			sqt = new SMARTSQueryTool(q);
 			if (sqt.matches(product)) {

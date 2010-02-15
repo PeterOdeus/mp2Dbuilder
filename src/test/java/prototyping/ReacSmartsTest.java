@@ -212,7 +212,7 @@ public class ReacSmartsTest {
 
 				try {
 
-					JFrame frame = new JFrame("Reactant - Product - ReacSMARTS");
+					JFrame frame = new JFrame("ReacSMARTS  -  Reactant-Product-MCSS");
 					frame.addWindowListener(new WindowAdapter() {
 						public void windowClosing(WindowEvent paramWindowEvent) {
 							shouldExit = true;

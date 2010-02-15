@@ -234,8 +234,11 @@ public class ReactSmartsMoleculeViewerWorker extends SwingWorker<Void, String> {
 							new Boolean(true));
 				}
 			}
+			
+			this._viewer.setCurrentMCSS(sqt.getMCSS());
 			return true;
 		} else {
+			this._viewer.setCurrentMCSS(null);
 			return false;
 		}
 	}

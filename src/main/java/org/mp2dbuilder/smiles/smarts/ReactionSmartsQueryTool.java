@@ -32,6 +32,7 @@ public class ReactionSmartsQueryTool {
 	public static final String COMMON_ID_FIELD_NAME = "ReactionSmartsCommonId";
 	private List<List<Integer>> reactionAtomNumbers;
 	private List<List<Integer>> productAtomNumbers;
+	private IAtomContainer mcss;
 	private String reactionQuery;
 	private String productQuery;
 	private String reactionQueryNoClasses;
@@ -107,6 +108,16 @@ public class ReactionSmartsQueryTool {
 	public List<List<Integer>> getUniqueProductMatchingAtoms() {
 		// TODO: Ensure unique
 		return productAtomNumbers;
+	}
+	
+	/**
+	 * Get the atom container representing the first available Maximum
+	 * Common Sub Structure 
+	 * 
+	 * @return An IAtomContainer representing the MCSS
+	 */
+	public IAtomContainer getMCSS() {
+		return this.mcss;
 	}
 
 	/**
@@ -185,20 +196,20 @@ public class ReactionSmartsQueryTool {
 
 		// How many overlaps can we get? Anyway, pick largest for now TODO:
 		// Verify this
-		IAtomContainer mcs = getFirstMCSHavingMostAtoms(mcsList);
+		mcss = getFirstMCSHavingMostAtoms(mcsList);
 
 		// List<RMap> mcss =
 		// UniversalIsomorphismTester.getSubgraphAtomsMap(reactant, product);
-		if (mcs == null || mcs != null && mcs.getAtomCount() <= 0) {
+		if (mcss == null || mcss != null && mcss.getAtomCount() <= 0) {
 			System.out.println("No overlaps in MCSS. Exiting.");
 			return false;
 		}
 
-		System.out.println("MCSS has " + mcs.getAtomCount() + " atoms.");
+		System.out.println("MCSS has " + mcss.getAtomCount() + " atoms.");
 
 		// Add identifier fields used to map atoms from reactant to product.
 		AtomMapperUtil mapperUtil = new AtomMapperUtil();
-		mapperUtil.setCommonIds(COMMON_ID_FIELD_NAME, mcs, reactant, product);
+		mapperUtil.setCommonIds(COMMON_ID_FIELD_NAME, mcss, reactant, product);
 
 		// Verify conservation on this point or fail
 		if (!(areAtomsConserved(reactant, fullReactionQueryIndices, product,
