@@ -221,7 +221,11 @@ public class ReactionSmartsQueryTool {
 		fullProductHit_AtomList=removeIndicesWithoutCommonId(fullProductHit_AtomList, product);
 		//System.out.println("Reactant hits pruned by MCS:\n" + debugHits(fullReactantHit_AtomList));
 		System.out.println("Product hits pruned by MCS:\n" + debugHits(fullProductHit_AtomList));
-			
+
+		if (fullProductHit_AtomList.size() == 0){
+			return false;
+		}
+		
 		//Verify conservation per RC and class
 		//Start with reactant
 		System.out.println("** Starting conservation checking **");
