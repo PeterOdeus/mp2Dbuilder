@@ -137,10 +137,8 @@ SMARTS:
 //		//This is a dealkylation without any difficulties.
 //		//Daylight depict results in hit in subs and product
 //		//This should return true, classes do not make difference in this case
-		String 		rsmiles="CNCC(O)CCCN(C)C>>CNCC(O)CCCNC";
-		assertTrue(isDoubleMatch(rsmiles, 
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
+		String 		rsmiles="CCCC>>OCCCCO";
+		assertTrue(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
 	}
 	
 	@Test 
