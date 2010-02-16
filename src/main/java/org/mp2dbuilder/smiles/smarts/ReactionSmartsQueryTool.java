@@ -322,16 +322,17 @@ public class ReactionSmartsQueryTool {
 					prodHitsconcat_pruned = concatIndices(prodHits_pruned);
 					System.out.println("   Produced hits pruned by MCS: " + debugHits(prodHitsconcat_pruned));
 					// Remove hits not hit by the original smarts.
-					Set<Integer> prodToRemove = new HashSet<Integer>();
+					Set<Integer> prodToKeep = new HashSet<Integer>();
 					for (int prodHit : prodHitsconcat_pruned){
 						for (List<Integer> prodList : fullProductHit_AtomList){
-							if (!prodList.contains(prodHit)){
+							if (prodList.contains(prodHit)){
 								System.out.println("Prod atom to remove: " + prodHit);
-								prodToRemove.add(prodHit);
+								prodToKeep.add(prodHit);
 							}	
 						}
 					}
-					prodHitsconcat_pruned.removeAll(prodToRemove);
+					prodHitsconcat_pruned.clear();
+					prodHitsconcat_pruned.addAll(prodToKeep);
 					System.out.println("   Produced hits by original SMARTS: " + debugHits(fullProductHit_AtomList));
 					System.out.println("   Produced hits pruned by original SMARTS: " + debugHits(prodHitsconcat_pruned));
 
