@@ -359,14 +359,22 @@ public class ReactionSmartsQueryTool {
 
 				}
 				if (addedToMCSClasses){
-					return checkClassCoverage(mcsClasses, mcsSize);
+					if (checkClassCoverage(mcsClasses, mcsSize)){
+						// Add the putative reaction center as a reaction center.
+						reactantAtomNumbers.add(new ArrayList<Integer>());
+						reactantAtomNumbers.get(reactantAtomNumbers.size()-1).add(prc.get(0));
+					}
 				}
 			}
 			rcno++;
 		}
 		
-		return false;
-
+		if (reactantAtomNumbers.size() > 0){
+			return true;
+		}
+		else{
+			return false;
+		}
 	}
 
 	private boolean checkClassCoverage(List<List<Integer>> mcsClasses, int[] mcsSize) {
