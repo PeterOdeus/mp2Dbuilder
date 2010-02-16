@@ -321,7 +321,7 @@ public class ReactionSmartsQueryTool {
 					List<List<Integer>> prodHits_pruned = removeIndicesWithoutCommonId(prodHits, product);
 					prodHitsconcat_pruned = concatIndices(prodHits_pruned);
 					System.out.println("   Produced hits pruned by MCS: " + debugHits(prodHitsconcat_pruned));
-					// Remove hits not hit by the original smarts.
+					// Keep hits hit by the original smarts.
 					Set<Integer> prodToKeep = new HashSet<Integer>();
 					for (int prodHit : prodHitsconcat_pruned){
 						for (List<Integer> prodList : fullProductHit_AtomList){
@@ -347,9 +347,9 @@ public class ReactionSmartsQueryTool {
 								System.out.println("Pruned product hit" + j + ":" + atom.getProperty(COMMON_ID_FIELD_NAME) + ":" + commonId);
 								if (reactantClasses.get(reactant.getAtomNumber(atom)).contains(i)){
 									System.out.println("Adding class: "+ i + ", to mcs atom: " + j);
-									if (!mcsClasses.get(j).contains(i)) {
-										mcsClasses.get(j).add(i);
-										mcsSize[j] = mcsClasses.get(j).size();
+									if (!mcsClasses.get(reactant.getAtomNumber(atom)).contains(i)) {
+										mcsClasses.get(reactant.getAtomNumber(atom)).add(i);
+										mcsSize[reactant.getAtomNumber(atom)] = mcsClasses.get(reactant.getAtomNumber(atom)).size();
 									}
 									addedToMCSClasses = true;
 								}
