@@ -300,10 +300,10 @@ public class ReactionSmartsQueryTool {
 					
 				//PRODUCT PART
 				int[] mcsSize = new int[mcsClasses.size()];
-				// Init all elements to one since we are forming a product for the number of permutations below.
-				for (int mcsSizeEl : mcsSize){
-					mcsSizeEl = 1;
-				}
+//				// Init all elements to one since we are forming a product for the number of permutations below.
+//				for (int mcsSizeEl : mcsSize){
+//					mcsSizeEl = 1;
+//				}
 				String pclass = prodClasses.get(i);
 				String pclass_noclass=removeAllClasses(pclass);
 				System.out.println("Product class: " + i + "=" + pclass + "=" + pclass_noclass);
@@ -358,45 +358,8 @@ public class ReactionSmartsQueryTool {
 					}
 
 				}
-			
 				if (addedToMCSClasses){
-					
-					int[] curIndex = new int[mcsClasses.size()];
-					for (int curIndexEl : curIndex){
-						curIndexEl = 0;
-					}					
-					int maxNrPermutations = 1;
-					for (int mcsSizeEl : mcsSize){
-						if (mcsSizeEl > 0){
-							maxNrPermutations = maxNrPermutations * mcsSizeEl;
-						}
-					}
-					// Loop through mcsClasses and see if all classes are mapped on different atoms.
-					//boolean finishedCheckingClasses = false;
-					int indexToIncrease = 0;
-					for (int permutation = 0; permutation < maxNrPermutations; permutation++){
-						// Go through the next permutation.
-						List<Integer> classList = new ArrayList<Integer>();
-						int curNr = 0;
-						// Go through each atom number and add classes.
-						while (curNr < mcsClasses.size()){
-							if ( (mcsClasses.get(curNr).size() > 0) && (mcsClasses.get(curNr).size() > curIndex[curNr])){
-								int classVal = mcsClasses.get(curNr).get(curIndex[curNr]);
-								if (!classList.contains(classVal)){
-									classList.add(classVal);
-								}
-							}
-							curNr++;
-						}
-						System.out.println("Len class list: " + classList.size());
-						System.out.println("Len reactantClasses list: " + reactClasses.size());
-						if (classList.size() == reactClasses.size() ){
-							System.out.println("Returning TRUE!");
-							return true;
-						}
-						// Update the indices defined by curIndex.
-						updateIndices(curIndex, mcsClasses, indexToIncrease);
-					}		
+					return checkClassCoverage(mcsClasses, mcsSize);
 				}
 			}
 			rcno++;
@@ -404,6 +367,46 @@ public class ReactionSmartsQueryTool {
 		
 		return false;
 
+	}
+
+	private boolean checkClassCoverage(List<List<Integer>> mcsClasses, int[] mcsSize) {
+		int[] curIndex = new int[mcsClasses.size()];
+		for (int curIndexEl : curIndex){
+			curIndexEl = 0;
+		}					
+		int maxNrPermutations = 1;
+		for (int mcsSizeEl : mcsSize){
+			if (mcsSizeEl > 0){
+				maxNrPermutations = maxNrPermutations * mcsSizeEl;
+			}
+		}
+		// Loop through mcsClasses and see if all classes are mapped on different atoms.
+		//boolean finishedCheckingClasses = false;
+		int indexToIncrease = 0;
+		for (int permutation = 0; permutation < maxNrPermutations; permutation++){
+			// Go through the next permutation.
+			List<Integer> classList = new ArrayList<Integer>();
+			int curNr = 0;
+			// Go through each atom number and add classes.
+			while (curNr < mcsClasses.size()){
+				if ( (mcsClasses.get(curNr).size() > 0) && (mcsClasses.get(curNr).size() > curIndex[curNr])){
+					int classVal = mcsClasses.get(curNr).get(curIndex[curNr]);
+					if (!classList.contains(classVal)){
+						classList.add(classVal);
+					}
+				}
+				curNr++;
+			}
+			System.out.println("Len class list: " + classList.size());
+			System.out.println("Len reactantClasses list: " + reactClasses.size());
+			if (classList.size() == reactClasses.size() ){
+				System.out.println("Returning TRUE!");
+				return true;
+			}
+			// Update the indices defined by curIndex.
+			updateIndices(curIndex, mcsClasses, indexToIncrease);
+		}		
+		return false;
 	}
 	
 	
