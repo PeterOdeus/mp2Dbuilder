@@ -406,13 +406,13 @@ public class ReactionSmartsQueryTool {
 
 	private void updateIndices(int[] curIndex, List<List<Integer>> mcsClasses, int indexToIncrease) {
 		// Check if it will be too large.
-		if (curIndex[indexToIncrease]+1 >= mcsClasses.get(indexToIncrease).size()){
-			curIndex[indexToIncrease] = 0; //Reset
+		if (curIndex[indexToIncrease]+2 >= mcsClasses.get(indexToIncrease).size()){
 			// Increase the next more significant index.
 			//boolean foundNextIndex = false;
 			while (true){
+				curIndex[indexToIncrease] = 0; //Reset
 				indexToIncrease++;
-				if (curIndex[indexToIncrease] < mcsClasses.get(indexToIncrease).size()){
+				if ( (curIndex[indexToIncrease] < mcsClasses.get(indexToIncrease).size()) && (mcsClasses.get(indexToIncrease).size() > 1) ){
 					curIndex[indexToIncrease]++;
 					break;
 				}
