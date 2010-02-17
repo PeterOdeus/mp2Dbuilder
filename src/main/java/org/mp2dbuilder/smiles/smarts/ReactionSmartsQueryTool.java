@@ -176,6 +176,7 @@ public class ReactionSmartsQueryTool {
 		List<List<Integer>> fullProductHit_AtomList = prodQueryTool.getUniqueMatchingAtoms();
 
 		//Generate and pick largest MCS. Since there are only one structure as a reactant and one structure as a product the largest MCS should be ok.
+		// Any mapping between reactant and the product should be ok as well.
 		IAtomContainer mcs = getMCS(reactant, product);
 		if (mcs==null || mcs != null && mcs.getAtomCount()<=0){
 			System.out.println("No overlaps in MCSS. Exiting.");
@@ -209,6 +210,31 @@ public class ReactionSmartsQueryTool {
 		fullProductHit_AtomList=removeIndicesWithoutCommonId(fullProductHit_AtomList, product);
 		//System.out.println("Reactant hits pruned by MCS:\n" + debugHits(fullReactantHit_AtomList));
 		System.out.println("Product hits pruned by MCS:\n" + debugHits(fullProductHit_AtomList));
+		
+		// Determine if there are any non-class product hits and remove them.
+		List<String>  prodNonClasses = getNonClasses(productQueryNoDollar);
+		for (String pclass : prodNonClasses){
+			System.out.println("Original smarts: " + pclass);
+			String pclass_noclass=removeAllClasses(pclass);
+			System.out.println("\n## Product non-class: " + pclass + "=" + pclass_noclass);
+			Set<Integer> prodHitsconcat=null;
+			Set<Integer> prodHitsconcat_pruned=null;
+			reactQueryTool.setSmarts(pclass_noclass);
+			if (!reactQueryTool.matches(reactant)){
+				System.out.println("   Produced no hits.");
+			}else{
+				List<List<Integer>> prodHits = reactQueryTool.getUniqueMatchingAtoms();
+				prodHitsconcat=concatIndices(prodHits);
+				System.out.println("   Produced hits: " + debugHits(prodHitsconcat));
+				List<List<Integer>> prodHits_pruned = removeIndicesWithoutCommonId(prodHits, product);
+				prodHitsconcat_pruned = concatIndices(prodHits_pruned);
+				System.out.println("   Produced hits pruned by MCS: " + debugHits(prodHitsconcat_pruned));
+		
+
+			}
+		}
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Vi maste ta bort atomer som inte tillhor en klass. Fast det kanske ska goras vid mcsClasses tillagget. 
 
 		if (fullProductHit_AtomList.size() == 0){
 			return false;
@@ -829,6 +855,43 @@ public class ReactionSmartsQueryTool {
 		return classes;
 	}
 
+	/**
+	 * Get classes for a smarts query with colon notaion
+	 * @param smarts
+	 * @return Map<Integer, String> linking a class ID to a group [xxx:ID] with brackets and ID within
+	 */
+	private List<String> getNonClasses(String smarts) {
+		List<String> nonClasses= new ArrayList<String>();
+
+		//RegExp to find all groups (surrounded by [ and ])
+		String regx="\\[([^\\]]*)\\]";
+		Pattern groupPattern = Pattern.compile(regx);
+
+		String nregx=":(\\d)";
+		Pattern classPattern = Pattern.compile(nregx);
+
+		//Extract all groups from input
+		Matcher matcher = groupPattern.matcher(smarts);
+
+		System.out.println("Extracting non-classes from query: " + smarts);
+
+		while (matcher.find()) {
+			String group=matcher.group();
+
+			//Extract the number from the group
+			Matcher classMatcher = classPattern.matcher(group);
+			if (!classMatcher.find()){
+				System.out.println("     Found non class=" +  group);
+
+				//add to list
+				nonClasses.add(group);
+
+			}
+			
+		}		
+
+		return nonClasses;
+	}
 	/**
 	 * Remove the starting [$( and trailing )] from a string
 	 * 
