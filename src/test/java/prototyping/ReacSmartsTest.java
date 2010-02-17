@@ -134,11 +134,14 @@ SMARTS:
 
 	@Test 
 	public void testERROR() throws Exception {
-//		//This is a dealkylation without any difficulties.
-//		//Daylight depict results in hit in subs and product
-//		//This should return true, classes do not make difference in this case
-		String 		rsmiles="CCCC>>OCCCCO";
-		assertTrue(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
+//		//This is not a hydroxyhlation without any difficulties.
+//		//This should return false. The it crashes.
+//		String 		rsmiles="OCOC1CCCC(NC)C1>>CN(C1CCCC(O)C1)C";
+//		assertFalse(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
+//		//This is not a hydroxyhlation without any difficulties.
+//		//This should return false. The [O] in the smarts does not belong to a class and it should be handled.
+		String 		rsmiles="OC1CCCC(NC)C1>>CN(C1CCCC(O)C1)C";
+		assertFalse(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
 	}
 	
 	@Test 
