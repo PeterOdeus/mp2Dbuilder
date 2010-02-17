@@ -32,8 +32,7 @@ import org.openscience.cdk.tools.LoggingToolFactory;
 
 public class ReacSmartsTest {
 
-	private static ILoggingTool logger = null;// LoggingToolFactory.createLoggingTool(InitialTest.class);
-												// // new LoggingTool();
+	private static ILoggingTool logger = null;
 
 	// Our hydroxylation smarts definition
 	public static String HYDROXYLATION_REACTANT_SMARTS = "[$([*:1])]";
@@ -42,8 +41,6 @@ public class ReacSmartsTest {
 	@BeforeClass
 	public static void setup() {
 		logger = LoggingToolFactory.createLoggingTool(InitialTest.class);
-		// setSimpleChemObjectReader(new MDLRXNReader(),
-		// "data/mdl/reaction-1.rxn");
 	}
 
 	@Test
@@ -189,14 +186,6 @@ public class ReacSmartsTest {
 	public void testReactSmartsMoleculeViewer() throws Exception {
 		String f = "data/mdl/First500DB2005AllFields.rdf"; // "data/mdl/73320thRiReg.rdf";
 		ReaccsMDLRXNReader reader = getReaccsReader(f);
-		// IReactionSet reactionSet = (IReactionSet)reader.read(new
-		// NNReactionSet());
-		// IAtomContainer reactant = (IAtomContainer)
-		// reactionSet.getReaction(0).getReactants().getMolecule(0);
-		// IAtomContainer product = (IAtomContainer)
-		// reactionSet.getReaction(0).getProducts().getMolecule(0);
-		// List<IAtomContainer> mcsList =
-		// UniversalIsomorphismTester.getOverlaps(reactant, product);
 		URL url = this.getClass().getClassLoader().getResource(f);
 		File file = new File(url.toURI());
 		ReactSmartsMoleculeViewer gui = new ReactSmartsMoleculeViewer(reader,
