@@ -32,12 +32,9 @@ import org.openscience.cdk.smiles.SmilesParser;
 
 public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 
-	// Our dealkylation smarts definition
-	public static String N_DEALKYLATION_REACTANT_SMARTS = "[$([CH3][NH0;X3:1]([CH3])[*:2])]";
-	public static String N_DEALKYLATION_PRODUCT_SMARTS = "[CH3][NH:1][*:2]";
-
-	public static String SIMPLE_REACTANT_SMARTS = "[$([*:1])]";
-	public static String SIMPLE_PRODUCT_SMARTS = "[*:1]";
+	//Our dealkylation smarts definition
+	public static String N_DEALKYLATION_REACTANT_SMARTS="[$([CH3][NH0;X3:1]([CH3:3])[*:2])]";
+	public static String N_DEALKYLATION_PRODUCT_SMARTS="[CH3:3][NH:1][*:2]";
 	
 	private IAtomContainer mcss;
 
