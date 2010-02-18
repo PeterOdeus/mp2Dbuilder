@@ -9,6 +9,7 @@ package org.mp2dbuilder.viewer;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
@@ -27,7 +28,6 @@ import java.util.zip.GZIPInputStream;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -49,7 +49,6 @@ import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.renderer.Renderer;
 import org.openscience.cdk.renderer.font.AWTFontManager;
-import org.openscience.cdk.renderer.generators.AtomNumberGenerator;
 import org.openscience.cdk.renderer.generators.ExtendedAtomGenerator;
 import org.openscience.cdk.renderer.generators.IGenerator;
 import org.openscience.cdk.renderer.generators.RingGenerator;
@@ -111,7 +110,6 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 		JScrollPane scrollPane = new JScrollPane(logTextArea);
 		logTextArea.setEditable(false);
 		add(scrollPane, BorderLayout.SOUTH);
-
 	}
 
 	protected void addOptions(JToolBar optionsBar) {
@@ -147,28 +145,6 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 		}
 	}
 
-	// public void setRireg(int targetRireg) throws Exception{
-	// boolean isReset = false;
-	// if(targetRireg <= currentRireg){
-	// tryToReset();
-	// isReset = true;
-	// }
-	// currentRireg = targetRireg;
-	// if(currentRireg < 1){
-	// currentRireg = 1;
-	// }
-	// this.riregNoLabel.setText(this.currentRireg + "");
-	// if(isReset == true){
-	// reader.setInitialRiregNo(currentRireg);
-	// }
-	// this.generateImage();
-	// // SwingUtilities.invokeLater(new Runnable() {
-	// // public void run() {
-	// // repaint();
-	// // }
-	// // });
-	// }
-
 	protected IReactionSet getNextReactionSetForRendering()
 			throws ReaccsFileEndedException, CDKException {
 		return (IReactionSet) reader.read(new NNReactionSet());
@@ -186,15 +162,6 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 			IAtomContainer reactant = (IAtomContainer) returnList.get(0);
 			IAtomContainer product = (IAtomContainer) returnList.get(1);
 			IAtomContainer mcs = (IAtomContainer) returnList.get(2);
-			// IAtomContainer reactant = (IAtomContainer)
-			// reactionSet.getReaction(0).getReactants().getMolecule(0);
-			// IAtomContainer product = (IAtomContainer)
-			// reactionSet.getReaction(0).getProducts().getMolecule(0);
-			// List<IAtomContainer> mcsList =
-			// UniversalIsomorphismTester.getOverlaps(reactant, product);
-			// IAtomContainer mcs =
-			// metaboliteHandler.getFirstMCSHavingMostAtoms(mcsList);
-			// metaboliteHandler.setReactionCentres(reactant, product, mcs);
 
 			i1 = getImage(reactant, mcs, true, product, 3, false);
 			i2 = getImage(product, mcs, false, null, 3, false);
@@ -212,13 +179,19 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 			IAtomContainer productContainer, int numberOfGraphs,
 			boolean drawNumbers)
 			throws CDKException {
-
+		Dimension imagePanelDimension = null;
+		double imagePanelWidth = 0.0;
+		double imagePanelHeight = 0.0;
 		int WIDTH = 400;
-		int HEIGHT = 500;
-
-		if (numberOfGraphs == 2) {
-			WIDTH = 500;
-			HEIGHT = 600;
+		int HEIGHT = 400;
+		if(imagePanel != null){
+			imagePanelDimension = imagePanel.getSize();
+			
+			imagePanelWidth = imagePanelDimension.getWidth();
+			imagePanelHeight = imagePanelDimension.getHeight();
+			
+			WIDTH = (int)imagePanelWidth / numberOfGraphs;
+			HEIGHT = (int) imagePanelHeight;
 		}
 
 		// the draw area and the image should be the same size
@@ -229,10 +202,7 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 		if (atomContainer == null) {
 			return image;
 		}
-
-		// any molecule will do
-		// IMolecule theMolecule = MoleculeFactory.make123Triazole();
-
+		
 		StructureDiagramGenerator sdg = new StructureDiagramGenerator();
 		IMolecule molecule = atomContainer.getBuilder().newMolecule(
 				atomContainer);
@@ -260,7 +230,7 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 		Renderer renderer = new Renderer(generators, new AWTFontManager());
 
 		renderer.getRenderer2DModel().setDrawNumbers(drawNumbers);
-		renderer.getRenderer2DModel().setIsCompact(false);
+		//renderer.getRenderer2DModel().set .setIsCompact(false);
 		// the call to 'setup' only needs to be done on the first paint
 		renderer.setup(molecule, drawArea);
 
@@ -345,31 +315,7 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 		// }
 		swingWorker.execute();
 	}
-
-	// public void executeWorkerThreadtask(String cmd) {
-	// String description = null;
-	//
-	// // Handle each button.
-	// try{
-	// if (PREVIOUS.equals(cmd)) { //first button clicked
-	// this.setRireg(this.currentRireg - 1);
-	// } else if (NEXT.equals(cmd)) {
-	// this.setRireg(this.currentRireg + 1);
-	// } else if (GOTO.equals(cmd)) { // third button clicked
-	// tryToReset();
-	// reader.setInitialRiregNo(Integer.valueOf(text.getText().trim()));
-	// this.setRireg(Integer.valueOf(text.getText().trim()));
-	// }
-	// }
-	// catch (Exception e1) {
-	// final Writer result = new StringWriter();
-	// final PrintWriter printWriter = new PrintWriter(result);
-	// e1.printStackTrace(printWriter);
-	// JOptionPane.showMessageDialog(this, result.toString());
-	// throw new RuntimeException(e1);
-	// }
-	// }
-
+	
 	protected void displayResult(String actionDescription) {
 		textArea.append(actionDescription + newline);
 		textArea.setCaretPosition(textArea.getDocument().getLength());
@@ -408,14 +354,6 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 
 			JFrame frame = new JFrame("Reactant - Product - MCS");
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			// frame.addWindowListener(new WindowAdapter()
-			// {
-			// public void windowClosing(WindowEvent paramWindowEvent)
-			// {
-			// shouldExit = true;
-			// }
-			// });
-
 			frame.getContentPane().add(gui);
 			frame.pack();
 			frame.setVisible(true);

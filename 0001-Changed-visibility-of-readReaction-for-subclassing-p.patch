@@ -1,0 +1,25 @@
+From ac8ff1c758f951b341a6c2ecd73f994ed72aac68 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Peter=20Od=C3=A9us?= <peter.odeus@gmail.com>
+Date: Thu, 18 Feb 2010 14:41:47 +0100
+Subject: [PATCH] Changed visibility of readReaction for subclassing purposes
+
+---
+ src/main/org/openscience/cdk/io/MDLRXNReader.java |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/main/org/openscience/cdk/io/MDLRXNReader.java b/src/main/org/openscience/cdk/io/MDLRXNReader.java
+index 217fb35..2fd682e 100644
+--- a/src/main/org/openscience/cdk/io/MDLRXNReader.java
++++ b/src/main/org/openscience/cdk/io/MDLRXNReader.java
+@@ -287,7 +287,7 @@ public class MDLRXNReader extends DefaultChemObjectReader {
+      *
+      * @return  The Reaction that was read from the MDL file.
+      */
+-    private IReaction readReaction(IChemObjectBuilder builder) throws CDKException {
++    protected IReaction readReaction(IChemObjectBuilder builder) throws CDKException {
+     	logger.debug("Reading new reaction");
+         int linecount = 0;
+     	IReaction reaction = builder.newReaction();
+-- 
+1.6.5.3
+

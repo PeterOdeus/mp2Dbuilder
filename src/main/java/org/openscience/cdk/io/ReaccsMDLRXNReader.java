@@ -63,40 +63,18 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 	 * @return The IChemObject read
 	 * @exception CDKException
 	 */
+	@Override
 	public IChemObject read(IChemObject object)
 			throws ReaccsFileEndedException,
 			ReadingReaccsFileCancelledException, CDKException {
 		if (object instanceof IReactionSet) {
 			readUntilRXN();
-			Method m = null;
-			try {
-				m = MDLRXNReader.class.getDeclaredMethod("readReaction",
-						IChemObjectBuilder.class);
-				m.setAccessible(true);
-				IReaction r = (IReaction) m.invoke((MDLRXNReader) this, object
-						.getBuilder());
+				IReaction r = (IReaction) this.readReaction(object.getBuilder());
 				if (r != null) {
 					((IReactionSet) object).addReaction(r);
 				}
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NoSuchMethodException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
 			return object;
-			// return super.read(object);//
-			// readReactionSet((IReactionSet)object);
 		} else {
 			return super.read(object);
 		}

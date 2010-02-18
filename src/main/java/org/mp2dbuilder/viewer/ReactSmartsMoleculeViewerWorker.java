@@ -45,6 +45,7 @@ public class ReactSmartsMoleculeViewerWorker extends SwingWorker<Void, String> {
 			_viewer.repaint();
 		}
 		_viewer.cancelButton.setEnabled(false);
+		//_viewer.logTextArea.append(_viewer.imagePanel.getSize().toString());
 	}
 
 	@Override
