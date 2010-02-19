@@ -1,4 +1,4 @@
-package org.openscience.cdk.io;
+package org.mp2dbuilder.io;
 
 import org.openscience.cdk.exception.CDKException;
 

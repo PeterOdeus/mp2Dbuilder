@@ -1,8 +1,10 @@
 package org.mp2dbuilder.builder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import metaprint2d.Fingerprint;
@@ -45,9 +47,9 @@ public class MetaboliteHandler {
 			// reaction.getProductCount());
 			// }
 
-			List<? extends Object> preparedList = prepareForTransformation(reactionSet);
+			Map<String,? extends Object> preparedMap = prepareForTransformation(reactionSet);
 
-			List<AtomData> atomDataList = (List<AtomData>) preparedList.get(3);
+			List<AtomData> atomDataList = (List<AtomData>) preparedMap.get("atomDataList");
 
 			t = new Transformation();
 			t.setAtomData(atomDataList);
@@ -61,15 +63,15 @@ public class MetaboliteHandler {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List prepareForTransformation(IReactionSet reactionSet)
+	public Map<String,? extends Object> prepareForTransformation(IReactionSet reactionSet)
 			throws Exception {
 
-		List returnList = new ArrayList();
+		Map returnMap = new HashMap();
 
 		// Get the reaction and its Sybyl types
 		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0)
 				.getReactants().getMolecule(0);
-		returnList.add(reactant);
+		returnMap.put("reactant",reactant);
 		SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher
 				.getInstance(reactant.getBuilder());
 		IAtomType[] reactantTypes = reactantMatcher
@@ -83,7 +85,7 @@ public class MetaboliteHandler {
 		// Then get the product
 		IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0)
 				.getProducts().getMolecule(0);
-		returnList.add(product);
+		returnMap.put("product",product);
 
 		/*
 		 * Aromaticity needs to be perceived in the same way for both reactant
@@ -99,20 +101,20 @@ public class MetaboliteHandler {
 		// and generate the Maximum Common SubStructure
 		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(
 				reactant, product);
-		IAtomContainer mcs = getFirstMCSHavingMostAtoms(mcsList);
-		returnList.add(mcs);
+		IAtomContainer mcss = getFirstMCSHavingMostAtoms(mcsList);
+		returnMap.put("mcss",mcss);
 
 		// Mark the reactant atoms that are reaction centres
-		setReactionCentres(reactant, product, mcs);
+		setReactionCentres(reactant, product, mcss);
 
 		// and generate a list of atoms to be returned
 		Set<String> typeOfReactionCentresCandidates = new HashSet<String>();
 		typeOfReactionCentresCandidates.add(REACTION_CENTRE_FIELD_NAME);
 		List<AtomData> atomDataList = getProcessedAtoms(fpList, reactant,
 				typeOfReactionCentresCandidates);
-		returnList.add(atomDataList);
+		returnMap.put("atomDataList",atomDataList);
 
-		return returnList;
+		return returnMap;
 
 	}
 

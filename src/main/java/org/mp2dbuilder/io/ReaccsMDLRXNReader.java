@@ -1,20 +1,17 @@
-package org.openscience.cdk.io;
+package org.mp2dbuilder.io;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import javax.swing.SwingWorker;
 
 import org.mp2dbuilder.viewer.CancelledException;
 import org.mp2dbuilder.viewer.ReactSmartsMoleculeViewerWorker;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IChemObject;
-import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.interfaces.IReactionSet;
+import org.openscience.cdk.io.MDLRXNReader;
+import org.openscience.cdk.io.IChemObjectReader.Mode;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 

@@ -10,6 +10,7 @@ import java.io.Writer;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -18,14 +19,14 @@ import javax.swing.JToolBar;
 
 import org.junit.Assert;
 import org.mp2dbuilder.builder.MetaboliteHandler;
+import org.mp2dbuilder.io.ReaccsFileEndedException;
+import org.mp2dbuilder.io.ReaccsMDLRXNReader;
 import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IReactionSet;
-import org.openscience.cdk.io.ReaccsFileEndedException;
-import org.openscience.cdk.io.ReaccsMDLRXNReader;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.isomorphism.matchers.IQueryAtom;
 import org.openscience.cdk.isomorphism.matchers.IQueryAtomContainer;
@@ -92,10 +93,10 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 		try {
 			IReactionSet reactionSet = getNextReactionSetForRendering();
 
-			List returnList = metaboliteHandler
+			Map<String,? extends Object> returnMap = metaboliteHandler
 					.prepareForTransformation(reactionSet);
-			IAtomContainer reactant = (IAtomContainer) returnList.get(0);
-			IAtomContainer product = (IAtomContainer) returnList.get(1);
+			IAtomContainer reactant = (IAtomContainer) returnMap.get("reactant");
+			IAtomContainer product = (IAtomContainer) returnMap.get("product");
 			
 			String q = text.getText().trim();
 			SMARTSQueryTool sqt = new SMARTSQueryTool(q);

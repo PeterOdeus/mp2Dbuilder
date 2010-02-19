@@ -8,11 +8,11 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
+import org.mp2dbuilder.io.ReaccsFileEndedException;
 import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IReactionSet;
-import org.openscience.cdk.io.ReaccsFileEndedException;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
 

@@ -1,6 +1,6 @@
 package org.mp2dbuilder.builder;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -26,16 +26,16 @@ public class ReactionSmartsHandler extends MetaboliteHandler {
 	}
 
 	@Override
-	public List prepareForTransformation(IReactionSet reactionSet)
+	public Map<String,? extends Object> prepareForTransformation(IReactionSet reactionSet)
 			throws Exception {
-		List returnList = new ArrayList();
+		Map returnMap = new HashMap();
 
 		IReaction theReaction = reactionSet.getReaction(0);
 
 		// Get the reaction and its Sybyl types
 		IAtomContainer reactant = (IAtomContainer) theReaction.getReactants()
 				.getMolecule(0);
-		returnList.add(reactant);
+		returnMap.put("reactant",reactant);
 		SybylAtomTypeMatcher reactantMatcher = SybylAtomTypeMatcher
 				.getInstance(reactant.getBuilder());
 		IAtomType[] reactantTypes = reactantMatcher
@@ -71,9 +71,9 @@ public class ReactionSmartsHandler extends MetaboliteHandler {
 		atomDataList = getProcessedAtoms(fpList, reactant, _reactionSmarts
 				.keySet());
 
-		returnList.add(atomDataList);
+		returnMap.put("atomDataList",atomDataList);
 
-		return returnList;
+		return returnMap;
 	}
 
 }

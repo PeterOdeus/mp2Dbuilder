@@ -52,7 +52,22 @@ public class DataBuilderAppTest {
 				"data/mdl/firstRiReg.rdf");
 		String inFile = url.getPath();
 		url = this.getClass().getClassLoader().getResource("data/mdl");
-		String outFile = url.getPath() + "/simpleSMIRKSout.bin";
+		String outFile = url.getPath() + "/twoSMIRKSout.bin";
+		url = this.getClass().getClassLoader().getResource(
+				"data/mdl/ReactionSMARTSFilter.two");
+		String reactionSmartsFilterFile = url.getPath();
+		String[] args = { "-i", inFile, "-o", outFile, "-rfile",
+				reactionSmartsFilterFile };
+		DataBuilderApp.main(args);
+	}
+	
+	@Test
+	public void testDataBuilderAppTwoSmirksMultipleRiregs() throws Exception {
+		URL url = this.getClass().getClassLoader().getResource(
+				"data/mdl/First50DB2005AllFields.rdf");
+		String inFile = url.getPath();
+		url = this.getClass().getClassLoader().getResource("data/mdl");
+		String outFile = url.getPath() + "/twoSMIRKSMultipleRiregsOut.bin";
 		url = this.getClass().getClassLoader().getResource(
 				"data/mdl/ReactionSMARTSFilter.two");
 		String reactionSmartsFilterFile = url.getPath();

@@ -9,14 +9,14 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import org.mp2dbuilder.builder.MetaboliteHandler;
+import org.mp2dbuilder.io.ReaccsFileEndedException;
+import org.mp2dbuilder.io.ReadingReaccsFileCancelledException;
 import org.mp2dbuilder.smiles.smarts.ReactionSmartsQueryTool;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.interfaces.IReactionSet;
-import org.openscience.cdk.io.ReaccsFileEndedException;
-import org.openscience.cdk.io.ReadingReaccsFileCancelledException;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;

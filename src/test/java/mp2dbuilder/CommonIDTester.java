@@ -10,11 +10,11 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mp2dbuilder.builder.MetaboliteHandler;
+import org.mp2dbuilder.io.ReaccsMDLRXNReader;
 import org.mp2dbuilder.mcss.AtomMapperUtil;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IReactionSet;
-import org.openscience.cdk.io.ReaccsMDLRXNReader;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
@@ -49,14 +49,14 @@ public class CommonIDTester {
 	
 	@SuppressWarnings("unchecked")
 	private void doTestCommonIdEquality(int reactionIndex) throws Exception {
-		List<? extends Object> returnList = getCommonIdAtomContainersForReaction(reactionIndex);
-		IAtomContainer reactant = (IAtomContainer) returnList.get(0);
-		IAtomContainer product = (IAtomContainer) returnList.get(1);
-		IAtomContainer mcs = (IAtomContainer) returnList.get(2);
-		Map<Integer, Integer> mappedReactantAtoms = (Map<Integer, Integer>) returnList
-				.get(4);
-		Map<Integer, Integer> mappedProductAtoms = (Map<Integer, Integer>) returnList
-				.get(5);
+		Map returnMap = getCommonIdAtomContainersForReaction(reactionIndex);
+		IAtomContainer reactant = (IAtomContainer) returnMap.get("reactant");
+		IAtomContainer product = (IAtomContainer) returnMap.get("product");
+		IAtomContainer mcs = (IAtomContainer) returnMap.get("mcss");
+		Map<Integer, Integer> mappedReactantAtoms = (Map<Integer, Integer>) returnMap
+				.get("mappedReactantAtoms");
+		Map<Integer, Integer> mappedProductAtoms = (Map<Integer, Integer>) returnMap
+				.get("mappedProductAtoms");
 		StringBuffer sb = new StringBuffer();
 
 		int maxAtomCount = Math.max(reactant.getAtomCount(), product
@@ -125,20 +125,20 @@ public class CommonIDTester {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private List<? extends Object> getCommonIdAtomContainersForReaction(
+	private Map<String,? extends Object> getCommonIdAtomContainersForReaction(
 			int reactionId) throws Exception {
-		List returnList = getAtomContainersForReaction(reactionId);
-		IAtomContainer reactant = (IAtomContainer) returnList.get(0);
-		IAtomContainer product = (IAtomContainer) returnList.get(1);
-		IAtomContainer mcs = (IAtomContainer) returnList.get(2);
+		Map returnMap = getAtomContainersForReaction(reactionId);
+		IAtomContainer reactant = (IAtomContainer) returnMap.get("reactant");
+		IAtomContainer product = (IAtomContainer) returnMap.get("product");
+		IAtomContainer mcs = (IAtomContainer) returnMap.get("mcss");
 		AtomMapperUtil atomMapperUtil = new AtomMapperUtil();
 		Map<Integer, Integer> mappedReactantAtoms = atomMapperUtil
 				.getAtomMappings(reactant, mcs);
 		Map<Integer, Integer> mappedProductAtoms = atomMapperUtil
 				.getAtomMappings(product, mcs);
 
-		returnList.add(mappedReactantAtoms); // index 4
-		returnList.add(mappedProductAtoms);// index 5
+		returnMap.put("mappedReactantAtoms",mappedReactantAtoms);
+		returnMap.put("mappedProductAtoms",mappedProductAtoms);
 
 		Collection<Integer> reactantIds = mappedReactantAtoms.values();
 		Collection<Integer> productIds = mappedProductAtoms.values();
@@ -153,17 +153,17 @@ public class CommonIDTester {
 				mappedReactantAtoms);
 		atomMapperUtil.setIds(MetaboliteHandler.COMMON_ID_FIELD_NAME, product,
 				mappedProductAtoms);
-		return returnList;
+		return returnMap;
 	}
 	
-	private List getAtomContainersForReaction(int reactionId) throws Exception {
+	private Map<String,? extends Object> getAtomContainersForReaction(int reactionId) throws Exception {
 		IAtomContainer reactant = null;
 		IAtomContainer product = null;
 		IAtomContainer mcs = null;
 		String filename = "data/mdl/First500DB2005AllFields.rdf";
 		logger.info("Testing: " + filename);
 		InputStream ins = null;
-		List returnList = null;
+		Map<String,? extends Object> returnMap = null;
 		try {
 			ins = this.getClass().getClassLoader()
 					.getResourceAsStream(filename);
@@ -172,13 +172,13 @@ public class CommonIDTester {
 			IReactionSet reactionSet = (IReactionSet) reader
 					.read(new NNReactionSet());
 			MetaboliteHandler metaboliteHandler = new MetaboliteHandler();
-			returnList = metaboliteHandler
+			returnMap = metaboliteHandler
 					.prepareForTransformation(reactionSet);
 		} finally {
 			if (ins != null) {
 				ins.close();
 			}
 		}
-		return returnList;
+		return returnMap;
 	}
 }

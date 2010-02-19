@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import javax.swing.ImageIcon;
@@ -37,14 +38,14 @@ import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
 
 import org.mp2dbuilder.builder.MetaboliteHandler;
+import org.mp2dbuilder.io.ReaccsFileEndedException;
+import org.mp2dbuilder.io.ReaccsMDLRXNReader;
 import org.mp2dbuilder.renderer.generators.ReactionCentreGenerator;
 import org.mp2dbuilder.renderer.generators.SmartHitsGenerator;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IReactionSet;
-import org.openscience.cdk.io.ReaccsFileEndedException;
-import org.openscience.cdk.io.ReaccsMDLRXNReader;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.renderer.Renderer;
@@ -157,11 +158,11 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 
 		try {
 			IReactionSet reactionSet = getNextReactionSetForRendering();
-			List returnList = metaboliteHandler
+			Map returnList = metaboliteHandler
 					.prepareForTransformation(reactionSet);
-			IAtomContainer reactant = (IAtomContainer) returnList.get(0);
-			IAtomContainer product = (IAtomContainer) returnList.get(1);
-			IAtomContainer mcs = (IAtomContainer) returnList.get(2);
+			IAtomContainer reactant = (IAtomContainer) returnList.get("reactant");
+			IAtomContainer product = (IAtomContainer) returnList.get("product");
+			IAtomContainer mcs = (IAtomContainer) returnList.get("mcss");
 
 			i1 = getImage(reactant, mcs, true, product, 3, false);
 			i2 = getImage(product, mcs, false, null, 3, false);

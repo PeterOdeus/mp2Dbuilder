@@ -56,4 +56,15 @@ Maven build
 	The resulting jar can be found in the target directory and can be executed by issuing the following command:
 	java -Dcdk.debugging=true -jar mp2Dbuilder-0.0.1-SNAPSHOT-jar-with-dependencies.jar /home/podeus/dev/azWorkspace/mp2Dbuilder/src/test/resources/data/mdl/First500DB2005AllFields.rdf
 	
+Generating bin file
+	run from inside the target directory:
+	java -cp ./mp2Dbuilder-0.0.1-SNAPSHOT-jar-with-dependencies.jar \
+	metaprint2d.builder.DataBuilderApp -i test-classes/data/mdl/First50DB2005AllFields.rdf \
+	-o out.bin -rfile test-classes/data/mdl/ReactionSMARTSFilter.two
+	
+Testing resulting bin file
+	run from inside the target directory (if you have metaprint2d-exe in your possession):
+	java -jar ../../metaprint2d-exe-0.1-SNAPSHOT-jar-with-dependencies.jar \
+	-d out.bin -c LOOSE "O=C(NC(=O)C)NC(=O)C(CC)(CC)Br" 
+	
 	
