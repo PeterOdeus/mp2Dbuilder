@@ -99,7 +99,7 @@ SMARTS:
 		String rsmiles;
 
 //		//No dealkylation, daylight and we return false
-		rsmiles="CCCN(C)C>>CCN(C)C";
+		rsmiles="CCCN(C)C>>CCNC";
 		assertFalse(isDoubleMatch(rsmiles, 
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
@@ -146,8 +146,8 @@ SMARTS:
 //		assertFalse(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
 //		//This is not a hydroxylation without any difficulties.
 //		//This should return false. The [O] in the smarts does not belong to a class and it should be handled.
-		rsmiles= "OCN>>OCNC";//"OC1CCCC(NC)C1>>CN(C1CCCC(O)C1)C";
-		assertFalse(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
+//		rsmiles= "OCN>>OCNC";//"OC1CCCC(NC)C1>>CN(C1CCCC(O)C1)C";
+//		assertFalse(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
 	}
 	
 	@Test 

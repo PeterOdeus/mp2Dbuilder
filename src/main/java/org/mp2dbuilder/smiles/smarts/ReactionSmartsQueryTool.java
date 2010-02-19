@@ -271,6 +271,7 @@ public class ReactionSmartsQueryTool {
 					// Add the putative reaction center as a reaction center.
 					reactantAtomNumbers.add(new ArrayList<Integer>());
 					reactantAtomNumbers.get(reactantAtomNumbers.size()-1).add(putativeRC.get(0));
+					
 				}
 			}
 			rcno++;
@@ -426,7 +427,7 @@ public class ReactionSmartsQueryTool {
 			//System.out.println("Len class list: " + classList.size());
 			//System.out.println("Len reactantClasses list: " + reactClasses.size());
 			if (classList.size() == reactClasses.size() ){
-				//System.out.println("Returning TRUE!");
+				System.out.println("-----------------------------The current putative RC is a reaction center.");
 				return true;
 			}
 			// Update the indices defined by curIndex.
