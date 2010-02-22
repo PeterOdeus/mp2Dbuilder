@@ -1,5 +1,6 @@
 package prototyping;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -10,20 +11,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 
 import javax.swing.JFrame;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mp2dbuilder.io.ReaccsMDLRXNReader;
 import org.mp2dbuilder.smiles.smarts.ReactionSmartsQueryTool;
 import org.mp2dbuilder.viewer.MoleculeViewer;
 import org.mp2dbuilder.viewer.ReactSmartsMoleculeViewer;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.interfaces.IReactionSet;
+import org.openscience.cdk.io.ReaccsMDLRXNReader;
+import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
+import org.openscience.cdk.isomorphism.matchers.QueryAtomContainer;
+import org.openscience.cdk.isomorphism.mcss.RMap;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
@@ -32,78 +38,98 @@ import org.openscience.cdk.tools.LoggingToolFactory;
 
 public class ReacSmartsTest {
 
-	private static ILoggingTool logger = null;
+	private static ILoggingTool logger =  null;//LoggingToolFactory.createLoggingTool(InitialTest.class); // new LoggingTool();
 
-	// Our hydroxylation smarts definition
-	public static String HYDROXYLATION_REACTANT_SMARTS = "[$([*:1])]";
-	private static String HYDROXYLATION_PRODUCT_SMARTS = "[*:1][OH]";
+	
 
-	@BeforeClass
-	public static void setup() {
+	//Our hydroxylation smarts definition
+	public static String HYDROXYLATION_REACTANT_SMARTS="[$([*:1])]";
+	private static String HYDROXYLATION_PRODUCT_SMARTS="[*:1][OH]";
+	
+	@BeforeClass public static void setup() {
 		logger = LoggingToolFactory.createLoggingTool(InitialTest.class);
+		//setSimpleChemObjectReader(new MDLRXNReader(), "data/mdl/reaction-1.rxn");
 	}
+	
+	
+	@Test 
+	public void testQueryAtomMCS() throws Exception {
+		
+		SmilesParser sp = new SmilesParser(NoNotificationChemObjectBuilder.getInstance());
+		IMolecule mol1 = sp.parseSmiles("CCCO");
+		IMolecule mol2 = sp.parseSmiles("CC=O");
+		System.out.println("mol1: " + mol1);
+		System.out.println("mol2: " + mol2);
+		QueryAtomContainer q2 = ReactionSmartsQueryTool.createSymbolAndAnyBondOrderQueryContainer(mol2);
+		QueryAtomContainer q3 = ReactionSmartsQueryTool.createSymbolAndBondOrderQueryContainer(mol2);
+		
+		List<IAtomContainer> rmaps = UniversalIsomorphismTester.getOverlaps(mol1,q2);
+		System.out.println("Any order bonds: " + rmaps.get(0).getAtomCount());
+		assertEquals(3, rmaps.get(0).getAtomCount());
+
+		rmaps = UniversalIsomorphismTester.getOverlaps(mol1,q3);
+		System.out.println("Order bonds: " + rmaps.get(0).getAtomCount());
+		assertEquals(2, rmaps.get(0).getAtomCount());
+
+	}	
+
 	
 //	@Test 
 	public void testMCSSOverlaps() throws Exception {
 		String f = "data/mdl/firstRiReg.rdf";
 		ReaccsMDLRXNReader reader = getReaccsReader(f);
-		IReactionSet reactionSet = (IReactionSet) reader
-				.read(new NNReactionSet());
+		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 		IReaction reaction = reactionSet.getReaction(0);
 		String reactantQuery = HYDROXYLATION_REACTANT_SMARTS;
 		String productQuery = "[*:1]";
-		ReactionSmartsQueryTool sqt = new ReactionSmartsQueryTool(
-				reactantQuery, productQuery);
-
-		// We also know we only have one reactant and one product
-		IAtomContainer reactant = (IAtomContainer) reaction.getReactants()
-				.getMolecule(0);
-		IAtomContainer product = (IAtomContainer) reaction.getProducts()
-				.getMolecule(0);
+		ReactionSmartsQueryTool sqt = new ReactionSmartsQueryTool(reactantQuery,productQuery);
+		
+		//We also know we only have one reactant and one product
+		IAtomContainer reactant = (IAtomContainer) reaction.getReactants().getMolecule(0);
+		IAtomContainer product = (IAtomContainer) reaction.getProducts().getMolecule(0);
 		Assert.assertEquals(15, reactant.getAtomCount());
 		Assert.assertEquals(11, product.getAtomCount());
 		assertTrue(sqt.matches(reaction));
 	}
-
-	@Test
+	
+	@Test 
 	public void testMCSSOverlapsForSecondRiReg() throws Exception {
 		String f = "data/mdl/2ndRiReg.rdf";
 		ReaccsMDLRXNReader reader = getReaccsReader(f);
-		IReactionSet reactionSet = (IReactionSet) reader
-				.read(new NNReactionSet());
+		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 		IReaction reaction = reactionSet.getReaction(0);
 		String reactantQuery = HYDROXYLATION_REACTANT_SMARTS;
 		String productQuery = "[*:1]";
-		ReactionSmartsQueryTool sqt = new ReactionSmartsQueryTool(
-				reactantQuery, productQuery);
-
-		// We also know we only have one reactant and one product
-		IAtomContainer reactant = (IAtomContainer) reaction.getReactants()
-				.getMolecule(0);
-		IAtomContainer product = (IAtomContainer) reaction.getProducts()
-				.getMolecule(0);
+		ReactionSmartsQueryTool sqt = new ReactionSmartsQueryTool(reactantQuery,productQuery);
+		
+		//We also know we only have one reactant and one product
+		IAtomContainer reactant = (IAtomContainer) reaction.getReactants().getMolecule(0);
+		IAtomContainer product = (IAtomContainer) reaction.getProducts().getMolecule(0);
 		Assert.assertEquals(15, reactant.getAtomCount());
 		Assert.assertEquals(12, product.getAtomCount());
 		assertTrue(sqt.matches(reaction));
 	}
+	
 
-	@Test
-	public void testN_Dealkylation() throws Exception {
+	@Test public void testN_Dealkylation() throws Exception {
+		
+/* Reference:
+http://www.daylight.com/daycgi_tutorials/depictmatch.cgi
+SMILES:
+CCCN(C)C>>CCN(C)C
+CCCCCCCN(C)C>>CCCCCCCNC
+CNC(CC=OC)CCCCN(C)C>>CNC(CC=OC)CCCCN(C)C
+CNCC(O)CCCN(C)C>>CNCC(O)CCCNC
 
-		/*
-		 * Reference: http://www.daylight.com/daycgi_tutorials/depictmatch.cgi
-		 * SMILES: CCCN(C)C>>CCN(C)C CCCCCCCN(C)C>>CCCCCCCNC
-		 * CNC(CC=OC)CCCCN(C)C>>CNC(CC=OC)CCCCN(C)C
-		 * CNCC(O)CCCN(C)C>>CNCC(O)CCCNC
-		 * 
-		 * SMARTS: [$([CH3][NH0;X3]([CH3])[*])]>>[CH3][NH][*]
-		 */
+SMARTS:
+[$([CH3][NH0;X3]([CH3])[*])]>>[CH3][NH][*]
+*/
 
 		String rsmiles;
 
 //		//No dealkylation, daylight and we return false
 		rsmiles="CCCN(C)C>>CCNC";
-		assertFalse(isDoubleMatch(rsmiles, 
+		assertTrue(isDoubleMatch(rsmiles, 
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
 //
@@ -115,26 +141,24 @@ public class ReacSmartsTest {
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
 
-		// This test has match in substrate and product but not on a conserved
-		// N.
-		// Daylight depict returns true for
-		// [$([CH3][NH0;X3]([CH3])[*])]>>[CH3][NH][*] (No classes)
-		// but we should return no matches due to non-conservation.
-		rsmiles = "CNC(CC=OC)CCCCN(C)C>>CNC(CC=OC)CCCCN(C)C";
-		assertFalse(isDoubleMatch(rsmiles,
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS,
+		
+//		This test has match in substrate and product but not on a conserved N.
+//		Daylight depict returns true for [$([CH3][NH0;X3]([CH3])[*])]>>[CH3][NH][*] (No classes)
+//		but we should return no matches due to non-conservation.
+		rsmiles="CNC(CC=OC)CCCCN(C)C>>CNC(CC=OC)CCCCN(C)C";
+		assertFalse(isDoubleMatch(rsmiles, 
+				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
 
-		// // This test has match in substrate and 2 matches in product, but
-		// only one is conserved.
-		// // Daylight depict returns true for
-		// [$([CH3][NH0;X3]([CH3])[*])]>>[CH3][NH][*] (No classes)
-		// // but we should return no matches due to non-conservation.
-		rsmiles = "CNCC(O)CCCN(C)C>>CNCC(O)CCCNC";
-		assertTrue(isDoubleMatch(rsmiles,
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS,
+////		This test has match in substrate and 2 matches in product, but only one is conserved.
+////		Daylight depict returns true for [$([CH3][NH0;X3]([CH3])[*])]>>[CH3][NH][*] (No classes)
+////		but we should return no matches due to non-conservation.
+		rsmiles="CNCC(O)CCCN(C)C>>CNCC(O)CCCNC";
+		assertTrue(isDoubleMatch(rsmiles, 
+				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
-
+		
+		
 	}
 
 	@Test 
@@ -143,7 +167,7 @@ public class ReacSmartsTest {
 
 //		//No dealkylation, daylight and we return false
 		rsmiles="CCCN(C)C>>CCNC";
-		assertFalse(isDoubleMatch(rsmiles, 
+		assertTrue(isDoubleMatch(rsmiles, 
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
 	}
@@ -173,65 +197,70 @@ public class ReacSmartsTest {
 		assertFalse(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
 		
 	}
+	
 
 	/**
-	 * Parse a reaction smiles and test a ReactionSmarts query for matches in
-	 * both substrate and product
-	 * 
+	 * Parse a reaction smiles and test a ReactionSmarts query for matches in both substrate and product
 	 * @param rsmiles
 	 * @param reactionQuery
 	 * @param productQuery
 	 * @return
-	 * @throws Exception
+	 * @throws Exception 
 	 */
 	private boolean isDoubleMatch(String rsmiles, String reactionQuery,
 			String productQuery) throws Exception {
 
 		System.out.println("**************");
 		System.out.println("* Testing smiles: " + rsmiles);
-		System.out.println("* Testing smarts: " + reactionQuery + ">>"
-				+ productQuery);
+		System.out.println("* Testing smarts: " + reactionQuery + ">>" + productQuery);
 		System.out.println("**************");
 
-		SmilesParser sp = new SmilesParser(NoNotificationChemObjectBuilder
-				.getInstance());
+		SmilesParser sp = new SmilesParser(NoNotificationChemObjectBuilder.getInstance());
 		IReaction reaction = sp.parseReactionSmiles(rsmiles);
-		ReactionSmartsQueryTool rq = new ReactionSmartsQueryTool(reactionQuery,
-				productQuery);
+		ReactionSmartsQueryTool rq= new ReactionSmartsQueryTool(reactionQuery, productQuery);
 
-		boolean ret = rq.matches(reaction);
+		boolean ret= rq.matches(reaction);
 		System.out.println("**************");
 		System.out.println("* Testing done. Match: " + ret);
 		System.out.println("**************");
-		return ret;
+		return ret; 
 	}
 
-	@Test
+	
+	
+	
+
+
+	@Test 
 	public void testReactSmartsMoleculeViewer() throws Exception {
-		String f = "data/mdl/First500DB2005AllFields.rdf"; // "data/mdl/73320thRiReg.rdf";
+		String f = "data/mdl/First500DB2005AllFields.rdf"; //"data/mdl/73320thRiReg.rdf";
 		ReaccsMDLRXNReader reader = getReaccsReader(f);
+		//		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
+		//		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
+		//		IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
+		//		List<IAtomContainer> mcsList = UniversalIsomorphismTester.getOverlaps(reactant, product);
 		URL url = this.getClass().getClassLoader().getResource(f);
 		File file = new File(url.toURI());
-		ReactSmartsMoleculeViewer gui = new ReactSmartsMoleculeViewer(reader,
-				file.getAbsolutePath());
+		ReactSmartsMoleculeViewer gui = new ReactSmartsMoleculeViewer(reader, file.getAbsolutePath());
 		showGUI(gui);
 	}
-
-	public void showGUI(final MoleculeViewer gui) {
+	
+	public void showGUI(final MoleculeViewer gui){
 		new Runnable() {
 			boolean shouldExit = false;
-
 			public void run() {
-
+				
 				try {
 
-					JFrame frame = new JFrame("ReacSMARTS  -  Reactant-Product-MCSS");
-					frame.addWindowListener(new WindowAdapter() {
-						public void windowClosing(WindowEvent paramWindowEvent) {
+					JFrame frame = new JFrame("Reactant - Product - ReacSMARTS");
+					frame.addWindowListener(new WindowAdapter()
+					{
+						public void windowClosing(WindowEvent paramWindowEvent)
+						{
 							shouldExit = true;
 						}
 					});
-
+					
 					frame.getContentPane().add(gui);
 					frame.pack();
 					frame.setVisible(true);
@@ -240,23 +269,21 @@ public class ReacSmartsTest {
 					e.printStackTrace();
 				}
 				int i = 0;
-				while (shouldExit == false) {
-					try {
+				while(shouldExit == false){
+					try{
 						Thread.sleep(1000);
-					} catch (Exception e) {
+					}catch(Exception e){
 						i++;
 					}
 				}
 			}
 		}.run();
-
+		
 	}
-
-	private ReaccsMDLRXNReader getReaccsReader(String filename)
-			throws URISyntaxException, IOException {
+	
+	private ReaccsMDLRXNReader getReaccsReader(String filename) throws URISyntaxException, IOException{
 		logger.info("Testing: " + filename);
-		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(
-				filename);
+		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
 		URL url = this.getClass().getClassLoader().getResource(filename);
 		File file = new File(url.toURI());
 		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);

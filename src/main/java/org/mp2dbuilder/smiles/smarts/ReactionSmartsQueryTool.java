@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,8 +19,14 @@ import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
+import org.openscience.cdk.isomorphism.matchers.IQueryAtom;
+import org.openscience.cdk.isomorphism.matchers.OrderQueryBond;
+import org.openscience.cdk.isomorphism.matchers.QueryAtomContainer;
+import org.openscience.cdk.isomorphism.matchers.SymbolQueryAtom;
+import org.openscience.cdk.isomorphism.matchers.smarts.AnyOrderQueryBond;
 import org.openscience.cdk.renderer.generators.AtomMassGenerator;
 import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
@@ -133,7 +140,8 @@ public class ReactionSmartsQueryTool {
 	public boolean matches(IReaction reaction) throws Exception {
 		//TODO: Change some of the List<List<Integer>> to List<Integer>, we only use them as lists and not lists of lists.
 		
-		System.out.println("Computing matches. ============================================");
+		
+
 		
 		//Assert only one reactant and one product, this is all we can handle for now
 		//TODO: Extend this to be more generic
@@ -145,6 +153,21 @@ public class ReactionSmartsQueryTool {
 		IAtomContainer product = (IAtomContainer) reaction.getProducts().getMolecule(0);
 		assert(reactant!=null);
 		assert(product!=null);
+		
+		System.out.println("Add explicit hydrogens, calculate atom type, and aromaticity. ============================================");
+        // Detect aromaticity
+        CDKHueckelAromaticityDetector.detectAromaticity(reactant);
+        AtomContainerManipulator.convertImplicitToExplicitHydrogens(reactant);
+        // Percieve atom types again to assign hydrogens atom types
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(reactant);
+
+        // Detect aromaticity
+        CDKHueckelAromaticityDetector.detectAromaticity(product);
+        AtomContainerManipulator.convertImplicitToExplicitHydrogens(product);
+        // Percieve atom types again to assign hydrogens atom types
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(product);
+
+		System.out.println("Computing matches. ============================================");
 
 		reactantAtomNumbers=new ArrayList<List<Integer>>();
 		productAtomNumbers=new ArrayList<List<Integer>>();
@@ -1152,6 +1175,45 @@ public class ReactionSmartsQueryTool {
 		return retmap;
 	}
 	 */
+
+
+		
+
+	public static QueryAtomContainer createSymbolAndAnyBondOrderQueryContainer(IAtomContainer container) {
+		QueryAtomContainer queryContainer = new QueryAtomContainer();
+		for (int i = 0; i < container.getAtomCount(); i++) {
+			queryContainer.addAtom(new SymbolQueryAtom(container.getAtom(i)));
+		}
+		Iterator<IBond> bonds = container.bonds().iterator();
+		while (bonds.hasNext()) {
+			IBond bond = (IBond)bonds.next();
+			int index1 = container.getAtomNumber(bond.getAtom(0));
+			int index2 = container.getAtomNumber(bond.getAtom(1));
+			queryContainer.addBond(new AnyOrderQueryBond((IQueryAtom) queryContainer.getAtom(index1),
+					(IQueryAtom) queryContainer.getAtom(index2),
+					bond.getOrder()));
+		}
+		
+		return queryContainer;
+	}
+	
+	public static QueryAtomContainer createSymbolAndBondOrderQueryContainer(IAtomContainer container) {
+		QueryAtomContainer queryContainer = new QueryAtomContainer();
+		for (int i = 0; i < container.getAtomCount(); i++) {
+			queryContainer.addAtom(new SymbolQueryAtom(container.getAtom(i)));
+		}
+		Iterator<IBond> bonds = container.bonds().iterator();
+		while (bonds.hasNext()) {
+			IBond bond = (IBond)bonds.next();
+			int index1 = container.getAtomNumber(bond.getAtom(0));
+			int index2 = container.getAtomNumber(bond.getAtom(1));
+			queryContainer.addBond(new OrderQueryBond((IQueryAtom) queryContainer.getAtom(index1),
+					(IQueryAtom) queryContainer.getAtom(index2),
+					bond.getOrder()));
+		}
+		
+		return queryContainer;
+	}
 
 
 }
