@@ -5,10 +5,13 @@ import static org.junit.Assert.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -19,18 +22,32 @@ import org.junit.Test;
 import org.mp2dbuilder.smiles.smarts.ReactionSmartsQueryTool;
 import org.mp2dbuilder.viewer.MoleculeViewer;
 import org.mp2dbuilder.viewer.ReactSmartsMoleculeViewer;
+import org.openscience.cdk.Molecule;
+import org.openscience.cdk.Reaction;
+import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
+import org.openscience.cdk.atomtype.CDKAtomTypeMatcher;
+import org.openscience.cdk.graph.ConnectivityChecker;
+import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IAtomType;
+import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IMolecule;
+import org.openscience.cdk.interfaces.IMoleculeSet;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.interfaces.IReactionSet;
+import org.openscience.cdk.io.MDLV2000Reader;
+import org.openscience.cdk.io.MDLWriter;
 import org.openscience.cdk.io.ReaccsMDLRXNReader;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.isomorphism.matchers.QueryAtomContainer;
+import org.openscience.cdk.nonotify.NNChemObject;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
+import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
+import org.openscience.cdk.tools.manipulator.AtomTypeManipulator;
 
 public class ReacSmartsTest {
 
@@ -62,6 +79,72 @@ public class ReacSmartsTest {
 		assertEquals(2, rmaps.get(0).getAtomCount());
 
 	}	
+
+	@Test 
+	public void testCompareSMILESandFILESmatching() throws Exception {
+		
+		//The simplest form of hydroxylation.
+		//Daylight depict and we return true
+		String rsmiles="CCCCC>>CCCCCO";
+		assertTrue(isDoubleMatch(rsmiles, ReactionSmartsDefinitions.HYDROXYLATION_REACTANT_SMARTS, ReactionSmartsDefinitions.HYDROXYLATION_PRODUCT_SMARTS));
+
+		//Write in to file
+		SmilesParser sp = new SmilesParser(NoNotificationChemObjectBuilder.getInstance());
+		IMolecule mol1 = sp.parseSmiles("CCCCC");
+//		System.out.println("MOL1-smi: " + mol1);
+		debugMol(mol1);
+		File file=new File("/tmp/sm_in.mdl");
+		FileOutputStream fo=new FileOutputStream(file);
+		MDLWriter writer=new MDLWriter(fo);
+		writer.write(mol1);
+		writer.close();
+
+		//Write out to file
+		IMolecule mol2 = sp.parseSmiles("CCCCCO");
+//		System.out.println("MOL2-smi: " + mol2);
+		file=new File("/tmp/sm_out.mdl");
+		fo=new FileOutputStream(file);
+		writer=new MDLWriter(fo);
+		writer.write(mol2);
+		writer.close();
+
+		//Read back in from file
+		file=new File("/tmp/sm_in.mdl");
+		FileInputStream fi=new FileInputStream(file);
+		MDLV2000Reader r=new MDLV2000Reader(fi);
+		IMolecule mol_in=(IMolecule) r.read(new Molecule());
+//		System.out.println("MOL1-mdl: " + mol_in);
+//		doAT(mol_in);
+//		debugMol(mol_in);
+
+		file=new File("/tmp/sm_out.mdl");
+		fi=new FileInputStream(file);
+		r=new MDLV2000Reader(fi);
+		IMolecule mol_out=(IMolecule) r.read(new Molecule());
+//		System.out.println("MOL2-mdl: " + mol_out);
+//		doAT(mol_out);
+		
+		IReaction rr=new Reaction();
+		rr.addReactant(mol_in);
+		rr.addProduct(mol_out);
+
+		ReactionSmartsQueryTool rq= new ReactionSmartsQueryTool(ReactionSmartsDefinitions.HYDROXYLATION_REACTANT_SMARTS, ReactionSmartsDefinitions.HYDROXYLATION_PRODUCT_SMARTS);
+		boolean ret= rq.matches(rr);
+		assertTrue(ret);
+
+	}
+	
+
+
+
+	private void debugMol(IMolecule mol){
+		System.out.println("Mol.");
+		for (IAtom atom : mol.atoms()){
+			System.out.println("   Atom: " + atom.getSymbol() + mol.getAtomNumber(atom) + "-" + atom.getAtomTypeName());
+		}
+	}
+		
+
 
 	
 //	@Test 
