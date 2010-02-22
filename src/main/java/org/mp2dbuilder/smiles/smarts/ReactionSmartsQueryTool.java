@@ -249,67 +249,73 @@ public class ReactionSmartsQueryTool {
 			for (List<Integer> currentProductHits : fullProductHit_AtomList){
 				currentProductHit_AtomList.clear();
 				currentProductHit_AtomList.add(currentProductHits);
-				
+
 				// Check that all non-class atomic expressions have matches outside the MCS.
+				List<List<Integer>> complementToMCS = removeIndicesWithCommonId(currentProductHit_AtomList,product);
 
-				// Setup the structure that holds the overlapping class labels. Do this here so that it is cleared for each new product SMARTS hits.
-				List<List<Integer>> mcsClasses = new ArrayList<List<Integer>>();
-				for (IAtom atom : reactant.atoms()){
-					if (atom.getProperty(COMMON_ID_FIELD_NAME)!=null){
-						mcsClasses.add(new ArrayList<Integer>());
-					}
-				}
+				//Loop over all non-class atom expressions
+				if (assertNoClassesHits(complementToMCS, product, productQueryTool)){
+					System.out.println(" The product hit did not fulfill constraint that non-classes should match in complement to MCS.");
 
-				int[] mcsSize = new int[mcsClasses.size()];
-				// Loop through the different classes. And check if they can be assigned to any MCS atoms.
-				for (int i : reactClasses.keySet()){
-					//REACTANT PART - We are looking at the hits of the SMARTS which overlap the current reaction center. If any of these belong to the mcs we store that info in reactantClasses.
-					String reactantClassSMARTS = reactClasses.get(i);
-					String reactantRemovedClassSMARTS=removeAllClasses(reactantClassSMARTS);
-					System.out.println("\n## Reaction class: " + i + "=" + reactantClassSMARTS + "=" + reactantRemovedClassSMARTS);
-					reactantQueryTool.setSmarts(reactantRemovedClassSMARTS);
-					if (!reactantQueryTool.matches(reactant)){
-						System.out.println("   Produced no hits.");
-					}else{
-						Set<Integer> reactHitsconcat=null;
-						Set<Integer> reactHitsconcat_pruned=null;
-						List<List<Integer>> reactHits = reactantQueryTool.getUniqueMatchingAtoms();
-						reactHitsconcat=concatIndices(reactHits);
-						// Remove the ones not belonging to the MCS.
-						List<List<Integer>> reactHits_pruned = removeIndicesWithoutCommonId(reactHits, reactant);
-						reactHitsconcat_pruned = concatIndices(reactHits_pruned);
-						// Add reactant classes to the atoms that were originally hit by the smarts and part of the MCS. 
-						for (int j : reactHitsconcat_pruned){
-							if (curReactantSet.contains(j)){
-								System.out.println("Adding class: "+ i + ", to reactant atom: " + j);
-								reactantClasses.get(j).add(i);
-							}
+					// Setup the structure that holds the overlapping class labels. Do this here so that it is cleared for each new product SMARTS hits.
+					List<List<Integer>> mcsClasses = new ArrayList<List<Integer>>();
+					for (IAtom atom : reactant.atoms()){
+						if (atom.getProperty(COMMON_ID_FIELD_NAME)!=null){
+							mcsClasses.add(new ArrayList<Integer>());
 						}
 					}
 
-					//PRODUCT PART - This is different compared to the reactant.
-					String productClassSMARTS = prodClasses.get(i);
-					String productNoClassSMARTS=removeAllClasses(productClassSMARTS);
-					System.out.println("## Product class: " + i + "=" + productClassSMARTS + "=" + productNoClassSMARTS);
-					productQueryTool.setSmarts(productNoClassSMARTS);
-					if (!productQueryTool.matches(product)){
-						System.out.println("   Produced no hits.");
-					}else{
-						List<List<Integer>> prodHits = productQueryTool.getUniqueMatchingAtoms();
-						addedToMCSClasses = checkProductSMARTSHit(reactant,
-								product, productQueryTool, currentProductHit_AtomList,
-								addedToMCSClasses, mcsClasses, reactantClasses,
-								mcsSize, i, prodHits);
+					int[] mcsSize = new int[mcsClasses.size()];
+					// Loop through the different classes. And check if they can be assigned to any MCS atoms.
+					for (int i : reactClasses.keySet()){
+						//REACTANT PART - We are looking at the hits of the SMARTS which overlap the current reaction center. If any of these belong to the mcs we store that info in reactantClasses.
+						String reactantClassSMARTS = reactClasses.get(i);
+						String reactantRemovedClassSMARTS=removeAllClasses(reactantClassSMARTS);
+						System.out.println("\n## Reaction class: " + i + "=" + reactantClassSMARTS + "=" + reactantRemovedClassSMARTS);
+						reactantQueryTool.setSmarts(reactantRemovedClassSMARTS);
+						if (!reactantQueryTool.matches(reactant)){
+							System.out.println("   Produced no hits.");
+						}else{
+							Set<Integer> reactHitsconcat=null;
+							Set<Integer> reactHitsconcat_pruned=null;
+							List<List<Integer>> reactHits = reactantQueryTool.getUniqueMatchingAtoms();
+							reactHitsconcat=concatIndices(reactHits);
+							// Remove the ones not belonging to the MCS.
+							List<List<Integer>> reactHits_pruned = removeIndicesWithoutCommonId(reactHits, reactant);
+							reactHitsconcat_pruned = concatIndices(reactHits_pruned);
+							// Add reactant classes to the atoms that were originally hit by the smarts and part of the MCS. 
+							for (int j : reactHitsconcat_pruned){
+								if (curReactantSet.contains(j)){
+									System.out.println("Adding class: "+ i + ", to reactant atom: " + j);
+									reactantClasses.get(j).add(i);
+								}
+							}
+						}
 
+						//PRODUCT PART - This is different compared to the reactant.
+						String productClassSMARTS = prodClasses.get(i);
+						String productNoClassSMARTS=removeAllClasses(productClassSMARTS);
+						System.out.println("## Product class: " + i + "=" + productClassSMARTS + "=" + productNoClassSMARTS);
+						productQueryTool.setSmarts(productNoClassSMARTS);
+						if (!productQueryTool.matches(product)){
+							System.out.println("   Produced no hits.");
+						}else{
+							List<List<Integer>> prodHits = productQueryTool.getUniqueMatchingAtoms();
+							addedToMCSClasses = checkProductSMARTSHit(reactant,
+									product, productQueryTool, currentProductHit_AtomList,
+									addedToMCSClasses, mcsClasses, reactantClasses,
+									mcsSize, i, prodHits);
+
+						}
 					}
-				}
-				if (addedToMCSClasses){
-					addedToMCSClasses = false;
-					if (checkClassCoverage(mcsClasses, mcsSize)){
-						// Add the putative reaction center as a reaction center.
-						reactantAtomNumbers.add(new ArrayList<Integer>());
-						reactantAtomNumbers.get(reactantAtomNumbers.size()-1).add(putativeRC.get(0));
+					if (addedToMCSClasses){
+						addedToMCSClasses = false;
+						if (checkClassCoverage(mcsClasses, mcsSize)){
+							// Add the putative reaction center as a reaction center.
+							reactantAtomNumbers.add(new ArrayList<Integer>());
+							reactantAtomNumbers.get(reactantAtomNumbers.size()-1).add(putativeRC.get(0));
 
+						}
 					}
 				}
 			}
@@ -323,6 +329,36 @@ public class ReactionSmartsQueryTool {
 		else{
 			return false;
 		}
+	}
+
+	private boolean assertNoClassesHits(List<List<Integer>> complementToMCS, IAtomContainer product,
+			SMARTSQueryTool prodQueryTool) throws CDKException{
+
+		List<String>  prodNonClasses = getNonClasses(productQueryNoDollar);
+		for (String pclass : prodNonClasses){
+			String pclass_noclass=removeAllClasses(pclass);
+			System.out.println("\n## Product non-class: " + pclass + "=" + pclass_noclass);
+			Set<Integer> prodHitsconcat=null;
+				prodQueryTool.setSmarts(pclass_noclass);
+				if (!prodQueryTool.matches(product)){
+					System.out.println("   Produced no hits.");
+				}else{
+					List<List<Integer>> hits = prodQueryTool.getUniqueMatchingAtoms();
+					prodHitsconcat=concatIndices(hits);
+					System.out.println("   Product hits: " + debugHits(prodHitsconcat));
+					boolean haveHit=false;
+					for (Integer h : prodHitsconcat){
+						if (complementToMCS.contains(h)){
+							haveHit=true;
+						}
+					}
+
+					if (!haveHit)
+						return false;
+				}
+		}
+
+		return true;
 	}
 
 	private List<Integer> extractCurrentReactantSet(IAtomContainer reactant,
@@ -405,37 +441,6 @@ public class ReactionSmartsQueryTool {
 			}
 		}
 		return addedToMCSClasses;
-	}
-
-	private void identifyNonClassAtoms(Set<Integer> prodHits, IAtomContainer product,
-			SMARTSQueryTool prodQueryTool) throws CDKException {
-		List<String>  prodNonClasses = getNonClasses(productQueryNoDollar);
-		boolean removeAllProductHits = false;
-		for (String pclass : prodNonClasses){
-			String pclass_noclass=removeAllClasses(pclass);
-			System.out.println("\n## Product non-class: " + pclass + "=" + pclass_noclass);
-			Set<Integer> prodHitsconcat=null;
-			prodQueryTool.setSmarts(pclass_noclass);
-			if (!prodQueryTool.matches(product)){
-				System.out.println("   Produced no hits.");
-			}else{
-				List<List<Integer>> hits = prodQueryTool.getUniqueMatchingAtoms();
-				prodHitsconcat=concatIndices(hits);
-				System.out.println("   Product hits: " + debugHits(prodHitsconcat));
-				int lenProdHitsBefore = prodHits.size();
-				prodHits.removeAll(prodHitsconcat);
-				int lenProdHitsAfter = prodHits.size();
-				System.out.println("   identifyNonClassAtoms::Produced hits pruned by non-class SMARTS: " + debugHits(prodHits));
-				if (lenProdHitsBefore > lenProdHitsAfter){
-					removeAllProductHits = true;
-				}
-				
-			}
-		}
-		if (removeAllProductHits) {
-			System.out.println("Non-class MCS atoms. This SMARTS can't be used.");
-			prodHits.clear();
-		}
 	}
 
 	private boolean checkClassCoverage(List<List<Integer>> mcsClasses, int[] mcsSize) {
@@ -540,6 +545,32 @@ public class ReactionSmartsQueryTool {
 
 		return rclist;
 	}
+	
+	private List<List<Integer>> removeIndicesWithCommonId(
+			List<List<Integer>> rclist,
+			IAtomContainer mol) {
+
+		for (IAtom atom : mol.atoms()){
+			for (List<Integer> rc : rclist){
+				if (atom.getProperty(COMMON_ID_FIELD_NAME)!=null){
+					//REMOVE
+					Integer i = mol.getAtomNumber(atom);
+					rc.remove(i);
+				}
+			}
+		}
+
+		//remove empty lists
+		Set<List<Integer>> toRemove=new HashSet<List<Integer>>();
+		for (List<Integer> rc : rclist){
+			if (rc.size()==0)
+				toRemove.add(rc);
+		}
+		rclist.removeAll(toRemove);
+
+		return rclist;
+	}
+
 
 	private List<Integer> removeIndicesSimpleListWithoutCommonId(
 			List<Integer> rclist,
