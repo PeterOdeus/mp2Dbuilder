@@ -1,6 +1,7 @@
 package org.mp2dbuilder.smiles.smarts;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -265,7 +266,7 @@ public class ReactionSmartsQueryTool {
 
 				// Check that all non-class atomic expressions have matches outside the MCS.
 				List<List<Integer>> complementToMCS = removeIndicesWithCommonId(currentProductHit_AtomList,product);
-
+				
 				//Loop over all non-class atom expressions
 				if (assertNoClassesHits(complementToMCS, product, productQueryTool)){
 
@@ -349,6 +350,10 @@ public class ReactionSmartsQueryTool {
 			SMARTSQueryTool prodQueryTool) throws CDKException{
 
 		List<String>  prodNonClasses = getNonClasses(productQueryNoDollar);
+		if (complementToMCS.size()==0 && prodNonClasses.size()>0){
+			System.out.println("   We have product with non-classes but complementToMCS is empty.");
+			return false;
+		}
 		for (String pclass : prodNonClasses){
 			String pclass_noclass=removeAllClasses(pclass);
 			System.out.println("\n## Product non-class: " + pclass + "=" + pclass_noclass);
@@ -539,8 +544,17 @@ public class ReactionSmartsQueryTool {
 			List<List<Integer>> rclist,
 			IAtomContainer mol) {
 
+		List<List<Integer>> copyList=new ArrayList<List<Integer>>();
+		for (List<Integer> r : rclist){
+			List<Integer> rcopy=new ArrayList<Integer>();
+			for (Integer i : r){
+				rcopy.add(i);
+			}
+			copyList.add(rcopy);
+		}
+
 		for (IAtom atom : mol.atoms()){
-			for (List<Integer> rc : rclist){
+			for (List<Integer> rc : copyList){
 				if (atom.getProperty(COMMON_ID_FIELD_NAME)==null){
 					//REMOVE
 					Integer i = mol.getAtomNumber(atom);
@@ -551,21 +565,30 @@ public class ReactionSmartsQueryTool {
 
 		//remove empty lists
 		Set<List<Integer>> toRemove=new HashSet<List<Integer>>();
-		for (List<Integer> rc : rclist){
+		for (List<Integer> rc : copyList){
 			if (rc.size()==0)
 				toRemove.add(rc);
 		}
-		rclist.removeAll(toRemove);
+		copyList.removeAll(toRemove);
 
-		return rclist;
+		return copyList;
 	}
 	
 	private List<List<Integer>> removeIndicesWithCommonId(
 			List<List<Integer>> rclist,
 			IAtomContainer mol) {
+		
+		List<List<Integer>> copyList=new ArrayList<List<Integer>>();
+		for (List<Integer> r : rclist){
+			List<Integer> rcopy=new ArrayList<Integer>();
+			for (Integer i : r){
+				rcopy.add(i);
+			}
+			copyList.add(rcopy);
+		}
 
 		for (IAtom atom : mol.atoms()){
-			for (List<Integer> rc : rclist){
+			for (List<Integer> rc : copyList){
 				if (atom.getProperty(COMMON_ID_FIELD_NAME)!=null){
 					//REMOVE
 					Integer i = mol.getAtomNumber(atom);
@@ -576,13 +599,13 @@ public class ReactionSmartsQueryTool {
 
 		//remove empty lists
 		Set<List<Integer>> toRemove=new HashSet<List<Integer>>();
-		for (List<Integer> rc : rclist){
+		for (List<Integer> rc : copyList){
 			if (rc.size()==0)
 				toRemove.add(rc);
 		}
-		rclist.removeAll(toRemove);
+		copyList.removeAll(toRemove);
 
-		return rclist;
+		return copyList;
 	}
 
 
