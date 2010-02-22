@@ -16,10 +16,15 @@ import java.util.regex.Pattern;
 
 import org.mp2dbuilder.mcss.AtomMapperUtil;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
+import org.openscience.cdk.atomtype.CDKAtomTypeMatcher;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IAtomType;
 import org.openscience.cdk.interfaces.IBond;
+import org.openscience.cdk.interfaces.IMolecule;
+import org.openscience.cdk.interfaces.IMoleculeSet;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.isomorphism.matchers.IQueryAtom;
@@ -29,7 +34,9 @@ import org.openscience.cdk.isomorphism.matchers.SymbolQueryAtom;
 import org.openscience.cdk.isomorphism.matchers.smarts.AnyOrderQueryBond;
 import org.openscience.cdk.renderer.generators.AtomMassGenerator;
 import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
+import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
+import org.openscience.cdk.tools.manipulator.AtomTypeManipulator;
 
 /**
  * ReactionSmartsQueryTool can be used to query a reaction for conserved matches in reactant and product.
@@ -127,6 +134,73 @@ public class ReactionSmartsQueryTool {
 		return this.mcss;
 	}
 
+	
+	private void doAT(IAtomContainer molecule) {
+		
+		// perceive atom types
+		CDKAtomTypeMatcher matcher = CDKAtomTypeMatcher.getInstance(molecule.getBuilder());
+		int i = 0;
+        for (IAtom atom : molecule.atoms()) {
+            i++;
+            try {
+                IAtomType type = matcher.findMatchingAtomType(molecule, atom);
+                AtomTypeManipulator.configure(atom, type);
+            } catch (Exception e) {
+                System.out.println("Cannot percieve atom type for the " + i + "th atom: " + atom.getSymbol());
+                atom.setAtomTypeName("X");
+            }
+        }
+		this.addImplicitHydrogens(molecule);
+		this.perceiveAromaticity(molecule);
+
+		
+	}
+	
+	private void addImplicitHydrogens(IAtomContainer container) {
+
+		CDKHydrogenAdder hAdder=CDKHydrogenAdder.getInstance(container.getBuilder());
+
+		try {
+//			logger.debug("before H-adding: ", container);
+			Iterator<IAtom> atoms = container.atoms().iterator();
+			while (atoms.hasNext()) {
+				IAtom nextAtom = atoms.next();
+					hAdder.addImplicitHydrogens(container, nextAtom);
+			}
+//			logger.debug("after H-adding: ", container);
+		} catch (Exception exception) {
+//			logger.error("Error while calculation Hcount for SMILES atom: ", exception.getMessage());
+		}
+	}
+
+	private void perceiveAromaticity(IAtomContainer m) {
+		IMoleculeSet moleculeSet = ConnectivityChecker.partitionIntoMolecules(m);
+//		logger.debug("#mols ", moleculeSet.getAtomContainerCount());
+		for (int i = 0; i < moleculeSet.getAtomContainerCount(); i++) {
+			IAtomContainer molecule = moleculeSet.getAtomContainer(i);
+//			logger.debug("mol: ", molecule);
+			try {
+//				logger.debug(" after saturation: ", molecule);
+				if (CDKHueckelAromaticityDetector
+						.detectAromaticity(molecule)) {
+//					logger.debug("Structure is aromatic...");
+				}
+			} catch (Exception exception) {
+//				logger.error("Could not perceive aromaticity: ", exception
+//						.getMessage());
+//				logger.debug(exception);
+			}
+		}
+	}
+	
+	private void debugMol(IAtomContainer ac){
+		System.out.println("Mol.");
+		for (IAtom atom : ac.atoms()){
+			System.out.println("   Atom: " + atom.getSymbol() + ac.getAtomNumber(atom) + "-" + atom.getAtomTypeName());
+		}
+	}
+
+	
 	/**
 	 * Do matching in reaction and product.
 	 * 
@@ -166,6 +240,19 @@ public class ReactionSmartsQueryTool {
         AtomContainerManipulator.convertImplicitToExplicitHydrogens(product);
         // Percieve atom types again to assign hydrogens atom types
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(product);
+        
+		System.out.println("-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:");
+        debugMol(reactant);
+        debugMol(product);
+		System.out.println("-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:");
+		doAT(reactant);
+		doAT(product);
+        AtomContainerManipulator.convertImplicitToExplicitHydrogens(reactant);
+        AtomContainerManipulator.convertImplicitToExplicitHydrogens(product);
+        debugMol(reactant);
+        debugMol(product);
+		System.out.println("-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:");
+        
 
 		System.out.println("Computing matches. ============================================");
 
