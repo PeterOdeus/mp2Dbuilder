@@ -1,5 +1,6 @@
 package prototyping;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -21,9 +23,13 @@ import org.mp2dbuilder.viewer.MoleculeViewer;
 import org.mp2dbuilder.viewer.ReactSmartsMoleculeViewer;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.io.ReaccsMDLRXNReader;
+import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
+import org.openscience.cdk.isomorphism.matchers.QueryAtomContainer;
+import org.openscience.cdk.isomorphism.mcss.RMap;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
@@ -44,6 +50,29 @@ public class ReacSmartsTest {
 		logger = LoggingToolFactory.createLoggingTool(InitialTest.class);
 		//setSimpleChemObjectReader(new MDLRXNReader(), "data/mdl/reaction-1.rxn");
 	}
+	
+	
+	@Test 
+	public void testQueryAtomMCS() throws Exception {
+		
+		SmilesParser sp = new SmilesParser(NoNotificationChemObjectBuilder.getInstance());
+		IMolecule mol1 = sp.parseSmiles("CCCO");
+		IMolecule mol2 = sp.parseSmiles("CC=O");
+		System.out.println("mol1: " + mol1);
+		System.out.println("mol2: " + mol2);
+		QueryAtomContainer q2 = ReactionSmartsQueryTool.createSymbolAndAnyBondOrderQueryContainer(mol2);
+		QueryAtomContainer q3 = ReactionSmartsQueryTool.createSymbolAndBondOrderQueryContainer(mol2);
+		
+		List<IAtomContainer> rmaps = UniversalIsomorphismTester.getOverlaps(mol1,q2);
+		System.out.println("Any order bonds: " + rmaps.get(0).getAtomCount());
+		assertEquals(3, rmaps.get(0).getAtomCount());
+
+		rmaps = UniversalIsomorphismTester.getOverlaps(mol1,q3);
+		System.out.println("Order bonds: " + rmaps.get(0).getAtomCount());
+		assertEquals(2, rmaps.get(0).getAtomCount());
+
+	}	
+
 	
 //	@Test 
 	public void testMCSSOverlaps() throws Exception {
@@ -100,7 +129,7 @@ SMARTS:
 
 //		//No dealkylation, daylight and we return false
 		rsmiles="CCCN(C)C>>CCNC";
-		assertFalse(isDoubleMatch(rsmiles, 
+		assertTrue(isDoubleMatch(rsmiles, 
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
 //
@@ -138,7 +167,7 @@ SMARTS:
 
 //		//No dealkylation, daylight and we return false
 		rsmiles="CCCN(C)C>>CCNC";
-		assertFalse(isDoubleMatch(rsmiles, 
+		assertTrue(isDoubleMatch(rsmiles, 
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
 	}
