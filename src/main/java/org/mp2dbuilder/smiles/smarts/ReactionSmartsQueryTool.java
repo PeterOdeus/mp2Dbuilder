@@ -231,7 +231,7 @@ public class ReactionSmartsQueryTool {
 		//fullReactantHit_AtomList=removeIndicesWithoutCommonId(fullReactantHit_AtomList, reactant);//Don't do it for reactant atoms it might remove the rc.
 		List<List<Integer>> mcsPrunedFullProductHit_AtomList = removeIndicesWithoutCommonId(fullProductHit_AtomList, product);
 		//System.out.println("Reactant hits pruned by MCS:\n" + debugHits(fullReactantHit_AtomList));
-		System.out.println("Product SMARTS hits pruned by MCS:\n" + debugHits(fullProductHit_AtomList));		
+		System.out.println("Product SMARTS hits pruned by MCS:\n" + debugHits(mcsPrunedFullProductHit_AtomList));		
 		if (mcsPrunedFullProductHit_AtomList.size() == 0){
 			System.out.println("No SMARTS hits in product. Exiting.");
 			return false;
@@ -354,6 +354,7 @@ public class ReactionSmartsQueryTool {
 			System.out.println("   We have product with non-classes but complementToMCS is empty.");
 			return false;
 		}
+		System.out.println("  We are comparing to list: " + complementToMCS);
 		for (String pclass : prodNonClasses){
 			String pclass_noclass=removeAllClasses(pclass);
 			System.out.println("\n## Product non-class: " + pclass + "=" + pclass_noclass);
@@ -367,8 +368,10 @@ public class ReactionSmartsQueryTool {
 					System.out.println("   Product hits: " + debugHits(prodHitsconcat));
 					boolean haveHit=false;
 					for (Integer h : prodHitsconcat){
-						if (complementToMCS.contains(h)){
-							haveHit=true;
+						for (List<Integer> plist : complementToMCS){
+							if (plist.contains(h)){
+								haveHit=true;
+							}
 						}
 					}
 
