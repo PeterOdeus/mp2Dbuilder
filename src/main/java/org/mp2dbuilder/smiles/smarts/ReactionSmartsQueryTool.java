@@ -253,9 +253,7 @@ public class ReactionSmartsQueryTool {
 			// Setup the structure that holds the reactant class labels. Do this here so that it is cleared for each new putative RC.
 			List<List<Integer>> reactantClasses = new ArrayList<List<Integer>>();
 			for (IAtom atom : reactant.atoms()){
-				if (atom.getProperty(COMMON_ID_FIELD_NAME)!=null){
-					reactantClasses.add(new ArrayList<Integer>());
-				}
+				reactantClasses.add(new ArrayList<Integer>());
 			}
 
 			// Pull out each list of the product hits and submit that as a list of list below. This is a bad solution but the code below was set up to deal with List<List<Integer>>.
@@ -273,9 +271,7 @@ public class ReactionSmartsQueryTool {
 					// Setup the structure that holds the overlapping class labels. Do this here so that it is cleared for each new product SMARTS hits.
 					List<List<Integer>> mcsClasses = new ArrayList<List<Integer>>();
 					for (IAtom atom : reactant.atoms()){
-						if (atom.getProperty(COMMON_ID_FIELD_NAME)!=null){
-							mcsClasses.add(new ArrayList<Integer>());
-						}
+						mcsClasses.add(new ArrayList<Integer>());
 					}
 
 					int[] mcsSize = new int[mcsClasses.size()];
