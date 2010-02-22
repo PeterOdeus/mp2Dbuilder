@@ -199,7 +199,8 @@ public class ReactionSmartsQueryTool {
 
 		// Generate and pick largest MCS. Since there are only one structure as a reactant and one structure as a product the largest MCS should be ok.
 		// Any mapping between reactant and the product should be ok as well.
-		IAtomContainer mcs = getMCS(reactant, product);
+		QueryAtomContainer productAnyBondOrderQuery = ReactionSmartsQueryTool.createSymbolAndAnyBondOrderQueryContainer(product);
+		IAtomContainer mcs = getMCS(reactant, productAnyBondOrderQuery);
 		if (mcs==null || mcs != null && mcs.getAtomCount()<=0){
 			System.out.println("No overlaps in MCSS. Exiting.");
 			return false;
