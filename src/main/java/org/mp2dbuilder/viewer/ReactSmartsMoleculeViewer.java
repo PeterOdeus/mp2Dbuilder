@@ -11,6 +11,7 @@ import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
 import org.mp2dbuilder.builder.MetaboliteHandler;
+import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.interfaces.IAtom;
@@ -26,14 +27,11 @@ import org.openscience.cdk.isomorphism.mcss.RMap;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 //import prototyping.ReacSmartsTest;
 
 public class ReactSmartsMoleculeViewer extends MoleculeViewer {
-
-	//Our dealkylation smarts definition
-	public static String N_DEALKYLATION_REACTANT_SMARTS="[$([CH3][NH0;X3:1]([CH3:3])[*:2])]";
-	public static String N_DEALKYLATION_PRODUCT_SMARTS="[CH3:3][NH:1][*:2]";
 
 //	public static String N_DEALKYLATION_REACTANT_SMARTS="[$([C][N:1]([C:3])[*:2])]";
 //	public static String N_DEALKYLATION_PRODUCT_SMARTS="[C:3][N:1][*:2]";
@@ -53,7 +51,7 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 
 	public ReactSmartsMoleculeViewer(ReaccsMDLRXNReader reader, String filename) throws Exception {
 		super(reader,filename);
-		//initializeReactionList();
+//		initializeReactionList();
 	}
 
 	private void initializeReactionList() throws InvalidSmilesException {
@@ -105,7 +103,20 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 			
 			IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
 			IAtomContainer product = (IAtomContainer) reactionSet.getReaction(0).getProducts().getMolecule(0);
-			
+/*
+	         // Detect aromaticity and add explicit hydrogens
+	         CDKHueckelAromaticityDetector.detectAromaticity(reactant);
+	         AtomContainerManipulator.convertImplicitToExplicitHydrogens(reactant);
+	         // Percieve atom types again to assign hydrogens atom types
+	         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(reactant);
+
+	         // Detect aromaticity
+	         CDKHueckelAromaticityDetector.detectAromaticity(product);
+	         AtomContainerManipulator.convertImplicitToExplicitHydrogens(product);
+	         // Percieve atom types again to assign hydrogens atom types
+	         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(product);
+*/
+	         
 			i1 = getImage(reactant, null, true, product, 2);
 			i2 = getImage(product, null, true, null, 2);
 		} catch(ReaccsFileEndedException e){
