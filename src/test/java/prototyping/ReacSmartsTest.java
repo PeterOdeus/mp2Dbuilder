@@ -136,23 +136,23 @@ SMARTS:
 	public void testERROR() throws Exception {
 		String rsmiles;
 		
-		rsmiles="CCCN(C)C>>CCNC";
-		assertFalse(isDoubleMatch(rsmiles, 
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
-
-		rsmiles="CCN(C)C>>CCNC";
-		assertTrue(isDoubleMatch(rsmiles, 
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
+//		rsmiles="CCCN(C)C>>CCNC";
+//		assertFalse(isDoubleMatch(rsmiles, 
+//				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
+//				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
+//
+//		rsmiles="CCN(C)C>>CCNC";
+//		assertTrue(isDoubleMatch(rsmiles, 
+//				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
+//				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
 //		//This is not a hydroxylation without any difficulties.
 //		//This should return false. Instead it crashes.
 //		String 		rsmiles="OCOC1CCCC(NC)C1>>CN(C1CCCC(O)C1)C";
 //		assertFalse(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
-//		//This is not a hydroxylation without any difficulties.
-//		//This should return false. The [O] in the smarts does not belong to a class and it should be handled.
-//		rsmiles= "OCN>>OCNC";//"OC1CCCC(NC)C1>>CN(C1CCCC(O)C1)C";
-//		assertFalse(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
+		//This is not a hydroxylation without any difficulties.
+		//This should return false. The [O] in the smarts does not belong to a class and it should be handled.
+		rsmiles= "CNC>>OCNCO";//"OC1CCCC(NC)C1>>CN(C1CCCC(O)C1)C";
+		assertTrue(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
 	}
 	
 	@Test 
