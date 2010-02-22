@@ -136,6 +136,11 @@ SMARTS:
 	public void testERROR() throws Exception {
 		String rsmiles;
 		
+		rsmiles="CCCN(C)C>>CCNC";
+		assertFalse(isDoubleMatch(rsmiles, 
+				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
+				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
+
 		rsmiles="CCN(C)C>>CCNC";
 		assertTrue(isDoubleMatch(rsmiles, 
 				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
