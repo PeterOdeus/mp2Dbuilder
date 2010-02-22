@@ -1,8 +1,6 @@
 package prototyping;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -21,7 +19,6 @@ import org.junit.Test;
 import org.mp2dbuilder.smiles.smarts.ReactionSmartsQueryTool;
 import org.mp2dbuilder.viewer.MoleculeViewer;
 import org.mp2dbuilder.viewer.ReactSmartsMoleculeViewer;
-import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IReaction;
@@ -29,7 +26,6 @@ import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.io.ReaccsMDLRXNReader;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.isomorphism.matchers.QueryAtomContainer;
-import org.openscience.cdk.isomorphism.mcss.RMap;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
@@ -40,12 +36,6 @@ public class ReacSmartsTest {
 
 	private static ILoggingTool logger =  null;//LoggingToolFactory.createLoggingTool(InitialTest.class); // new LoggingTool();
 
-	
-
-	//Our hydroxylation smarts definition
-	public static String HYDROXYLATION_REACTANT_SMARTS="[$([*:1])]";
-	private static String HYDROXYLATION_PRODUCT_SMARTS="[*:1][OH]";
-	
 	@BeforeClass public static void setup() {
 		logger = LoggingToolFactory.createLoggingTool(InitialTest.class);
 		//setSimpleChemObjectReader(new MDLRXNReader(), "data/mdl/reaction-1.rxn");
@@ -80,7 +70,7 @@ public class ReacSmartsTest {
 		ReaccsMDLRXNReader reader = getReaccsReader(f);
 		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 		IReaction reaction = reactionSet.getReaction(0);
-		String reactantQuery = HYDROXYLATION_REACTANT_SMARTS;
+		String reactantQuery = ReactionSmartsDefinitions.HYDROXYLATION_REACTANT_SMARTS;
 		String productQuery = "[*:1]";
 		ReactionSmartsQueryTool sqt = new ReactionSmartsQueryTool(reactantQuery,productQuery);
 		
@@ -98,7 +88,7 @@ public class ReacSmartsTest {
 		ReaccsMDLRXNReader reader = getReaccsReader(f);
 		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 		IReaction reaction = reactionSet.getReaction(0);
-		String reactantQuery = HYDROXYLATION_REACTANT_SMARTS;
+		String reactantQuery = ReactionSmartsDefinitions.HYDROXYLATION_REACTANT_SMARTS;
 		String productQuery = "[*:1]";
 		ReactionSmartsQueryTool sqt = new ReactionSmartsQueryTool(reactantQuery,productQuery);
 		
@@ -130,16 +120,16 @@ SMARTS:
 //		//No dealkylation, daylight and we return false
 		rsmiles="CCCN(C)C>>CCNC";
 		assertTrue(isDoubleMatch(rsmiles, 
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
+				ReactionSmartsDefinitions.N_DEALKYLATION_REACTANT_SMARTS, 
+				ReactionSmartsDefinitions.N_DEALKYLATION_PRODUCT_SMARTS));
 //
 //		//This is a dealkylation without any difficulties.
 //		//Daylight depict results in hit in subs and product
 //		//This should return true, classes do not make difference in this case
 		rsmiles="CCN(C)C>>CCNC";
 		assertTrue(isDoubleMatch(rsmiles, 
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
+				ReactionSmartsDefinitions.N_DEALKYLATION_REACTANT_SMARTS, 
+				ReactionSmartsDefinitions.N_DEALKYLATION_PRODUCT_SMARTS));
 
 		
 //		This test has match in substrate and product but not on a conserved N.
@@ -147,16 +137,16 @@ SMARTS:
 //		but we should return no matches due to non-conservation.
 		rsmiles="CNC(CC=OC)CCCCN(C)C>>CNC(CC=OC)CCCCN(C)C";
 		assertFalse(isDoubleMatch(rsmiles, 
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
+				ReactionSmartsDefinitions.N_DEALKYLATION_REACTANT_SMARTS, 
+				ReactionSmartsDefinitions.N_DEALKYLATION_PRODUCT_SMARTS));
 
 ////		This test has match in substrate and 2 matches in product, but only one is conserved.
 ////		Daylight depict returns true for [$([CH3][NH0;X3]([CH3])[*])]>>[CH3][NH][*] (No classes)
 ////		but we should return no matches due to non-conservation.
 		rsmiles="CNCC(O)CCCN(C)C>>CNCC(O)CCCNC";
 		assertTrue(isDoubleMatch(rsmiles, 
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
+				ReactionSmartsDefinitions.N_DEALKYLATION_REACTANT_SMARTS, 
+				ReactionSmartsDefinitions.N_DEALKYLATION_PRODUCT_SMARTS));
 		
 		
 	}
@@ -168,8 +158,8 @@ SMARTS:
 //		//No dealkylation, daylight and we return false
 		rsmiles="CCCN(C)C>>CCNC";
 		assertTrue(isDoubleMatch(rsmiles, 
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_REACTANT_SMARTS, 
-				ReactSmartsMoleculeViewer.N_DEALKYLATION_PRODUCT_SMARTS));
+				ReactionSmartsDefinitions.N_DEALKYLATION_REACTANT_SMARTS, 
+				ReactionSmartsDefinitions.N_DEALKYLATION_PRODUCT_SMARTS));
 	}
 	
 	@Test 
@@ -178,23 +168,23 @@ SMARTS:
 		//The simplest form of hydroxylation.
 		//Daylight depict and we return true
 		String rsmiles="CCCCC>>CCCCCO";
-		assertTrue(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
+		assertTrue(isDoubleMatch(rsmiles, ReactionSmartsDefinitions.HYDROXYLATION_REACTANT_SMARTS, ReactionSmartsDefinitions.HYDROXYLATION_PRODUCT_SMARTS));
 
 		//OH added, but via a N hence not on a conserved atom. Should return false.
 		rsmiles="CCCCC>>CCCCCNO";
-		assertFalse(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
+		assertFalse(isDoubleMatch(rsmiles, ReactionSmartsDefinitions.HYDROXYLATION_REACTANT_SMARTS, ReactionSmartsDefinitions.HYDROXYLATION_PRODUCT_SMARTS));
 		
 		//Hydroxylation on conserved atom. Should return true.
 		rsmiles="C1CCCCC1CCN(CC)CC>>C1CCCCC1CCN(CC)C(O)C";
-		assertTrue(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
+		assertTrue(isDoubleMatch(rsmiles, ReactionSmartsDefinitions.HYDROXYLATION_REACTANT_SMARTS, ReactionSmartsDefinitions.HYDROXYLATION_PRODUCT_SMARTS));
 		
 		//Hydroxylation on both ends of a molecule. Should return true.
 		rsmiles="CCCC>>OCCCCO";
-		assertTrue(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
+		assertTrue(isDoubleMatch(rsmiles, ReactionSmartsDefinitions.HYDROXYLATION_REACTANT_SMARTS, ReactionSmartsDefinitions.HYDROXYLATION_PRODUCT_SMARTS));
 		
 		//Hydroxylation on both ends of a molecule but add N so no conservation. Should return false.
 		rsmiles="CCCC>>ONCCNO";
-		assertFalse(isDoubleMatch(rsmiles, HYDROXYLATION_REACTANT_SMARTS, HYDROXYLATION_PRODUCT_SMARTS));
+		assertFalse(isDoubleMatch(rsmiles, ReactionSmartsDefinitions.HYDROXYLATION_REACTANT_SMARTS, ReactionSmartsDefinitions.HYDROXYLATION_PRODUCT_SMARTS));
 		
 	}
 	
