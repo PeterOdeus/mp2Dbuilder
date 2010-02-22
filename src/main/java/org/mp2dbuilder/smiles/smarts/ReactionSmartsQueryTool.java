@@ -229,10 +229,10 @@ public class ReactionSmartsQueryTool {
 		//Remove all indices which are not available in MCS. If this makes some hits
 		//or RC empty, remove the empty lists.
 		//fullReactantHit_AtomList=removeIndicesWithoutCommonId(fullReactantHit_AtomList, reactant);//Don't do it for reactant atoms it might remove the rc.
-		fullProductHit_AtomList=removeIndicesWithoutCommonId(fullProductHit_AtomList, product);
+		List<List<Integer>> mcsPrunedFullProductHit_AtomList = removeIndicesWithoutCommonId(fullProductHit_AtomList, product);
 		//System.out.println("Reactant hits pruned by MCS:\n" + debugHits(fullReactantHit_AtomList));
 		System.out.println("Product SMARTS hits pruned by MCS:\n" + debugHits(fullProductHit_AtomList));		
-		if (fullProductHit_AtomList.size() == 0){
+		if (mcsPrunedFullProductHit_AtomList.size() == 0){
 			System.out.println("No SMARTS hits in product. Exiting.");
 			return false;
 		}
