@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -43,6 +44,7 @@ import org.mp2dbuilder.io.ReaccsMDLRXNReader;
 import org.mp2dbuilder.renderer.generators.ReactionCentreGenerator;
 import org.mp2dbuilder.renderer.generators.SmartHitsGenerator;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IReactionSet;
@@ -234,7 +236,11 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 		//renderer.getRenderer2DModel().set .setIsCompact(false);
 		// the call to 'setup' only needs to be done on the first paint
 		renderer.setup(molecule, drawArea);
-
+		
+		renderer.getRenderer2DModel().setDrawNumbers(false);
+		renderer.getRenderer2DModel().setShowExplicitHydrogens(true);
+		renderer.getRenderer2DModel().setShowAtomTypeNames(true);
+		
 		// paint the background
 		Graphics2D g2 = (Graphics2D) image.getGraphics();
 		g2.setColor(Color.WHITE);
