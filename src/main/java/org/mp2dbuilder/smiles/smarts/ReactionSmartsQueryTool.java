@@ -187,7 +187,7 @@ public class ReactionSmartsQueryTool {
 				if (reactantAtom.getProperty(COMMON_ID_FIELD_NAME)!=null){
 					String curReactantAtom = (String) reactantAtom.getProperty(COMMON_ID_FIELD_NAME);	
 					if (curReactantAtom.equals(curMCSAtom)){
-						reactantAtomFromMCSAtom.put(reactant.getAtomNumber(reactantAtom), mcs.getAtomNumber(atom));
+						reactantAtomFromMCSAtom.put(mcs.getAtomNumber(reactantAtom), reactant.getAtomNumber(atom));
 					}
 				}
 			}
@@ -195,7 +195,7 @@ public class ReactionSmartsQueryTool {
 				if (productAtom.getProperty(COMMON_ID_FIELD_NAME)!=null){
 					String curProductAtom = (String) productAtom.getProperty(COMMON_ID_FIELD_NAME);	
 					if (curProductAtom.equals(curMCSAtom)){
-						productAtomFromMCSAtom.put(product.getAtomNumber(productAtom), mcs.getAtomNumber(atom));
+						productAtomFromMCSAtom.put(mcs.getAtomNumber(productAtom), product.getAtomNumber(atom));
 					}
 				}
 			}
