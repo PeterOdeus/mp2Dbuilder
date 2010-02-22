@@ -255,7 +255,6 @@ public class ReactionSmartsQueryTool {
 
 				//Loop over all non-class atom expressions
 				if (assertNoClassesHits(complementToMCS, product, productQueryTool)){
-					System.out.println(" The product hit did not fulfill constraint that non-classes should match in complement to MCS.");
 
 					// Setup the structure that holds the overlapping class labels. Do this here so that it is cleared for each new product SMARTS hits.
 					List<List<Integer>> mcsClasses = new ArrayList<List<Integer>>();
@@ -317,6 +316,8 @@ public class ReactionSmartsQueryTool {
 
 						}
 					}
+				}else{
+					System.out.println(" The product hits: " + currentProductHits + " did not fulfill constraint that non-classes should match in complement to MCS.");
 				}
 			}
 			rcno++;
