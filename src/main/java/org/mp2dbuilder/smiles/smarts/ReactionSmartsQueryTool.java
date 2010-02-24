@@ -414,32 +414,32 @@ public class ReactionSmartsQueryTool {
 			IAtomContainer substructure,
 			List<String> smartsList) throws CDKException {
 
-		//If we have more hits in substructre than MCS, return true
-		if (getNumberOfHits(smartsList, mcs) < getNumberOfHits(smartsList, substructure)){
-			return true;
-		}
-	
-		return false;
-	}
-
-	private int getNumberOfHits(List<String> smartsList, IAtomContainer ac) throws CDKException {
-
-		int nohits=0;
+		//If we have more hits in substructure than MCS, return true
 		SMARTSQueryTool q=null;
+
 		for (String sm : smartsList){
 			if (q==null)
 				q=new SMARTSQueryTool(smartsList.get(0)); //initialize in first round
 			else
 				q.setSmarts(sm);
 
-			//Match the smart 
-			if (q.matches(ac)){
-				nohits=nohits+getNumberOfUniqueHits(q.getUniqueMatchingAtoms());
+			if (q.matches(substructure)){
+				int uniqueSubhits = getNumberOfUniqueHits(q.getUniqueMatchingAtoms());
+
+				if (q.matches(mcs)){
+					int uniqueMCShits = getNumberOfUniqueHits(q.getUniqueMatchingAtoms());
+					
+					if (uniqueMCShits >= uniqueSubhits)
+						return false;
+				}
+
 			}
-			
+
 		}
-		return nohits;
+	
+		return true;
 	}
+
 
 	/**
 	 * Return number of unique hits by comparing all atoms in each hit for previous existence
