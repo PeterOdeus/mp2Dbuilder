@@ -376,11 +376,11 @@ public class ReactionSmartsQueryTool {
 							if (!productQueryTool.matches(productSubstructure)){
 								System.out.println("   Produced no hits.");
 							}else{
-								List<List<Integer>> prodHits = productQueryTool.getUniqueMatchingAtoms();
+								List<List<Integer>> productSubstructureClassHits = productQueryTool.getUniqueMatchingAtoms();
 								// If the product hit corresponds to a reactant hit with the class conserved, then we add the class to mcsClasses.
 								addedToMCSClasses = checkProductSMARTSHit(reactantSubstructure, productSubstructure, 
-										currentProductHit_AtomList, mcsClasses, reactantClasses,
-										curClass, prodHits);
+										mcsClasses, reactantClasses,
+										curClass, productSubstructureClassHits);
 
 							}
 						}
@@ -594,17 +594,17 @@ public class ReactionSmartsQueryTool {
 			List<List<Integer>> mcsClasses,
 			List<List<Integer>> reactantClasses,
 			int curClass,
-			List<List<Integer>> prodHits) throws CDKException {
-		Set<Integer> prodHitsconcat;
+			List<List<Integer>> prodClassSMARTSHits) throws CDKException {
+		Set<Integer> concatenatedProductSubstructureClassHits;
 		boolean addedToMCSClasses = false;
-		prodHitsconcat=concatIndices(prodHits);
-		System.out.println("   Produced hits: " + debugHits(prodHitsconcat));
+		concatenatedProductSubstructureClassHits=concatIndices(prodClassSMARTSHits);
+		System.out.println("    Concatenated product substructure hits with classes: " + debugHits(concatenatedProductSubstructureClassHits));
 
-		for (int j : prodHitsconcat){
+		for (int j : concatenatedProductSubstructureClassHits){
 			String commonId = (String) productSubstructure.getAtom(j).getProperty(COMMON_ID_FIELD_NAME);
 			// Pull out the corresponding atom from the reactant. 
 			// If the same class exists in the reactant and the product add it to the mcsClasses for that particular mcs (product) atom.
-			System.out.println("Checking pruned product hit: " + j + ", with mapping: " + commonId);
+			System.out.println("Checking hit: " + j + ", with mapping: " + commonId);
 			for (IAtom atom : reactantSubstructure.atoms()){
 //							System.out.println("Common ID: " + atom.getProperty(COMMON_ID_FIELD_NAME));							
 				if (commonId.equals((String)atom.getProperty(COMMON_ID_FIELD_NAME))){
