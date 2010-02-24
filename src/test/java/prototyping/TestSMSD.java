@@ -36,22 +36,18 @@ public class TestSMSD {
 	
 	public static void main(String[] args) throws IOException, URISyntaxException, ReaccsFileEndedException, ReadingReaccsFileCancelledException, CDKException {
 
-		String filename = "metaprint2d/data/First500DB2005AllFields.rdf";
+//		String filename = "metaprint2d/data/First500DB2005AllFields.rdf";
 		
 		//Should work too, just rename
-		String filename2 = "metaprint2d/data/First500DB2005AllFields.rdf.gz";
+		String filename2 = "metaprint2d/data/First50DB2005AllFields.rdf.gz";
 
-		System.out.println("Testing: " + filename);
-		InputStream ins = TestSMSD.class.getClassLoader().getResourceAsStream(filename);
-    	if(filename.endsWith(".gz")){
+		System.out.println("Testing: " + filename2);
+		InputStream ins = TestSMSD.class.getClassLoader().getResourceAsStream(filename2);
+    	if(filename2.endsWith(".gz")){
     		ins = new GZIPInputStream(ins);
     	}
-		URL url = TestSMSD.class.getClassLoader().getResource(filename);
 		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
-		File file = new File(url.toURI());
-		long fileLengthLong = file.length();
-
-		reader.activateReset(fileLengthLong);
+//		reader.activateReset(10024);
 
 		//Read reaction
 		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
