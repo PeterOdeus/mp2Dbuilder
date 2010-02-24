@@ -321,11 +321,11 @@ public class ReactionSmartsQueryTool {
 					// Check that all non-class atomic expressions have matches outside the MCS.
 					// Rakna antalet traffar pa productSubstructure och mcs. Det ska vara fler traffar i den forsta for att detta ska vara ok.
 					
-					//Match non-classes in MCS, get no hits
-					//Match non-classes in product, get no hits
-					//Assert
-					
-					List<List<Integer>> complementToMCS = removeIndicesWithCommonId(currentProductHit_AtomList,product);
+//					//Match non-classes in MCS, get no hits
+//					//Match non-classes in product, get no hits
+//					//Assert
+//					
+//					List<List<Integer>> complementToMCS = removeIndicesWithCommonId(currentProductHit_AtomList,product);
 
 					//The list of non-classes
 					List<String> reactSmartsNonClasses= getNonClasses(reactantQueryNoDollar);
@@ -337,7 +337,7 @@ public class ReactionSmartsQueryTool {
 
 						// Setup the structure that holds the overlapping class labels. Do this here so that it is cleared for each new product SMARTS hits.
 						List<List<Integer>> mcsClasses = new ArrayList<List<Integer>>();
-						for (IAtom atom : reactant.atoms()){
+						for (IAtom atom : reactantSubstructure.atoms()){
 							mcsClasses.add(new ArrayList<Integer>());
 						}
 
@@ -349,7 +349,7 @@ public class ReactionSmartsQueryTool {
 							String reactantRemovedClassSMARTS=removeAllClasses(reactantClassSMARTS);
 							System.out.println("\n## Reaction class: " + i + "=" + reactantClassSMARTS + "=" + reactantRemovedClassSMARTS);
 							reactantQueryTool.setSmarts(reactantRemovedClassSMARTS);
-							if (!reactantQueryTool.matches(reactant)){
+							if (!reactantQueryTool.matches(reactantSubstructure)){
 								System.out.println("   Produced no hits.");
 							}else{
 								Set<Integer> reactHitsconcat=null;
@@ -357,7 +357,7 @@ public class ReactionSmartsQueryTool {
 								List<List<Integer>> reactHits = reactantQueryTool.getUniqueMatchingAtoms();
 								reactHitsconcat=concatIndices(reactHits);
 								// Remove the ones not belonging to the MCS.
-								List<List<Integer>> reactHits_pruned = removeIndicesWithoutCommonId(reactHits, reactant);
+								List<List<Integer>> reactHits_pruned = removeIndicesWithoutCommonId(reactHits, reactantSubstructure);
 								reactHitsconcat_pruned = concatIndices(reactHits_pruned);
 								// Add reactant classes to the atoms that were originally hit by the smarts and part of the MCS. 
 								for (int j : reactHitsconcat_pruned){
@@ -373,12 +373,13 @@ public class ReactionSmartsQueryTool {
 							String productNoClassSMARTS=removeAllClasses(productClassSMARTS);
 							System.out.println("## Product class: " + i + "=" + productClassSMARTS + "=" + productNoClassSMARTS);
 							productQueryTool.setSmarts(productNoClassSMARTS);
-							if (!productQueryTool.matches(product)){
+							if (!productQueryTool.matches(productSubstructure)){
 								System.out.println("   Produced no hits.");
 							}else{
 								List<List<Integer>> prodHits = productQueryTool.getUniqueMatchingAtoms();
-								addedToMCSClasses = checkProductSMARTSHit(reactant,
-										product, productQueryTool, currentProductHit_AtomList,
+								// If the product hit corresponds to a reactant hit with the class conserved, then we add the class to mcsClasses.
+								addedToMCSClasses = checkProductSMARTSHit(reactantSubstructure,
+										productSubstructure, productQueryTool, currentProductHit_AtomList,
 										addedToMCSClasses, mcsClasses, reactantClasses,
 										mcsSize, i, prodHits);
 
