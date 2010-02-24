@@ -320,10 +320,20 @@ public class ReactionSmartsQueryTool {
 
 					// Check that all non-class atomic expressions have matches outside the MCS.
 					// Rakna antalet traffar pa productSubstructure och mcs. Det ska vara fler traffar i den forsta for att detta ska vara ok.
+					
+					//Match non-classes in MCS, get no hits
+					//Match non-classes in product, get no hits
+					//Assert
+					
 					List<List<Integer>> complementToMCS = removeIndicesWithCommonId(currentProductHit_AtomList,product);
 
+					//The list of non-classes
+					List<String> reactSmartsNoClasses= getNonClasses(reactantQueryNoDollar);
+					List<String> productSmartsNoClasses = getNonClasses(productQueryNoDollar);
+					
 					//Loop over all non-class atom expressions
-					if (assertNoClassesHits(complementToMCS, product, productQueryTool)){
+					if ((assertNoClassesHitsNew(mcs, reactantSubstructure, reactSmartsNoClasses)) &&
+							(assertNoClassesHitsNew(mcs, productSubstructure, productSmartsNoClasses))){
 
 						// Setup the structure that holds the overlapping class labels. Do this here so that it is cleared for each new product SMARTS hits.
 						List<List<Integer>> mcsClasses = new ArrayList<List<Integer>>();
@@ -398,6 +408,61 @@ public class ReactionSmartsQueryTool {
 		else{
 			return false;
 		}
+	}
+
+	private boolean assertNoClassesHitsNew(IAtomContainer mcs,
+			IAtomContainer substructure,
+			List<String> smartsList) throws CDKException {
+
+		//If we have more hits in substructre than MCS, return true
+		if (getNumberOfHits(smartsList, mcs) < getNumberOfHits(smartsList, substructure)){
+			return true;
+		}
+	
+		return false;
+	}
+
+	private int getNumberOfHits(List<String> smartsList, IAtomContainer ac) throws CDKException {
+
+		int nohits=0;
+		SMARTSQueryTool q=null;
+		for (String sm : smartsList){
+			if (q==null)
+				q=new SMARTSQueryTool(smartsList.get(0)); //initialize in first round
+			else
+				q.setSmarts(sm);
+
+			//Match the smart 
+			if (q.matches(ac)){
+				nohits=nohits+getNumberOfUniqueHits(q.getUniqueMatchingAtoms());
+			}
+			
+		}
+		return nohits;
+	}
+
+	/**
+	 * Return number of unique hits by comparing all atoms in each hit for previous existence
+	 * @param uniqueMatchingAtoms
+	 * @return
+	 */
+	private int getNumberOfUniqueHits(List<List<Integer>> uniqueMatchingAtoms) {
+
+		Set<Integer> hitset=new HashSet<Integer>();
+		List<Integer> uniqueAtoms=new ArrayList<Integer>();
+		int hitno=0;
+		for (List<Integer> m : uniqueMatchingAtoms){
+			for (Integer i : m){
+				if (uniqueAtoms.contains(i)){
+					//This is a hit containing a new atom
+					uniqueAtoms.add(i);
+					hitset.add(hitno);
+				}
+			}
+			hitno++;
+		}
+
+		return hitset.size();
 	}
 
 	private void createAtomMappingsViaCommonID(
