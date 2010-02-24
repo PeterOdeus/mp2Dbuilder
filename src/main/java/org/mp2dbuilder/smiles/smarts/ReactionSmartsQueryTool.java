@@ -81,7 +81,7 @@ public class ReactionSmartsQueryTool {
 		productQueryNoDollar=productQuery;
 
 		//Extract classes to map INT > String
-		reactClasses = getClasses(reactantQueryNoDollarNoClasses);
+		reactClasses = getClasses(reactantQueryNoDollar);
 		prodClasses = getClasses(productQueryNoDollar);
 
 		//Extract full query without dollar and without classes
@@ -334,7 +334,7 @@ public class ReactionSmartsQueryTool {
 //					List<List<Integer>> complementToMCS = removeIndicesWithCommonId(currentProductHit_AtomList,product);
 
 					//The list of non-classes
-					List<String> reactSmartsNonClasses= getNonClasses(reactantQueryNoDollarNoClasses);
+					List<String> reactSmartsNonClasses= getNonClasses(reactantQueryNoDollar);
 					List<String> productSmartsNonClasses = getNonClasses(productQueryNoDollar);
 					
 					//Loop over all non-class atom expressions
