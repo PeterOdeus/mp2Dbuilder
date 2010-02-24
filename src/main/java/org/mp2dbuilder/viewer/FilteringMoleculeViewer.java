@@ -16,7 +16,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
-import org.junit.Assert;
 import org.mp2dbuilder.builder.MetaboliteHandler;
 import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
 import org.openscience.cdk.exception.CDKException;
