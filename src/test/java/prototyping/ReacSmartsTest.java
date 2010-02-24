@@ -244,7 +244,7 @@ SMARTS:
 //				ReactionSmartsDefinitions.N_DEALKYLATION_REACTANT_SMARTS, 
 //				ReactionSmartsDefinitions.N_DEALKYLATION_PRODUCT_SMARTS));
 		
-		rsmiles="CCCCC>>CCCCCO";
+		rsmiles="C1CCCCC1CCN(CC)CC>>C1CCCCC1CCN(CC)C(O)C";
 		assertTrue(isDoubleMatch(rsmiles, ReactionSmartsDefinitions.HYDROXYLATION_REACTANT_SMARTS, ReactionSmartsDefinitions.HYDROXYLATION_PRODUCT_SMARTS));
 
 	}

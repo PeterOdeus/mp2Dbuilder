@@ -313,6 +313,7 @@ public class ReactionSmartsQueryTool {
 					// Determine the mapping of the mcs atoms.
 					String mcsstr="";
 					
+					System.out.println("MCS: " + substructureToString(mcs));
 					System.out.println("Reactant substructure with CID: " + substructureToString(reactantSubstructure));
 					System.out.println("Product substructure with CID: " + substructureToString(productSubstructure));
 
