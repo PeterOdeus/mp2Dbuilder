@@ -58,6 +58,8 @@ public class TestSMSD {
 		IReaction reaction = reactionSet.getReaction(0);
 
 		System.out.println("Noreacs: " + reactionSet.getReactionCount());
+		
+        long start = System.currentTimeMillis(); // start timing
 
 		int cnt=1;
 		System.out.print("Running SMSD on reaction: " + cnt);
@@ -65,12 +67,17 @@ public class TestSMSD {
 			try{
 			runSMSD(reaction);
 			}catch(Exception e){
-				System.out.println("Problem with entry: " + cnt);
+				System.out.print("\nProblem with entry: " + cnt + "\n");
 			}
 			reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 			reaction = reactionSet.getReaction(0);
 			cnt++;
-			System.out.print("," + cnt);
+			if (cnt%30==0){
+	            long now = System.currentTimeMillis(); // stop timing
+				System.out.print("\nTime elapsed: " + millisecsToString(now-start) +"\nContinuing: " + cnt);
+			}else{
+				System.out.print("," + cnt);
+			}
 		}
 		
 
@@ -162,6 +169,46 @@ public class TestSMSD {
 //		System.out.println("+++++++++ Nr of MCS: " + nrMCSs);
 		
 	}
-	
+
+    public final static long SECOND = 1000;
+    public final static long MINUTE = SECOND * 60;
+    public final static long HOUR = MINUTE * 60;
+    public final static long DAY = HOUR * 24;
+
+    
+    public static String millisecsToString(long time) {
+        StringBuilder result = new StringBuilder();
+        long timeleft = time;
+        if ( timeleft < SECOND ) {
+            return "less than a second";
+        }
+        if ( timeleft > DAY ) {
+            long days = (time / DAY);
+            result.append( days );
+            result.append( "d " );
+            timeleft = timeleft - (days * DAY);
+        }
+        if ( timeleft > HOUR ) {
+            long hours = (timeleft / HOUR);
+            result.append( hours );
+            result.append( "h " );
+            timeleft = timeleft - (hours * HOUR); 
+        }
+        if ( timeleft > MINUTE ) {
+            long minutes = (timeleft / MINUTE);
+            result.append( minutes );
+            result.append( "min " );
+            timeleft = timeleft - (minutes * MINUTE);
+        }
+        if ( timeleft > SECOND ) {
+            long seconds = (timeleft / SECOND);
+            result.append( seconds );
+            result.append( "s" );
+        }
+
+        return result.toString();
+    }
+
+
 	
 }
