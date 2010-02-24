@@ -298,7 +298,7 @@ public class ReactionSmartsQueryTool {
 
 				// Build a substructure of the current reactant SMARTS hit.
 				IAtomContainer productSubstructure = createSubstructure(product, currentProductHits);
-				System.out.println("Product substructure: " + substructureToString(reactantSubstructure));
+				System.out.println("Product substructure: " + substructureToString(productSubstructure));
 
 				// Generate and pick largest MCS. Since there are only one structure as a reactant substructure and one structure as a product substructure the largest MCS should be ok.
 				// Any mapping between reactant and the product should be ok as well.
@@ -311,6 +311,10 @@ public class ReactionSmartsQueryTool {
 					mapperUtil.setCommonIds(COMMON_ID_FIELD_NAME, mcs, reactantSubstructure, productSubstructure);
 					// Determine the mapping of the mcs atoms.
 					String mcsstr="";
+					
+					System.out.println("Reactant substructure with CID: " + substructureToString(reactantSubstructure));
+					System.out.println("Product substructure with CID: " + substructureToString(productSubstructure));
+
 					
 					//TODO: Remove these if unused
 					Map<Integer,Integer> reactantAtomFromMCSAtom = new HashMap<Integer, Integer>();
@@ -414,7 +418,11 @@ public class ReactionSmartsQueryTool {
 		
 		String ret="";
 		for (IAtom a : substructure.atoms()){
-			ret=ret+ a.getSymbol()+substructure.getAtomNumber(a)+",";
+			ret=ret+ a.getSymbol()+substructure.getAtomNumber(a);
+			String p=(String) a.getProperty(COMMON_ID_FIELD_NAME);
+			if (p!=null)
+				ret=ret+"-"+p;
+			ret=ret+",";
 		}
 		return ret;
 	}
