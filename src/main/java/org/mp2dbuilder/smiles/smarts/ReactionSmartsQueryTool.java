@@ -652,23 +652,27 @@ public class ReactionSmartsQueryTool {
 
 		for (int j : concatenatedProductSubstructureClassHits){
 			String commonId = (String) productSubstructure.getAtom(j).getProperty(COMMON_ID_FIELD_NAME);
-			// Pull out the corresponding atom from the reactant. 
-			// If the same class exists in the reactant and the product add it to the mcsClasses for that particular mcs (product) atom.
-			System.out.println("     Checking hit: " + j + ", with mapping: " + commonId);
-			for (IAtom atom : reactantSubstructure.atoms()){
-//							System.out.println("Common ID: " + atom.getProperty(COMMON_ID_FIELD_NAME));							
-				if (commonId.equals((String)atom.getProperty(COMMON_ID_FIELD_NAME))){
-					if (reactantClasses.get(reactantSubstructure.getAtomNumber(atom)).contains(curClass)){
-						System.out.println("Adding class: "+ curClass + ", to mcs atom: " + j);
-						if (!mcsClasses.get(reactantSubstructure.getAtomNumber(atom)).contains(curClass)) {
-							mcsClasses.get(reactantSubstructure.getAtomNumber(atom)).add(curClass);
-							//mcsSize[reactantSubstructure.getAtomNumber(atom)] = mcsClasses.get(reactantSubstructure.getAtomNumber(atom)).size();
+			if (commonId!=null){
+
+				// Pull out the corresponding atom from the reactant. 
+				// If the same class exists in the reactant and the product add it to the mcsClasses for that particular mcs (product) atom.
+				System.out.println("     Checking hit: " + j + ", with mapping: " + commonId);
+				for (IAtom atom : reactantSubstructure.atoms()){
+					//							System.out.println("Common ID: " + atom.getProperty(COMMON_ID_FIELD_NAME));							
+					if (commonId.equals((String)atom.getProperty(COMMON_ID_FIELD_NAME))){
+						if (reactantClasses.get(reactantSubstructure.getAtomNumber(atom)).contains(curClass)){
+							System.out.println("Adding class: "+ curClass + ", to mcs atom: " + j);
+							if (!mcsClasses.get(reactantSubstructure.getAtomNumber(atom)).contains(curClass)) {
+								mcsClasses.get(reactantSubstructure.getAtomNumber(atom)).add(curClass);
+								//mcsSize[reactantSubstructure.getAtomNumber(atom)] = mcsClasses.get(reactantSubstructure.getAtomNumber(atom)).size();
+							}
+							addedToMCSClasses = true;
 						}
-						addedToMCSClasses = true;
 					}
 				}
 			}
 		}
+
 		return addedToMCSClasses;
 	}
 
