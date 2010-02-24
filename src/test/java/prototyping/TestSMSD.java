@@ -2,6 +2,7 @@ package prototyping;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.interfaces.IAtom;
@@ -19,8 +20,10 @@ public class TestSMSD {
 	public static void main(String[] args) throws Exception {
 		
 		SmilesParser sp = new SmilesParser(NoNotificationChemObjectBuilder.getInstance());
-		IMolecule A1 = sp.parseSmiles("CNC(CC=OC)CCCCN(C)C");
-		IMolecule A2 = sp.parseSmiles("CNC(CC=OC)CCCCN(C)C");
+//		IMolecule A1 = sp.parseSmiles("CNC(CC=OC)CCCCN(C)C");
+//		IMolecule A2 = sp.parseSmiles("CNC(CC=OC)CCCCN(C)C");
+		IMolecule A1 = sp.parseSmiles("CN(=C)O");
+		IMolecule A2 = sp.parseSmiles("CN(=C)O");
 		System.out.println("mol1: " + A1);
 		System.out.println("mol2: " + A1);
 		
@@ -36,7 +39,7 @@ public class TestSMSD {
 
         boolean bondSensitive = true;
         boolean removeHydrogen = true;
-        boolean stereoMatch = true;
+        boolean stereoMatch = false;
         boolean fragmentMinimization = true;
         boolean energyMinimization = true;
 
@@ -49,7 +52,7 @@ public class TestSMSD {
         IAtomContainer Query = comparison.getReactantMolecule();
         IAtomContainer Target = comparison.getProductMolecule();
 
-
+        
         for (Map.Entry<Integer, Integer> mappings : comparison.getFirstMapping().entrySet()) {
             //Get the mapped atom number in Query Molecule
             int queryMappingNumber = mappings.getKey();
@@ -78,6 +81,30 @@ public class TestSMSD {
         System.out.println("Tanimoto Euclidean Distance: " + comparison.getEuclideanDistance());
         System.out.println("");
 
-		
+        int nrMCSs = 0;
+		for (TreeMap<Integer, Integer> listOfMappings : comparison.getAllMapping()){
+			nrMCSs++;
+			int nrMCSAtoms = 0;
+			for (Map.Entry<Integer, Integer> mappings : listOfMappings.entrySet()){
+				nrMCSAtoms++;
+	            int queryMappingNumber = mappings.getKey();
+	            //Get the mapped atom number in Target Molecule
+	            int targetMappingNumber = mappings.getValue();
+
+	            //Get the mapped atom in Query Molecule
+	            IAtom queryAtom = Query.getAtom(queryMappingNumber);
+	            //Get the mapped atom in Target Molecule
+	            IAtom targetAtom = Target.getAtom(targetMappingNumber);
+	            //Print mapped atom numbers
+	            System.out.println(queryMappingNumber + " " +
+	                    (targetMappingNumber));
+	            //Print mapped atoms
+	            System.out.println(queryAtom.getSymbol() + " " +
+	                    targetAtom.getSymbol());
+				
+			}
+			System.out.println("------- Nr of MCS atoms: " + nrMCSAtoms);
+		}
+		System.out.println("+++++++++ Nr of MCS: " + nrMCSs);
 	}
 }
