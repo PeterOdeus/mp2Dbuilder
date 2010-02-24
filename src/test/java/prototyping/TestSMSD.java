@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
@@ -19,7 +20,9 @@ import org.openscience.cdk.interfaces.IChemObject;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.interfaces.IReactionSet;
+import org.openscience.cdk.io.ReaccsFileEndedException;
 import org.openscience.cdk.io.ReaccsMDLRXNReader;
+import org.openscience.cdk.io.ReadingReaccsFileCancelledException;
 import org.openscience.cdk.nonotify.NNChemObject;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
@@ -31,7 +34,7 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 public class TestSMSD {
 
 	
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws IOException, URISyntaxException, ReaccsFileEndedException, ReadingReaccsFileCancelledException, CDKException {
 
 		String filename = "metaprint2d/data/First500DB2005AllFields.rdf";
 		
@@ -59,17 +62,21 @@ public class TestSMSD {
 		int cnt=1;
 		System.out.print("Running SMSD on reaction: " + cnt);
 		while(reaction!=null){
+			try{
 			runSMSD(reaction);
 			reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 			reaction = reactionSet.getReaction(0);
 			cnt++;
 			System.out.print("," + cnt);
+			}catch(Exception e){
+				System.out.println("Problem with entry: " + cnt);
+			}
 		}
 		
 
 	}
 	
-	public static void runSMSD(IReaction reaction) throws Exception{
+	public static void runSMSD(IReaction reaction) throws CDKException{
 		
 		IAtomContainer A1=reaction.getReactants().getAtomContainer(0);
 		IAtomContainer A2=reaction.getProducts().getAtomContainer(0);
