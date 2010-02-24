@@ -310,28 +310,13 @@ public class ReactionSmartsQueryTool {
 					mapperUtil.setCommonIds(COMMON_ID_FIELD_NAME, mcs, reactantSubstructure, productSubstructure);
 					// Determine the mapping of the mcs atoms.
 					String mcsstr="";
+					
+					//TODO: Remove these if unused
 					Map<Integer,Integer> reactantAtomFromMCSAtom = new HashMap<Integer, Integer>();
 					Map<Integer,Integer> productAtomFromMCSAtom = new HashMap<Integer, Integer>();
-					for (IAtom atom : mcs.atoms()){
-						mcsstr=mcsstr + mcs.getAtomNumber(atom) + ",";
-						String curMCSAtom = (String) atom.getProperty(COMMON_ID_FIELD_NAME);
-						for (IAtom reactantAtom : reactantSubstructure.atoms()){
-							if (reactantAtom.getProperty(COMMON_ID_FIELD_NAME)!=null){
-								String curReactantAtom = (String) reactantAtom.getProperty(COMMON_ID_FIELD_NAME);	
-								if (curReactantAtom.equals(curMCSAtom)){
-									reactantAtomFromMCSAtom.put(mcs.getAtomNumber(atom), reactantSubstructure.getAtomNumber(reactantAtom));
-								}
-							}
-						}
-						for (IAtom productAtom : productSubstructure.atoms()){
-							if (productAtom.getProperty(COMMON_ID_FIELD_NAME)!=null){
-								String curProductAtom = (String) productAtom.getProperty(COMMON_ID_FIELD_NAME);	
-								if (curProductAtom.equals(curMCSAtom)){
-									productAtomFromMCSAtom.put(mcs.getAtomNumber(atom), productSubstructure.getAtomNumber(productAtom));
-								}
-							}
-						}
-					}
+					createAtomMappingsViaCommonID(reactantSubstructure,
+							productSubstructure, mcs, mcsstr,
+							reactantAtomFromMCSAtom, productAtomFromMCSAtom);
 
 					// Check that all non-class atomic expressions have matches outside the MCS.
 					// Rakna antalet traffar pa productSubstructure och mcs. Det ska vara fler traffar i den forsta for att detta ska vara ok.
@@ -412,6 +397,34 @@ public class ReactionSmartsQueryTool {
 		}
 		else{
 			return false;
+		}
+	}
+
+	private void createAtomMappingsViaCommonID(
+			IAtomContainer reactantSubstructure,
+			IAtomContainer productSubstructure, IAtomContainer mcs,
+			String mcsstr, Map<Integer, Integer> reactantAtomFromMCSAtom,
+			Map<Integer, Integer> productAtomFromMCSAtom) {
+
+		for (IAtom atom : mcs.atoms()){
+			mcsstr=mcsstr + mcs.getAtomNumber(atom) + ",";
+			String curMCSAtom = (String) atom.getProperty(COMMON_ID_FIELD_NAME);
+			for (IAtom reactantAtom : reactantSubstructure.atoms()){
+				if (reactantAtom.getProperty(COMMON_ID_FIELD_NAME)!=null){
+					String curReactantAtom = (String) reactantAtom.getProperty(COMMON_ID_FIELD_NAME);	
+					if (curReactantAtom.equals(curMCSAtom)){
+						reactantAtomFromMCSAtom.put(mcs.getAtomNumber(atom), reactantSubstructure.getAtomNumber(reactantAtom));
+					}
+				}
+			}
+			for (IAtom productAtom : productSubstructure.atoms()){
+				if (productAtom.getProperty(COMMON_ID_FIELD_NAME)!=null){
+					String curProductAtom = (String) productAtom.getProperty(COMMON_ID_FIELD_NAME);	
+					if (curProductAtom.equals(curMCSAtom)){
+						productAtomFromMCSAtom.put(mcs.getAtomNumber(atom), productSubstructure.getAtomNumber(productAtom));
+					}
+				}
+			}
 		}
 	}
 
