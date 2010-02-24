@@ -341,7 +341,6 @@ public class ReactionSmartsQueryTool {
 							mcsClasses.add(new ArrayList<Integer>());
 						}
 
-						int[] mcsSize = new int[mcsClasses.size()];
 						// Loop through the different classes. And check if they can be assigned to any MCS atoms.
 						for (int curClass : reactClasses.keySet()){
 							//REACTANT PART - We are looking at the hits of the SMARTS which overlap the current reaction center. If any of these belong to the mcs we store that info in reactantClasses.
@@ -386,7 +385,7 @@ public class ReactionSmartsQueryTool {
 						}
 						if (addedToMCSClasses){
 							addedToMCSClasses = false;
-							if (checkClassCoverage(mcsClasses, mcsSize)){
+							if (checkClassCoverage(mcsClasses)){
 								// Add the putative reaction center as a reaction center.
 								reactantAtomNumbers.add(new ArrayList<Integer>());
 								reactantAtomNumbers.get(reactantAtomNumbers.size()-1).add(putativeRC.get(0));
@@ -604,11 +603,10 @@ public class ReactionSmartsQueryTool {
 			String commonId = (String) productSubstructure.getAtom(j).getProperty(COMMON_ID_FIELD_NAME);
 			// Pull out the corresponding atom from the reactant. 
 			// If the same class exists in the reactant and the product add it to the mcsClasses for that particular mcs (product) atom.
-			System.out.println("Checking hit: " + j + ", with mapping: " + commonId);
+			System.out.println("     Checking hit: " + j + ", with mapping: " + commonId);
 			for (IAtom atom : reactantSubstructure.atoms()){
 //							System.out.println("Common ID: " + atom.getProperty(COMMON_ID_FIELD_NAME));							
 				if (commonId.equals((String)atom.getProperty(COMMON_ID_FIELD_NAME))){
-					System.out.println("Pruned product hit" + j + ":" + atom.getProperty(COMMON_ID_FIELD_NAME) + ":" + commonId);
 					if (reactantClasses.get(reactantSubstructure.getAtomNumber(atom)).contains(curClass)){
 						System.out.println("Adding class: "+ curClass + ", to mcs atom: " + j);
 						if (!mcsClasses.get(reactantSubstructure.getAtomNumber(atom)).contains(curClass)) {
@@ -623,10 +621,12 @@ public class ReactionSmartsQueryTool {
 		return addedToMCSClasses;
 	}
 
-	private boolean checkClassCoverage(List<List<Integer>> mcsClasses, int[] mcsSize) {
+	private boolean checkClassCoverage(List<List<Integer>> mcsClasses) {
 		int[] curIndex = new int[mcsClasses.size()];
 		int maxNrPermutations = 1;
-		for (int mcsSizeEl : mcsSize){
+		
+		for (List<Integer> mcsEntryClasses: mcsClasses){
+			int mcsSizeEl = mcsEntryClasses.size();
 			if (mcsSizeEl > 0){
 				maxNrPermutations = maxNrPermutations * mcsSizeEl;
 			}
