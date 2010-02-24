@@ -64,13 +64,13 @@ public class TestSMSD {
 		while(reaction!=null){
 			try{
 			runSMSD(reaction);
+			}catch(Exception e){
+				System.out.println("Problem with entry: " + cnt);
+			}
 			reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 			reaction = reactionSet.getReaction(0);
 			cnt++;
 			System.out.print("," + cnt);
-			}catch(Exception e){
-				System.out.println("Problem with entry: " + cnt);
-			}
 		}
 		
 
