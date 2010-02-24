@@ -57,11 +57,12 @@ public class ReactionSmartsQueryTool {
 	private String reactantQueryNoClasses;
 	private String productQueryNoClasses;
 
-	private String reactantQueryNoDollar;
+	private String reactantQueryNoDollarNoClasses;
 	private String productQueryNoDollar;
 
 	private Map<Integer, String> reactClasses;
 	private Map<Integer, String> prodClasses;
+	private String reactantQueryNoDollar;
 
 	/**
 	 * Constructor.
@@ -80,7 +81,7 @@ public class ReactionSmartsQueryTool {
 		productQueryNoDollar=productQuery;
 
 		//Extract classes to map INT > String
-		reactClasses = getClasses(reactantQueryNoDollar);
+		reactClasses = getClasses(reactantQueryNoDollarNoClasses);
 		prodClasses = getClasses(productQueryNoDollar);
 
 		//Extract full query without dollar and without classes
@@ -88,7 +89,7 @@ public class ReactionSmartsQueryTool {
 		productQueryNoClasses=removeAllClasses(productQuery);
 
 		//remove the [$( partof reactant. Assign it again to get it without classes.
-		reactantQueryNoDollar=removeDollarPart(reactantQueryNoClasses);
+		reactantQueryNoDollarNoClasses=removeDollarPart(reactantQueryNoClasses);
 	}
 
 	/**
@@ -255,7 +256,7 @@ public class ReactionSmartsQueryTool {
 			return false;
 		}
 		List<List<Integer>> putativeRC_Atomlist = rcQueryTool.getUniqueMatchingAtoms();
-		SMARTSQueryTool reactantQueryTool = new SMARTSQueryTool(reactantQueryNoDollar);
+		SMARTSQueryTool reactantQueryTool = new SMARTSQueryTool(reactantQueryNoDollarNoClasses);
 		reactantQueryTool.matches(reactant); // This 
 		SMARTSQueryTool productQueryTool = new SMARTSQueryTool(productQueryNoClasses);
 		if (!productQueryTool.matches(product)){
@@ -264,7 +265,7 @@ public class ReactionSmartsQueryTool {
 		}
 
 		// Create the lists that hold the SMARTS hits.
-		System.out.println(":"+reactantQueryNoDollar+":");
+		System.out.println(":"+reactantQueryNoDollarNoClasses+":");
 		List<List<Integer>> fullReactantHit_AtomList = reactantQueryTool.getUniqueMatchingAtoms();//It might be needed to associate the reactant hits with the rc.
 		List<List<Integer>> fullProductHit_AtomList = productQueryTool.getUniqueMatchingAtoms();
 
@@ -333,7 +334,7 @@ public class ReactionSmartsQueryTool {
 //					List<List<Integer>> complementToMCS = removeIndicesWithCommonId(currentProductHit_AtomList,product);
 
 					//The list of non-classes
-					List<String> reactSmartsNonClasses= getNonClasses(reactantQueryNoDollar);
+					List<String> reactSmartsNonClasses= getNonClasses(reactantQueryNoDollarNoClasses);
 					List<String> productSmartsNonClasses = getNonClasses(productQueryNoDollar);
 					
 					//Loop over all non-class atom expressions
@@ -430,6 +431,9 @@ public class ReactionSmartsQueryTool {
 	private boolean assertNonClassesHitsNew(IAtomContainer mcs,
 			IAtomContainer substructure,
 			List<String> smartsList) throws CDKException {
+		
+		if (smartsList==null || smartsList.size()<=0)
+			return true;
 
 		//If we have more hits in substructure than MCS, return true
 		SMARTSQueryTool q=null;
@@ -470,7 +474,7 @@ public class ReactionSmartsQueryTool {
 		int hitno=0;
 		for (List<Integer> m : uniqueMatchingAtoms){
 			for (Integer i : m){
-				if (uniqueAtoms.contains(i)){
+				if (!uniqueAtoms.contains(i)){
 					//This is a hit containing a new atom
 					uniqueAtoms.add(i);
 					hitset.add(hitno);
