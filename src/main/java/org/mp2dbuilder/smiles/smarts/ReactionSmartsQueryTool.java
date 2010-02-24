@@ -297,6 +297,10 @@ public class ReactionSmartsQueryTool {
 				currentProductHit_AtomList.clear();
 				currentProductHit_AtomList.add(currentProductHits);
 
+				//We need to clear commonIDs evry time here.
+				clearCommonIDS(product);
+				clearCommonIDS(reactant);
+
 				// Build a substructure of the current reactant SMARTS hit.
 				IAtomContainer productSubstructure = createSubstructure(product, currentProductHits);
 				System.out.println("Product substructure: " + substructureToString(productSubstructure));
@@ -414,6 +418,16 @@ public class ReactionSmartsQueryTool {
 		else{
 			return false;
 		}
+	}
+
+	private void clearCommonIDS(IAtomContainer ac) {
+		
+		for (IAtom atom : ac.atoms()){
+			if (atom.getProperty(COMMON_ID_FIELD_NAME)!=null){
+				atom.removeProperty(COMMON_ID_FIELD_NAME);
+			}
+		}
+		
 	}
 
 	private String substructureToString(IAtomContainer substructure) {
