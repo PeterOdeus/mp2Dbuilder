@@ -328,12 +328,12 @@ public class ReactionSmartsQueryTool {
 					List<List<Integer>> complementToMCS = removeIndicesWithCommonId(currentProductHit_AtomList,product);
 
 					//The list of non-classes
-					List<String> reactSmartsNoClasses= getNonClasses(reactantQueryNoDollar);
-					List<String> productSmartsNoClasses = getNonClasses(productQueryNoDollar);
+					List<String> reactSmartsNonClasses= getNonClasses(reactantQueryNoDollar);
+					List<String> productSmartsNonClasses = getNonClasses(productQueryNoDollar);
 					
 					//Loop over all non-class atom expressions
-					if ((assertNoClassesHitsNew(mcs, reactantSubstructure, reactSmartsNoClasses)) &&
-							(assertNoClassesHitsNew(mcs, productSubstructure, productSmartsNoClasses))){
+					if ((assertNonClassesHitsNew(mcs, reactantSubstructure, reactSmartsNonClasses)) &&
+							(assertNonClassesHitsNew(mcs, productSubstructure, productSmartsNonClasses))){
 
 						// Setup the structure that holds the overlapping class labels. Do this here so that it is cleared for each new product SMARTS hits.
 						List<List<Integer>> mcsClasses = new ArrayList<List<Integer>>();
@@ -410,7 +410,7 @@ public class ReactionSmartsQueryTool {
 		}
 	}
 
-	private boolean assertNoClassesHitsNew(IAtomContainer mcs,
+	private boolean assertNonClassesHitsNew(IAtomContainer mcs,
 			IAtomContainer substructure,
 			List<String> smartsList) throws CDKException {
 
