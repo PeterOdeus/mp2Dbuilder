@@ -591,9 +591,9 @@ public class ReactionSmartsQueryTool {
 
 	private boolean checkProductSMARTSHit(IAtomContainer reactantSubstructure,
 			IAtomContainer productSubstructure,
-			List<List<Integer>> fullProductHit_AtomList,
 			List<List<Integer>> mcsClasses,
-			List<List<Integer>> reactantClasses, int icurClass,
+			List<List<Integer>> reactantClasses,
+			int curClass,
 			List<List<Integer>> prodHits) throws CDKException {
 		Set<Integer> prodHitsconcat;
 		boolean addedToMCSClasses = false;
@@ -609,10 +609,10 @@ public class ReactionSmartsQueryTool {
 //							System.out.println("Common ID: " + atom.getProperty(COMMON_ID_FIELD_NAME));							
 				if (commonId.equals((String)atom.getProperty(COMMON_ID_FIELD_NAME))){
 					System.out.println("Pruned product hit" + j + ":" + atom.getProperty(COMMON_ID_FIELD_NAME) + ":" + commonId);
-					if (reactantClasses.get(reactantSubstructure.getAtomNumber(atom)).contains(icurClass)){
-						System.out.println("Adding class: "+ icurClass + ", to mcs atom: " + j);
-						if (!mcsClasses.get(reactantSubstructure.getAtomNumber(atom)).contains(icurClass)) {
-							mcsClasses.get(reactantSubstructure.getAtomNumber(atom)).add(icurClass);
+					if (reactantClasses.get(reactantSubstructure.getAtomNumber(atom)).contains(curClass)){
+						System.out.println("Adding class: "+ curClass + ", to mcs atom: " + j);
+						if (!mcsClasses.get(reactantSubstructure.getAtomNumber(atom)).contains(curClass)) {
+							mcsClasses.get(reactantSubstructure.getAtomNumber(atom)).add(curClass);
 							//mcsSize[reactantSubstructure.getAtomNumber(atom)] = mcsClasses.get(reactantSubstructure.getAtomNumber(atom)).size();
 						}
 						addedToMCSClasses = true;
