@@ -17,7 +17,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
-import org.junit.Assert;
 import org.mp2dbuilder.builder.MetaboliteHandler;
 import org.mp2dbuilder.io.ReaccsFileEndedException;
 import org.mp2dbuilder.io.ReaccsMDLRXNReader;

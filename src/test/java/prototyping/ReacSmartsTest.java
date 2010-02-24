@@ -306,7 +306,7 @@ SMARTS:
 
 	@Test 
 	public void testReactSmartsMoleculeViewer() throws Exception {
-		String f = "data/mdl/First500DB2005AllFields.rdf"; //"data/mdl/73320thRiReg.rdf";
+		String f = "metaprint2d/data/First500DB2005AllFields.rdf"; //"data/mdl/73320thRiReg.rdf";
 		ReaccsMDLRXNReader reader = getReaccsReader(f);
 		//		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 		//		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
@@ -355,7 +355,7 @@ SMARTS:
 	}
 	
 	private ReaccsMDLRXNReader getReaccsReader(String filename) throws URISyntaxException, IOException{
-		logger.info("Testing: " + filename);
+		System.out.println("Testing: " + filename);
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
 		URL url = this.getClass().getClassLoader().getResource(filename);
 		File file = new File(url.toURI());

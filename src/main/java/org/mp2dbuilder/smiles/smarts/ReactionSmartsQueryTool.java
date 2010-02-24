@@ -32,7 +32,6 @@ import org.openscience.cdk.isomorphism.matchers.OrderQueryBond;
 import org.openscience.cdk.isomorphism.matchers.QueryAtomContainer;
 import org.openscience.cdk.isomorphism.matchers.SymbolQueryAtom;
 import org.openscience.cdk.isomorphism.matchers.smarts.AnyOrderQueryBond;
-import org.openscience.cdk.renderer.generators.AtomMassGenerator;
 import org.openscience.cdk.smiles.smarts.SMARTSQueryTool;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
