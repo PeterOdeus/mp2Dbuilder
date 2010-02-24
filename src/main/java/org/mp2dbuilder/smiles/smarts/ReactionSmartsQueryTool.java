@@ -281,7 +281,7 @@ public class ReactionSmartsQueryTool {
 					fullReactantHit_AtomList, putativeRC, curReactantSet);
 
 			// Build a substructure of the current reactant SMARTS hit.
-			IAtomContainer reactantSubstructure = createSubstructureWithExplicitHydrogens(reactant, curReactantSet);
+			IAtomContainer reactantSubstructure = createSubstructure(reactant, curReactantSet);
 			System.out.println("Reactant substructure: " + substructureToString(reactantSubstructure));
 			
 			// Setup the structure that holds the reactant class labels. Do this here so that it is cleared for each new putative RC.
@@ -297,7 +297,7 @@ public class ReactionSmartsQueryTool {
 				currentProductHit_AtomList.add(currentProductHits);
 
 				// Build a substructure of the current reactant SMARTS hit.
-				IAtomContainer productSubstructure = createSubstructureWithExplicitHydrogens(product, currentProductHits);
+				IAtomContainer productSubstructure = createSubstructure(product, currentProductHits);
 				System.out.println("Product substructure: " + substructureToString(reactantSubstructure));
 
 				// Generate and pick largest MCS. Since there are only one structure as a reactant substructure and one structure as a product substructure the largest MCS should be ok.
@@ -502,7 +502,7 @@ public class ReactionSmartsQueryTool {
 		}
 	}
 
-	private IAtomContainer createSubstructureWithExplicitHydrogens(IAtomContainer structure, List<Integer> atomSet) {
+	private IAtomContainer createSubstructure(IAtomContainer structure, List<Integer> atomSet) {
 		// This function extracts the atom from a structure identified by atomSet and creates a new substructure containing those atoms.
 		// It preserves the bonds between the atoms.
 
@@ -511,7 +511,15 @@ public class ReactionSmartsQueryTool {
 
 		if (atomSet.size()==1){
 			//only a single atom, so add it
-			substructure.addAtom(structure.getAtom(atomSet.get(0)));
+			IAtom origAtom = structure.getAtom(atomSet.get(0));
+			substructure.addAtom(origAtom);
+
+			//We also need to add the hydrogens from origAtom
+			for (IAtom atom : structure.getConnectedAtomsList(origAtom)){
+				if (atom.getSymbol().equals("H")){
+					substructure.addAtom(atom);
+				}
+			}
 		}else{
 			//We have more than one atom, hence loop over bonds
 			for (IBond bond : structure.bonds()){
@@ -530,8 +538,8 @@ public class ReactionSmartsQueryTool {
 		}
 		
 		//Do atom typing and add explicit hydrogens
-		doAT(substructure);
-        AtomContainerManipulator.convertImplicitToExplicitHydrogens(substructure);
+//		doAT(substructure);
+//        AtomContainerManipulator.convertImplicitToExplicitHydrogens(substructure);
 //        debugMol(substructure);
 
 		return substructure;
