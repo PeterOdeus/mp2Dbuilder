@@ -239,10 +239,14 @@ SMARTS:
 		String rsmiles;
 
 //		//No dealkylation, daylight and we return false
-		rsmiles="CCCN(C)C>>CCNC";
-		assertTrue(isDoubleMatch(rsmiles, 
-				ReactionSmartsDefinitions.N_DEALKYLATION_REACTANT_SMARTS, 
-				ReactionSmartsDefinitions.N_DEALKYLATION_PRODUCT_SMARTS));
+//		rsmiles="CCCN(C)C>>CCNC";
+//		assertTrue(isDoubleMatch(rsmiles, 
+//				ReactionSmartsDefinitions.N_DEALKYLATION_REACTANT_SMARTS, 
+//				ReactionSmartsDefinitions.N_DEALKYLATION_PRODUCT_SMARTS));
+		
+		rsmiles="CCCCC>>CCCCCO";
+		assertTrue(isDoubleMatch(rsmiles, ReactionSmartsDefinitions.HYDROXYLATION_REACTANT_SMARTS, ReactionSmartsDefinitions.HYDROXYLATION_PRODUCT_SMARTS));
+
 	}
 	
 	@Test 

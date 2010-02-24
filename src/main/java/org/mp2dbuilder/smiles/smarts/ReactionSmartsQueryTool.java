@@ -226,17 +226,17 @@ public class ReactionSmartsQueryTool {
         // Percieve atom types again to assign hydrogens atom types
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(product);
         
-		System.out.println("-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:");
-        debugMol(reactant);
-        debugMol(product);
-		System.out.println("-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:");
+//		System.out.println("-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:");
+//        debugMol(reactant);
+//        debugMol(product);
+//		System.out.println("-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:");
 		doAT(reactant);
 		doAT(product);
         AtomContainerManipulator.convertImplicitToExplicitHydrogens(reactant);
         AtomContainerManipulator.convertImplicitToExplicitHydrogens(product);
-        debugMol(reactant);
-        debugMol(product);
-		System.out.println("-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:");
+//        debugMol(reactant);
+//        debugMol(product);
+//		System.out.println("-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:");
         
 
 		System.out.println("Computing matches. ============================================");
@@ -281,8 +281,8 @@ public class ReactionSmartsQueryTool {
 					fullReactantHit_AtomList, putativeRC, curReactantSet);
 
 			// Build a substructure of the current reactant SMARTS hit.
-			// Ola, maste vi fixa for att fa till vaten?
 			IAtomContainer reactantSubstructure = createSubstructureWithExplicitHydrogens(reactant, curReactantSet);
+			System.out.println("Reactant substructure: " + substructureToString(reactantSubstructure));
 			
 			// Setup the structure that holds the reactant class labels. Do this here so that it is cleared for each new putative RC.
 			List<List<Integer>> reactantClasses = new ArrayList<List<Integer>>();
@@ -298,6 +298,7 @@ public class ReactionSmartsQueryTool {
 
 				// Build a substructure of the current reactant SMARTS hit.
 				IAtomContainer productSubstructure = createSubstructureWithExplicitHydrogens(product, currentProductHits);
+				System.out.println("Product substructure: " + substructureToString(reactantSubstructure));
 
 				// Generate and pick largest MCS. Since there are only one structure as a reactant substructure and one structure as a product substructure the largest MCS should be ok.
 				// Any mapping between reactant and the product should be ok as well.
@@ -407,6 +408,15 @@ public class ReactionSmartsQueryTool {
 		else{
 			return false;
 		}
+	}
+
+	private String substructureToString(IAtomContainer substructure) {
+		
+		String ret="";
+		for (IAtom a : substructure.atoms()){
+			ret=ret+ a.getSymbol()+substructure.getAtomNumber(a)+",";
+		}
+		return ret;
 	}
 
 	private boolean assertNonClassesHitsNew(IAtomContainer mcs,
@@ -1187,9 +1197,9 @@ public class ReactionSmartsQueryTool {
 			if(atoms.getAtomCount() > maxCount){
 				maxCount = atoms.getAtomCount();
 				if(chosenAtomContainer == null){
-					System.out.println("Choosing AC from MCSS having " + atoms.getAtomCount() + ".");
+					System.out.println("Choosing AC from MCSS having " + atoms.getAtomCount() + " atoms.");
 				}else{
-					System.out.println("No, wait... Choosing AC from MCSS having " + atoms.getAtomCount() + " instead.");
+					System.out.println("No, wait... Choosing AC from MCSS having " + atoms.getAtomCount() + " atoms instead.");
 				}
 				chosenAtomContainer = atoms;
 			}
