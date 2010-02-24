@@ -526,6 +526,7 @@ public class ReactionSmartsQueryTool {
 			for (IAtom atom : structure.getConnectedAtomsList(origAtom)){
 				if (atom.getSymbol().equals("H")){
 					substructure.addAtom(atom);
+					substructure.addBond(structure.getBond(atom,origAtom));
 				}
 			}
 		}else{
@@ -534,9 +535,29 @@ public class ReactionSmartsQueryTool {
 				for (int atomNr : atomSet){
 					if (bond.contains(structure.getAtom(atomNr))){
 						if ( atomSet.contains(structure.getAtomNumber(bond.getConnectedAtom(structure.getAtom(atomNr)))) ){
-							substructure.addAtom(structure.getAtom(atomNr));
-							substructure.addAtom(bond.getConnectedAtom(structure.getAtom(atomNr)));
+							
+							IAtom atom1 = structure.getAtom(atomNr);
+							IAtom atom2 = bond.getConnectedAtom(structure.getAtom(atomNr));
+							substructure.addAtom(atom1);
+							substructure.addAtom(atom2);
 							substructure.addBond(bond);
+							
+							//We also need to add the hydrogens for each atom
+							for (IAtom hatom : structure.getConnectedAtomsList(atom1)){
+								if (hatom.getSymbol().equals("H")){
+									substructure.addAtom(hatom);
+									substructure.addBond(structure.getBond(hatom,atom1));
+								}
+							}
+
+							for (IAtom hatom : structure.getConnectedAtomsList(atom2)){
+								if (hatom.getSymbol().equals("H")){
+									substructure.addAtom(hatom);
+									substructure.addBond(structure.getBond(hatom,atom2));
+								}
+							}
+
+							
 							break;
 						}
 
