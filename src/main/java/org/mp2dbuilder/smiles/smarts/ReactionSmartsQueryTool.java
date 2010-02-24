@@ -282,7 +282,7 @@ public class ReactionSmartsQueryTool {
 
 			// Build a substructure of the current reactant SMARTS hit.
 			// Ola, maste vi fixa for att fa till vaten?
-			IAtomContainer reactantSubstructure = createSubstructure(reactant, curReactantSet);
+			IAtomContainer reactantSubstructure = createSubstructureWithExplicitHydrogens(reactant, curReactantSet);
 			
 			// Setup the structure that holds the reactant class labels. Do this here so that it is cleared for each new putative RC.
 			List<List<Integer>> reactantClasses = new ArrayList<List<Integer>>();
@@ -297,7 +297,7 @@ public class ReactionSmartsQueryTool {
 				currentProductHit_AtomList.add(currentProductHits);
 
 				// Build a substructure of the current reactant SMARTS hit.
-				IAtomContainer productSubstructure = createSubstructure(product, currentProductHits);
+				IAtomContainer productSubstructure = createSubstructureWithExplicitHydrogens(product, currentProductHits);
 
 				// Generate and pick largest MCS. Since there are only one structure as a reactant substructure and one structure as a product substructure the largest MCS should be ok.
 				// Any mapping between reactant and the product should be ok as well.
@@ -414,27 +414,38 @@ public class ReactionSmartsQueryTool {
 		}
 	}
 
-	private IAtomContainer createSubstructure(IAtomContainer structure, List<Integer> atomSet) {
+	private IAtomContainer createSubstructureWithExplicitHydrogens(IAtomContainer structure, List<Integer> atomSet) {
 		// This function extracts the atom from a structure identified by atomSet and creates a new substructure containing those atoms.
 		// It preserves the bonds between the atoms.
-		
+
 		IChemObjectBuilder builder = NoNotificationChemObjectBuilder.getInstance();
 		IAtomContainer substructure = builder.newAtomContainer();
-		
-		for (IBond bond : structure.bonds()){
-			for (int atomNr : atomSet){
-				if (bond.contains(structure.getAtom(atomNr))){
-					if ( atomSet.contains(structure.getAtomNumber(bond.getConnectedAtom(structure.getAtom(atomNr)))) ){
-						substructure.addAtom(structure.getAtom(atomNr));
-						substructure.addAtom(bond.getConnectedAtom(structure.getAtom(atomNr)));
-						substructure.addBond(bond);
-						break;
+
+		if (atomSet.size()==1){
+			//only a single atom, so add it
+			substructure.addAtom(structure.getAtom(atomSet.get(0)));
+		}else{
+			//We have more than one atom, hence loop over bonds
+			for (IBond bond : structure.bonds()){
+				for (int atomNr : atomSet){
+					if (bond.contains(structure.getAtom(atomNr))){
+						if ( atomSet.contains(structure.getAtomNumber(bond.getConnectedAtom(structure.getAtom(atomNr)))) ){
+							substructure.addAtom(structure.getAtom(atomNr));
+							substructure.addAtom(bond.getConnectedAtom(structure.getAtom(atomNr)));
+							substructure.addBond(bond);
+							break;
+						}
+
 					}
-					
 				}
-			}
-		}		
-				
+			}	
+		}
+		
+		//Do atom typing and add explicit hydrogens
+		doAT(substructure);
+        AtomContainerManipulator.convertImplicitToExplicitHydrogens(substructure);
+//        debugMol(substructure);
+
 		return substructure;
 	}
 
