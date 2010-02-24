@@ -596,34 +596,11 @@ public class ReactionSmartsQueryTool {
 			List<List<Integer>> reactantClasses, int icurClass,
 			List<List<Integer>> prodHits) throws CDKException {
 		Set<Integer> prodHitsconcat;
-		Set<Integer> prodHitsconcat_pruned;
 		boolean addedToMCSClasses = false;
 		prodHitsconcat=concatIndices(prodHits);
 		System.out.println("   Produced hits: " + debugHits(prodHitsconcat));
 
-		List<List<Integer>> prodHits_pruned = removeIndicesWithoutCommonId(prodHits, productSubstructure);
-		prodHitsconcat_pruned = concatIndices(prodHits_pruned);
-		System.out.println("   Product hits pruned by MCS: " + debugHits(prodHitsconcat_pruned));
-		// Determine if there are any non-class product hits and remove them.
-		//identifyNonClassAtoms(prodHitsconcat_pruned, product, prodQueryTool);
-		//System.out.println("   Product hits pruned by non-class SMARTS: " + debugHits(prodHitsconcat_pruned));
-
-		// Keep hits hit by the class parts of the original smarts.
-		Set<Integer> prodToKeep = new HashSet<Integer>();
-		for (int prodHit : prodHitsconcat_pruned){
-			for (List<Integer> prodList : fullProductHit_AtomList){
-				if (prodList.contains(prodHit)){
-					System.out.println("Prod atom to keep: " + prodHit);
-					prodToKeep.add(prodHit);
-				}	
-			}
-		}
-		prodHitsconcat_pruned.clear();
-		prodHitsconcat_pruned.addAll(prodToKeep);
-		System.out.println("   Product hits produced by original SMARTS: " + debugHits(fullProductHit_AtomList));
-		System.out.println("   Product hits pruned by original SMARTS: " + debugHits(prodHitsconcat_pruned));
-
-		for (int j : prodHitsconcat_pruned){
+		for (int j : prodHitsconcat){
 			String commonId = (String) productSubstructure.getAtom(j).getProperty(COMMON_ID_FIELD_NAME);
 			// Pull out the corresponding atom from the reactant. 
 			// If the same class exists in the reactant and the product add it to the mcsClasses for that particular mcs (product) atom.
@@ -636,7 +613,7 @@ public class ReactionSmartsQueryTool {
 						System.out.println("Adding class: "+ icurClass + ", to mcs atom: " + j);
 						if (!mcsClasses.get(reactantSubstructure.getAtomNumber(atom)).contains(icurClass)) {
 							mcsClasses.get(reactantSubstructure.getAtomNumber(atom)).add(icurClass);
-							mcsSize[reactantSubstructure.getAtomNumber(atom)] = mcsClasses.get(reactantSubstructure.getAtomNumber(atom)).size();
+							//mcsSize[reactantSubstructure.getAtomNumber(atom)] = mcsClasses.get(reactantSubstructure.getAtomNumber(atom)).size();
 						}
 						addedToMCSClasses = true;
 					}
