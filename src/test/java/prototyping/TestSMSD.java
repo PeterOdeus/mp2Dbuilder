@@ -1,11 +1,13 @@
 package prototyping;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.zip.GZIPInputStream;
 
 import org.openscience.cdk.Molecule;
 import org.openscience.cdk.Reaction;
@@ -31,10 +33,16 @@ public class TestSMSD {
 	
 	public static void main(String[] args) throws Exception {
 
-		String filename = "metaprint2d/data/First500DB2005AllFields.rdf"; //"data/mdl/73320thRiReg.rdf";
+		String filename = "metaprint2d/data/First500DB2005AllFields.rdf";
 		
+		//Should work too, just rename
+		String filename2 = "metaprint2d/data/First500DB2005AllFields.rdf.gz";
+
 		System.out.println("Testing: " + filename);
 		InputStream ins = TestSMSD.class.getClassLoader().getResourceAsStream(filename);
+    	if(filename.endsWith(".gz")){
+    		ins = new GZIPInputStream(ins);
+    	}
 		URL url = TestSMSD.class.getClassLoader().getResource(filename);
 		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
 		File file = new File(url.toURI());
