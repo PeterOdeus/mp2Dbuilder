@@ -37,7 +37,7 @@ public class TestSMSD {
         CDKHueckelAromaticityDetector.detectAromaticity(A2);
 
 
-        boolean bondSensitive = true;
+        boolean bondSensitive = false;
         boolean removeHydrogen = true;
         boolean stereoMatch = false;
         boolean fragmentMinimization = true;
