@@ -319,7 +319,7 @@ public class ReactionSmartsQueryTool {
 							if (reactantAtom.getProperty(COMMON_ID_FIELD_NAME)!=null){
 								String curReactantAtom = (String) reactantAtom.getProperty(COMMON_ID_FIELD_NAME);	
 								if (curReactantAtom.equals(curMCSAtom)){
-									reactantAtomFromMCSAtom.put(mcs.getAtomNumber(atom), reactant.getAtomNumber(reactantAtom));
+									reactantAtomFromMCSAtom.put(mcs.getAtomNumber(atom), reactantSubstructure.getAtomNumber(reactantAtom));
 								}
 							}
 						}
@@ -327,13 +327,14 @@ public class ReactionSmartsQueryTool {
 							if (productAtom.getProperty(COMMON_ID_FIELD_NAME)!=null){
 								String curProductAtom = (String) productAtom.getProperty(COMMON_ID_FIELD_NAME);	
 								if (curProductAtom.equals(curMCSAtom)){
-									productAtomFromMCSAtom.put(mcs.getAtomNumber(atom), product.getAtomNumber(productAtom));
+									productAtomFromMCSAtom.put(mcs.getAtomNumber(atom), productSubstructure.getAtomNumber(productAtom));
 								}
 							}
 						}
 					}
 
 					// Check that all non-class atomic expressions have matches outside the MCS.
+					// Rakna antalet traffar pa productSubstructure och mcs. Det ska vara fler traffar i den forsta for att detta ska vara ok.
 					List<List<Integer>> complementToMCS = removeIndicesWithCommonId(currentProductHit_AtomList,product);
 
 					//Loop over all non-class atom expressions
