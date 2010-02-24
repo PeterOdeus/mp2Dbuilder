@@ -378,10 +378,9 @@ public class ReactionSmartsQueryTool {
 							}else{
 								List<List<Integer>> prodHits = productQueryTool.getUniqueMatchingAtoms();
 								// If the product hit corresponds to a reactant hit with the class conserved, then we add the class to mcsClasses.
-								addedToMCSClasses = checkProductSMARTSHit(reactantSubstructure,
-										productSubstructure, productQueryTool, currentProductHit_AtomList,
-										addedToMCSClasses, mcsClasses, reactantClasses,
-										mcsSize, curClass, prodHits);
+								addedToMCSClasses = checkProductSMARTSHit(reactantSubstructure, productSubstructure, 
+										currentProductHit_AtomList, mcsClasses, reactantClasses,
+										curClass, prodHits);
 
 							}
 						}
