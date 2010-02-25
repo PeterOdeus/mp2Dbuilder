@@ -36,10 +36,10 @@ public class TestSMSD {
 	
 	public static void main(String[] args) throws IOException, URISyntaxException, ReaccsFileEndedException, ReadingReaccsFileCancelledException, CDKException {
 
-//		String filename = "metaprint2d/data/First500DB2005AllFields.rdf";
+//		String filename2 = "metaprint2d/data/First500DB2005AllFields.rdf";
 		
 		//Should work too, just rename
-		String filename2 = "metaprint2d/data/First50DB2005AllFields.rdf.gz";
+		String filename2 = "metaprint2d/data/Metab_exp_2009-08-06_All.rdf.gz";
 
 		System.out.println("Testing: " + filename2);
 		InputStream ins = TestSMSD.class.getClassLoader().getResourceAsStream(filename2);
@@ -94,13 +94,14 @@ public class TestSMSD {
         CDKHueckelAromaticityDetector.detectAromaticity(A2);
 
 
-        boolean bondSensitive = false;
+        boolean bondSensitive = true;
         boolean removeHydrogen = true;
         boolean stereoMatch = false;
-        boolean fragmentMinimization = true;
-        boolean energyMinimization = true;
+        boolean fragmentMinimization = false;
+        boolean energyMinimization = false;
 
-        SMSD comparison = new SMSD(Algorithm.DEFAULT, bondSensitive);
+//        SMSD comparison = new SMSD(Algorithm.DEFAULT, bondSensitive);
+        SMSD comparison = new SMSD(Algorithm.CDKMCS, bondSensitive);
         comparison.init(A1, A2, removeHydrogen);
         comparison.setChemFilters(stereoMatch, fragmentMinimization, energyMinimization);
 
@@ -138,7 +139,7 @@ public class TestSMSD {
 //        System.out.println("Tanimoto Euclidean Distance: " + comparison.getEuclideanDistance());
 //        System.out.println("");
 
-        int nrMCSs = 0;
+        int nrMCSs = 0; int maxAtoms = 0; int minAtoms = 1000000; 
 		for (TreeMap<Integer, Integer> listOfMappings : comparison.getAllMapping()){
 			nrMCSs++;
 			int nrMCSAtoms = 0;
@@ -160,10 +161,17 @@ public class TestSMSD {
 //	                    targetAtom.getSymbol());
 				
 			}
+			if (nrMCSAtoms < minAtoms) {
+				minAtoms = nrMCSAtoms;
+			}
+			if (nrMCSAtoms > maxAtoms) {
+				maxAtoms = nrMCSAtoms;
+			}
 //			System.out.println("------- Nr of MCS atoms: " + nrMCSAtoms);
 		}
-//		System.out.println("+++++++++ Nr of MCS: " + nrMCSs);
-		
+		if (minAtoms != maxAtoms){
+			System.out.println("+++++++++ Diff min max atoms: " + minAtoms + ":" + maxAtoms);
+		}
 	}
 
     public final static long SECOND = 1000;
