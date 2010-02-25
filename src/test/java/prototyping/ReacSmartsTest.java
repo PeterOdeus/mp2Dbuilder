@@ -307,6 +307,7 @@ SMARTS:
 	@Test 
 	public void testReactSmartsMoleculeViewer() throws Exception {
 		String f = "metaprint2d/data/First500DB2005AllFields.rdf"; //"data/mdl/73320thRiReg.rdf";
+		//String f = "metaprint2d/data/Metab_exp_2009-08-06_All.rdf.gz"; //"data/mdl/73320thRiReg.rdf";
 		ReaccsMDLRXNReader reader = getReaccsReader(f);
 		//		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
 		//		IAtomContainer reactant = (IAtomContainer) reactionSet.getReaction(0).getReactants().getMolecule(0);
