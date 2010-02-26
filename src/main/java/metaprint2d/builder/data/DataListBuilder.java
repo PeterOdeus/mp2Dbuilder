@@ -19,7 +19,7 @@ import metaprint2d.analyzer.data.processor.DataSink;
  {
    private Map<Fingerprint, FPData> data = new HashMap();
  
-   public void put(Transformation t) throws IOException {
+   public synchronized void put(Transformation t) throws IOException {
      if (this.data == null) {
        throw new IOException("File closed");
      }

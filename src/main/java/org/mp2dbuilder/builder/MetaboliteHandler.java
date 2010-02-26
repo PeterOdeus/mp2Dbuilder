@@ -47,6 +47,7 @@ public class MetaboliteHandler {
 			// reaction.getProductCount());
 			// }
 
+			LOG.info("preparing for transformation");
 			Map<String,? extends Object> preparedMap = prepareForTransformation(reactionSet);
 
 			List<AtomData> atomDataList = (List<AtomData>) preparedMap.get("atomDataList");
@@ -59,6 +60,7 @@ public class MetaboliteHandler {
 		} catch (Exception e) {
 			LOG.warn("Exception thrown. ignoring this reaction");
 		}
+		LOG.info("returning transformation");
 		return t;
 	}
 

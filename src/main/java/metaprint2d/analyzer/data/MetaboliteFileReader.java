@@ -24,7 +24,8 @@ public class MetaboliteFileReader implements DataSource<Transformation> {
 	private static ILoggingTool logger = LoggingToolFactory
 			.createLoggingTool(MetaboliteFileReader.class);
 	private ReaccsMDLRXNReader reader;
-	private IReactionSet currentReactionSet;
+	
+	//	private IReactionSet currentReactionSet;
 	private MetaboliteHandler handler;
 	private boolean skipMultistep;
 
@@ -42,31 +43,18 @@ public class MetaboliteFileReader implements DataSource<Transformation> {
 		this(new FileInputStream(file), metaboliteHandler);
 	}
 
+	public ReaccsMDLRXNReader getReader() {
+		return reader;
+	}
+	
 	public void setInitialReaction(int i) {
 		this.reader.setInitialRiregNo(i);
 	}
 
-	public Transformation getNext() throws Exception {
+	public Transformation getNext(IReactionSet currentReactionSet) throws Exception {
 		Transformation t;
-		ensureOpen();
-		do {
-			try {
-				currentReactionSet = (IReactionSet) reader
-						.read(new NNReactionSet());
-			} catch (ReaccsFileEndedException e) {
-				logger.info("eof");
-				return null;
-			} catch (CDKException e) {
-				logger.fatal(e);
-				throw new RuntimeException(e);
-			}
-			if (currentReactionSet == null) {
-				return null;
-			}
-			t = this.handler.getTransformation(currentReactionSet);
-		} while ((this.skipMultistep) && (t.isMultiStep()));
-
-		return t;
+		//ensureOpen();
+		return this.handler.getTransformation(currentReactionSet);
 	}
 
 	private void ensureOpen() throws IOException {

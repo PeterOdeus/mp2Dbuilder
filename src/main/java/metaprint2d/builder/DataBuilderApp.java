@@ -29,6 +29,7 @@ import org.openscience.cdk.tools.LoggingToolFactory;
 public class DataBuilderApp
  {
    public static ILoggingTool LOG = LoggingToolFactory.createLoggingTool(DataBuilderApp.class);
+   private Integer threadPoolSize;
    public String infile;
    public String outfile;
    private String species;
@@ -109,6 +110,16 @@ public class DataBuilderApp
              this.species = ((String)it.next());
              LOG.info(new Object[] { "Species: " + this.species });
            }
+           else if ("-t".equals(opt)) {
+               if (this.threadPoolSize != null) {
+                 throw new IllegalArgumentException("Argument -t already specified");
+               }
+               if (!(it.hasNext())) {
+                 throw new IllegalArgumentException("Argument -t missing required value");
+               }
+               this.threadPoolSize = Integer.decode(((String)it.next()));
+               LOG.info(new Object[] { "Thread Pool Size: " + this.threadPoolSize });
+             }
            else if ("-r".equals(opt)) {
              if ((this.reactionTypes != null) || (this.smirks != null)) {
                throw new IllegalArgumentException("Argument -r already specified");
@@ -196,6 +207,7 @@ private void readReactionSmarts(String fileName) throws Exception {
      System.out.println("-i <input file>             path to input RDF file");
      System.out.println("-o <output file>            path to output file");
      System.out.println("-s <species>                species filter (optional)");
+     System.out.println("-t <number of concurrently running threads> Thread Pool Size");
      System.out.println("-r <reaction types>         reaction type filter (optional)");
 			  System.out.println("-rfile <file>         	  reaction type filter file (optional)");
      System.out.println("-include-multistep          include multi-step transformations (optional)");
@@ -358,6 +370,11 @@ private void run()
      }
  
      MetaPrintDataBuilder builder = new MetaPrintDataBuilder(in, out, this.initialReactionIndex);
+     
+     if(this.threadPoolSize != null){
+    	 builder.setPoolSize(this.threadPoolSize.intValue());
+     }
+     
      if (speciesFilter != null) {
 //       builder.setSpeciesFilter(speciesFilter);
      }

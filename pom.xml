@@ -50,98 +50,13 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-core</artifactId>
-			<version>bioclipse-2.1.x</version>
+			<artifactId>cdk</artifactId>
+			<version>1.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-interfaces</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-io</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-ioformats</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-nonotify</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-data</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-standard</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-atomtype</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-render</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-renderbasic</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-renderextra</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-renderawt</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-sdg</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-extra</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-isomorphism</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-smarts</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-valencycheck</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-smiles</artifactId>
-			<version>bioclipse-2.1.x</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openscience.cdk</groupId>
-			<artifactId>cdk-rendersvg</artifactId>
-			<version>bioclipse-2.1.x</version>
+			<artifactId>cdk-smsd</artifactId>
+			<version>x.x.x</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
