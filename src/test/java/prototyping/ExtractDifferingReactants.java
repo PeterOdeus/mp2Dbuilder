@@ -14,14 +14,14 @@ import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 
+import org.mp2dbuilder.io.ReaccsFileEndedException;
+import org.mp2dbuilder.io.ReaccsMDLRXNReader;
+import org.mp2dbuilder.io.ReadingReaccsFileCancelledException;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.fingerprint.Fingerprinter;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMoleculeSet;
 import org.openscience.cdk.interfaces.IReactionSet;
-import org.openscience.cdk.io.ReaccsFileEndedException;
-import org.openscience.cdk.io.ReaccsMDLRXNReader;
-import org.openscience.cdk.io.ReadingReaccsFileCancelledException;
 import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.nonotify.NNMoleculeSet;
 import org.openscience.cdk.nonotify.NNReactionSet;

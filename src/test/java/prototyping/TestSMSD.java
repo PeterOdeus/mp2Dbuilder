@@ -1,5 +1,6 @@
 package prototyping;
 
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,6 +11,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.zip.GZIPInputStream;
 
+import org.mp2dbuilder.io.ReaccsFileEndedException;
+import org.mp2dbuilder.io.ReaccsMDLRXNReader;
+import org.mp2dbuilder.io.ReadingReaccsFileCancelledException;
 import org.openscience.cdk.Molecule;
 import org.openscience.cdk.Reaction;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
@@ -20,9 +24,6 @@ import org.openscience.cdk.interfaces.IChemObject;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.interfaces.IReactionSet;
-import org.openscience.cdk.io.ReaccsFileEndedException;
-import org.openscience.cdk.io.ReaccsMDLRXNReader;
-import org.openscience.cdk.io.ReadingReaccsFileCancelledException;
 import org.openscience.cdk.nonotify.NNChemObject;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;

@@ -48,9 +48,6 @@ import org.openscience.cdk.interfaces.IChemObject;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.interfaces.IReactionSet;
-import org.openscience.cdk.io.ReaccsFileEndedException;
-import org.openscience.cdk.io.ReaccsMDLRXNReader;
-import org.openscience.cdk.io.ReadingReaccsFileCancelledException;
 import org.openscience.cdk.nonotify.NNChemObject;
 import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
@@ -81,6 +78,7 @@ public class ReactionSmartsQueryTool {
 
 	private Map<Integer, String> reactClasses;
 	private Map<Integer, String> prodClasses;
+	private IAtomContainer mcss;
 
 	/**
 	 * Constructor.
@@ -1227,6 +1225,7 @@ public class ReactionSmartsQueryTool {
 	 * return retmap; }
 	 */
 
+	/*
     	Map<Integer, Integer> retmap = new HashMap<Integer, Integer>();
 
 //    	String s="[CH3:1]=[N:2]";

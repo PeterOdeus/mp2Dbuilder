@@ -6,6 +6,7 @@ import java.io.Reader;
 
 import org.mp2dbuilder.viewer.CancelledException;
 import org.mp2dbuilder.viewer.ReactSmartsMoleculeViewerWorker;
+import org.openscience.cdk.Reaction;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IChemObject;
 import org.openscience.cdk.interfaces.IReaction;
@@ -66,7 +67,7 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 			ReadingReaccsFileCancelledException, CDKException {
 		if (object instanceof IReactionSet) {
 			readUntilRXN();
-				IReaction r = (IReaction) this.readReaction(object.getBuilder());
+				IReaction r = (IReaction) super.read(new Reaction());
 				if (r != null) {
 					((IReactionSet) object).addReaction(r);
 				}

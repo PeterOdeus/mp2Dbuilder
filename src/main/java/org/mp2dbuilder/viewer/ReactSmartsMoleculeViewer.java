@@ -12,6 +12,8 @@ import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
 import org.mp2dbuilder.builder.MetaboliteHandler;
+import org.mp2dbuilder.io.ReaccsFileEndedException;
+import org.mp2dbuilder.io.ReaccsMDLRXNReader;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
@@ -49,6 +51,7 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 	protected JCheckBox chkShouldShowMCSS;
 
 	JTextArea riregNoText;
+	private IAtomContainer mcss;
 
 	public ReactSmartsMoleculeViewer(ReaccsMDLRXNReader reader, String filename) throws Exception {
 		super(reader,filename);
@@ -132,11 +135,11 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 	         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(product);
 */
 	         
-			i1 = getImage(reactant, null, true, product, 2);
-			i2 = getImage(product, null, true, null, 2);
+			i1 = getImage(reactant, null, true, product, 2, false);
+			i2 = getImage(product, null, true, null, 2, false);
 		} catch(ReaccsFileEndedException e){
-			i1 = getImage(null,null,false,null, 2);
-			i2 = getImage(null,null,false,null, 2);
+			i1 = getImage(null,null,false,null, 2, false);
+			i2 = getImage(null,null,false,null, 2, false);
 		}
 		imagePanel.setImages(i1, i2, i3);
 	}
