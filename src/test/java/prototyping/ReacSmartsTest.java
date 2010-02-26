@@ -13,6 +13,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import javax.swing.JFrame;
 
@@ -306,7 +307,8 @@ SMARTS:
 
 	@Test 
 	public void testReactSmartsMoleculeViewer() throws Exception {
-		String f = "metaprint2d/data/First500DB2005AllFields.rdf"; //"data/mdl/73320thRiReg.rdf";
+		String f = "metaprint2d/data/First500DB2005AllFields.rdf.gz";
+//		String f = "metaprint2d/data/First500DB2005AllFields.rdf"; //"data/mdl/73320thRiReg.rdf";
 		//String f = "metaprint2d/data/Metab_exp_2009-08-06_All.rdf.gz"; //"data/mdl/73320thRiReg.rdf";
 		ReaccsMDLRXNReader reader = getReaccsReader(f);
 		//		IReactionSet reactionSet = (IReactionSet)reader.read(new NNReactionSet());
@@ -360,6 +362,10 @@ SMARTS:
 		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
 		URL url = this.getClass().getClassLoader().getResource(filename);
 		File file = new File(url.toURI());
+
+		if(filename.endsWith(".gz")){
+    		ins = new GZIPInputStream(ins);
+    	}
 		ReaccsMDLRXNReader reader = new ReaccsMDLRXNReader(ins);
 		long fileLengthLong = file.length();
 		reader.activateReset(fileLengthLong);
