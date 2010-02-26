@@ -10,11 +10,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.mp2dbuilder.mcss.AtomMapperUtil;
+import org.omegahat.Environment.DataStructures.Addable;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.atomtype.CDKAtomTypeMatcher;
 import org.openscience.cdk.exception.CDKException;
@@ -79,33 +81,19 @@ public class ReactionSmartsQueryTool {
 	private Map<Integer, String> reactClasses;
 	private Map<Integer, String> prodClasses;
 	private IAtomContainer mcss;
+	private List<String> smirks;
+
+	public ReactionSmartsQueryTool(List<String> smirks) {
+		this.smirks=smirks;
+	}
 
 	/**
 	 * Constructor.
-	 * @param reactantQuery the SMARTS string for the reactant part of the reaction
-	 * @param productQuery the SMARTS string for the product part of the reaction
+	 * @param SMIRK: reactionSmart to query for
 	 */
-	public ReactionSmartsQueryTool(String reactantQuery, String productQuery) {
-		this.reactantQuery=reactantQuery;
-		this.productQuery=productQuery;
-
-
-		//remove the [$( partof reactant
-		reactantQueryNoDollar=removeDollarPart(reactantQuery);
-
-		//product query must not have [$(
-		productQueryNoDollar=productQuery;
-
-		//Extract classes to map INT > String
-		reactClasses = getClasses(reactantQueryNoDollar);
-		prodClasses = getClasses(productQueryNoDollar);
-
-		//Extract full query without dollar and without classes
-		reactantQueryNoClasses=removeAllClasses(reactantQuery);
-		productQueryNoClasses=removeAllClasses(productQuery);
-
-		//remove the [$( partof reactant. Assign it again to get it without classes.
-		reactantQueryNoDollar=removeDollarPart(reactantQueryNoClasses);
+	public ReactionSmartsQueryTool(String SMIRK) {
+		this.smirks=new ArrayList<String>();
+		smirks.add(SMIRK);
 	}
 
 	/**
@@ -219,7 +207,6 @@ public class ReactionSmartsQueryTool {
 		}
 	}
 
-	
 	/**
 	 * Do matching in reaction and product.
 	 * 
@@ -231,6 +218,87 @@ public class ReactionSmartsQueryTool {
 	 * @throws Exception
 	 */
 	public boolean matches(IReaction reaction) throws Exception {
+
+		boolean ret=false;
+		StringBuffer buf=new StringBuffer();
+		Set<Integer> reactanthits=new HashSet<Integer>();
+		if (smirks!=null && smirks.size()>0){
+			for (String smirk : smirks){
+				boolean isMatch = doMatch(smirk, reaction);
+				List<List<Integer>> matchingRCs = getUniqueReactantMatchingAtoms();
+				if (isMatch){
+					buf.append("  SMIRK: " + smirk + " resulted in match with RC(s): " + concatIndices(matchingRCs) + "\n");
+					ret=true;	//only one is enough to return true
+					//Add reactant hits to set
+					reactanthits.addAll(concatIndices(matchingRCs));
+				}
+			}
+			//Set collective atom matches, just merge them all in one list
+			reactantAtomNumbers=new ArrayList<List<Integer>>();
+			for (Integer i : reactanthits){
+				List<Integer> l = new ArrayList<Integer>();
+				l.add(i);
+				reactantAtomNumbers.add(l);
+			}
+			
+			System.out.println("#####################################");
+			System.out.println("Results from multiple SMIRKS matching:");
+			System.out.println("#####################################");
+			System.out.print(buf.toString());
+			System.out.println("#####################################");
+			System.out.println("Conclusion for matches: '" + ret + "' with all RCs: " + concatIndices(reactantAtomNumbers));
+			System.out.println("#####################################");
+		}else{
+			System.out.println("No SMIRKS available to match.");
+		}
+		return ret;
+	}
+
+	/**
+	 * Do matching in reaction and product.
+	 * 
+	 * @param reaction
+	 *            The reaction to be queried
+	 * @return true if there is a match in reactant and product molecules, and
+	 *         all atoms marked with class are conserved in reactant and
+	 *         product.
+	 * @throws Exception
+	 */
+	public boolean doMatch(String SMIRKS, IReaction reaction) throws Exception {
+		
+		StringTokenizer tokenizer = new StringTokenizer(SMIRKS);
+		String reactantQuery = tokenizer.nextToken(">>");
+		String productQuery = tokenizer.nextToken(">>");
+
+		System.out.println("====================");
+		System.out.println("= Now processing smirk: " + SMIRKS);
+		System.out.println("= Reactant SMARTS: " + reactantQuery);
+		System.out.println("= Product SMARTS: " + productQuery);
+		System.out.println("====================");
+		
+		if (reactantQuery==null || productQuery==null || reactantQuery.equals("") || productQuery.equals("") ){
+			System.out.println("Empty reaction or product query. Cannot continue matching.");
+			return false;
+		}
+		
+
+		//remove the [$( partof reactant
+		reactantQueryNoDollar=removeDollarPart(reactantQuery);
+
+		//product query must not have [$(
+		productQueryNoDollar=productQuery;
+
+		//Extract classes to map INT > String
+		reactClasses = getClasses(reactantQueryNoDollar);
+		prodClasses = getClasses(productQueryNoDollar);
+
+		//Extract full query without dollar and without classes
+		reactantQueryNoClasses=removeAllClasses(reactantQuery);
+		productQueryNoClasses=removeAllClasses(productQuery);
+
+		//remove the [$( partof reactant. Assign it again to get it without classes.
+		reactantQueryNoDollar=removeDollarPart(reactantQueryNoClasses);
+		
 		//TODO: Change some of the List<List<Integer>> to List<Integer>, we only use them as lists and not lists of lists.
 		//Assert only one reactant and one product, this is all we can handle for now
 		//TODO: Extend this to be more generic
@@ -429,6 +497,11 @@ public class ReactionSmartsQueryTool {
 		else{
 			return false;
 		}
+	}
+
+	private String extractReactantSMARTS(String smirk) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private boolean noSMARTSHits(IAtomContainer structure,

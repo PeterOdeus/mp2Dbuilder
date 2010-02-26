@@ -185,7 +185,7 @@ public class ReactSmartsMoleculeViewerWorker extends SwingWorker<Void, String> {
 		}
 
 		ReactionSmartsQueryTool sqt = new ReactionSmartsQueryTool(
-				reactantQuery, productQuery);
+				reactantQuery +">>" + productQuery);
 
 		// We also know we only have one reactant and one product
 		IAtomContainer reactant = (IAtomContainer) reaction.getReactants()

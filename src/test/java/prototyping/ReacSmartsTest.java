@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -129,7 +130,7 @@ public class ReacSmartsTest {
 		rr.addReactant(mol_in);
 		rr.addProduct(mol_out);
 
-		ReactionSmartsQueryTool rq= new ReactionSmartsQueryTool(ReactionSmartsDefinitions.HYDROXYLATION_REACTANT_SMARTS, ReactionSmartsDefinitions.HYDROXYLATION_PRODUCT_SMARTS);
+		ReactionSmartsQueryTool rq= new ReactionSmartsQueryTool(ReactionSmartsDefinitions.HYDROXYLATION_REACTANT_SMARTS +">>" + ReactionSmartsDefinitions.HYDROXYLATION_PRODUCT_SMARTS);
 		boolean ret= rq.matches(rr);
 		assertTrue(ret);
 
@@ -156,7 +157,7 @@ public class ReacSmartsTest {
 		IReaction reaction = reactionSet.getReaction(0);
 		String reactantQuery = ReactionSmartsDefinitions.HYDROXYLATION_REACTANT_SMARTS;
 		String productQuery = "[*:1]";
-		ReactionSmartsQueryTool sqt = new ReactionSmartsQueryTool(reactantQuery,productQuery);
+		ReactionSmartsQueryTool sqt = new ReactionSmartsQueryTool(reactantQuery +">>" + productQuery);
 		
 		//We also know we only have one reactant and one product
 		IAtomContainer reactant = (IAtomContainer) reaction.getReactants().getMolecule(0);
@@ -174,7 +175,7 @@ public class ReacSmartsTest {
 		IReaction reaction = reactionSet.getReaction(0);
 		String reactantQuery = ReactionSmartsDefinitions.HYDROXYLATION_REACTANT_SMARTS;
 		String productQuery = "[*:1]";
-		ReactionSmartsQueryTool sqt = new ReactionSmartsQueryTool(reactantQuery,productQuery);
+		ReactionSmartsQueryTool sqt = new ReactionSmartsQueryTool(reactantQuery +">>" + productQuery);
 		
 		//We also know we only have one reactant and one product
 		IAtomContainer reactant = (IAtomContainer) reaction.getReactants().getMolecule(0);
@@ -247,6 +248,27 @@ SMARTS:
 	}
 	
 	@Test 
+	public void testMultipleSMARTS() throws Exception {
+		String rsmiles;
+
+//Dealkylation and hydroxylation
+		rsmiles="CCCN(C)C>>OCCCNC";
+		SmilesParser sp = new SmilesParser(NoNotificationChemObjectBuilder.getInstance());
+		IReaction reaction = sp.parseReactionSmiles(rsmiles);
+		List<String> smirks=new ArrayList<String>();
+		smirks.add(ReactionSmartsDefinitions.N_DEALKYLATION_REACTANT_SMARTS +">>"+ 
+				   ReactionSmartsDefinitions.N_DEALKYLATION_PRODUCT_SMARTS);
+		smirks.add(ReactionSmartsDefinitions.HYDROXYLATION_REACTANT_SMARTS +">>"+ 
+				   ReactionSmartsDefinitions.HYDROXYLATION_PRODUCT_SMARTS);
+		ReactionSmartsQueryTool rq= new ReactionSmartsQueryTool(smirks);
+
+		//We expect to find 3 RC
+		assertTrue(rq.matches(reaction));
+		assertEquals(3, rq.getUniqueReactantMatchingAtoms().size());
+	}
+
+	
+	@Test 
 	public void testHydroxylation() throws Exception {
 
 		//The simplest form of hydroxylation.
@@ -291,12 +313,12 @@ SMARTS:
 
 		SmilesParser sp = new SmilesParser(NoNotificationChemObjectBuilder.getInstance());
 		IReaction reaction = sp.parseReactionSmiles(rsmiles);
-		ReactionSmartsQueryTool rq= new ReactionSmartsQueryTool(reactionQuery, productQuery);
+		ReactionSmartsQueryTool rq= new ReactionSmartsQueryTool(reactionQuery +">>"+ productQuery);
 
 		boolean ret= rq.matches(reaction);
-		System.out.println("**************");
-		System.out.println("* Testing done. Match: " + ret);
-		System.out.println("**************");
+//		System.out.println("**************");
+//		System.out.println("* Testing done. Match: " + ret);
+//		System.out.println("**************");
 		return ret; 
 	}
 

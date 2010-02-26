@@ -50,10 +50,12 @@ public class ReactionSmartsHandler extends MetaboliteHandler {
 		List<AtomData> atomDataList = null;
 		for (Map.Entry<String, String> mapEntry : _reactionSmarts.entrySet()) {
 			String reactionName = mapEntry.getKey();
-			StringTokenizer tokenizer = new StringTokenizer(mapEntry.getValue());
-			String reactantString = tokenizer.nextToken(">>");
-			String productString = tokenizer.nextToken(">>");
-			sqt = new ReactionSmartsQueryTool(reactantString, productString);
+//			StringTokenizer tokenizer = new StringTokenizer(mapEntry.getValue());
+//			String reactantString = tokenizer.nextToken(">>");
+//			String productString = tokenizer.nextToken(">>");
+			
+			//Updated for API change, now accepting
+			sqt = new ReactionSmartsQueryTool(mapEntry.getValue());
 			if (sqt.matches(theReaction)) {
 				List<List<Integer>> matchingReactantAtomsList = sqt
 						.getUniqueReactantMatchingAtoms();
