@@ -49,6 +49,7 @@ Add jchempaint jars to local Maven repo
 	mvn eclipse:eclipse
 	
 	In Eclipse, do a refresh and "project clean" on mp2Dbuilder.
+	In Eclipse, right-click mp2Dbuilder project and do a "Maven -> Enable Dependency Management" (if applicable).
 	In Eclipse, right-click mp2Dbuilder project and do a "Maven -> Update Dependencies", 
 	 followed by "Run As -> Maven Clean" and "Run As -> Maven Install" 
 
@@ -69,8 +70,8 @@ Maven build
 	
 Generating bin file
 	run from inside the target directory:
-	java -cp ./mp2Dbuilder-0.0.1-SNAPSHOT-jar-with-dependencies.jar \
-	metaprint2d.builder.DataBuilderApp -i test-classes/data/mdl/First50DB2005AllFields.rdf \
+	java -Dcdk.debugging=true -cp ./mp2Dbuilder-0.0.1-SNAPSHOT-jar-with-dependencies.jar \
+	metaprint2d.builder.DataBuilderApp -i test-classes/data/mdl/First5DB2005AllFields.rdf \
 	-o out.bin -t 1 -rfile test-classes/data/mdl/ReactionSMARTSFilter.two
 	
 Testing resulting bin file

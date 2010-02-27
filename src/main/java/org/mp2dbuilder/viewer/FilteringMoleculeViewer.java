@@ -129,11 +129,11 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 				}
 			}
 
-			i1 = getImage(reactant, null, true, product, 2, false);
-			i2 = getImage(product, null, true, null, 2, false);
+			i1 = getImage(reactant, null, true, product, 2, false, false);
+			i2 = getImage(product, null, true, null, 2, false, false);
 		} catch (ReaccsFileEndedException e) {
-			i1 = getImage(null, null, false, null, 2, false);
-			i2 = getImage(null, null, false, null, 2, false);
+			i1 = getImage(null, null, false, null, 2, false, false);
+			i2 = getImage(null, null, false, null, 2, false, false);
 		}
 		imagePanel.setImages(i1, i2, null);
 	}
@@ -197,8 +197,8 @@ public class FilteringMoleculeViewer extends MoleculeViewer {
 
 	@Override
 	protected void initImagePanel() throws CDKException {
-		Image i1 = getImage(null, null, false, null, 2, false);
-		Image i2 = getImage(null, null, false, null, 2, false);
+		Image i1 = getImage(null, null, false, null, 2, false, false);
+		Image i2 = getImage(null, null, false, null, 2, false, false);
 		imagePanel = new ImagePanel(i1, i2, null);
 	}
 

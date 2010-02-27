@@ -126,9 +126,9 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 	}
 
 	protected void initImagePanel() throws CDKException {
-		Image i1 = getImage(null, null, false, null, 3, false);
-		Image i2 = getImage(null, null, false, null, 3, false);
-		Image i3 = getImage(null, null, false, null, 3, false);
+		Image i1 = getImage(null, null, false, null, 3, false, false);
+		Image i2 = getImage(null, null, false, null, 3, false, false);
+		Image i3 = getImage(null, null, false, null, 3, false, false);
 		imagePanel = new ImagePanel(i1, i2, i3);
 	}
 
@@ -166,13 +166,13 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 			IAtomContainer product = (IAtomContainer) returnList.get("product");
 			IAtomContainer mcs = (IAtomContainer) returnList.get("mcss");
 
-			i1 = getImage(reactant, mcs, true, product, 3, false);
-			i2 = getImage(product, mcs, false, null, 3, false);
-			i3 = getImage(mcs, mcs, false, null, 3, false);
+			i1 = getImage(reactant, mcs, true, product, 3, false, false);
+			i2 = getImage(product, mcs, false, null, 3, false, false);
+			i3 = getImage(mcs, mcs, false, null, 3, false, false);
 		} catch (ReaccsFileEndedException e) {
-			i1 = getImage(null, null, false, null, 3, false);
-			i2 = getImage(null, null, false, null, 3, false);
-			i3 = getImage(null, null, false, null, 3, false);
+			i1 = getImage(null, null, false, null, 3, false, false);
+			i2 = getImage(null, null, false, null, 3, false, false);
+			i3 = getImage(null, null, false, null, 3, false, false);
 		}
 		imagePanel.setImages(i1, i2, i3);
 	}
@@ -180,7 +180,7 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 	protected Image getImage(IAtomContainer atomContainer,
 			IAtomContainer mcsContainer, boolean renderReactionCentre,
 			IAtomContainer productContainer, int numberOfGraphs,
-			boolean drawNumbers)
+			boolean drawNumbers, boolean showHydrogens)
 			throws CDKException {
 		Dimension imagePanelDimension = null;
 		double imagePanelWidth = 0.0;
@@ -232,13 +232,13 @@ public class MoleculeViewer extends JPanel implements ActionListener {
 		// the renderer needs to have a toolkit-specific font manager
 		Renderer renderer = new Renderer(generators, new AWTFontManager());
 
-		renderer.getRenderer2DModel().setDrawNumbers(drawNumbers);
+		//renderer.getRenderer2DModel().setDrawNumbers(drawNumbers);
 		//renderer.getRenderer2DModel().set .setIsCompact(false);
 		// the call to 'setup' only needs to be done on the first paint
 		renderer.setup(molecule, drawArea);
 		
-		renderer.getRenderer2DModel().setDrawNumbers(false);
-		renderer.getRenderer2DModel().setShowExplicitHydrogens(true);
+		renderer.getRenderer2DModel().setDrawNumbers(drawNumbers);
+		renderer.getRenderer2DModel().setShowExplicitHydrogens(showHydrogens);
 		renderer.getRenderer2DModel().setShowAtomTypeNames(true);
 		
 		// paint the background

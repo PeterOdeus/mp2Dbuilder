@@ -43,11 +43,13 @@ public class MetaboliteHandler {
 			//LOG.info("preparing for transformation");
 			preparedMap = prepareForTransformation(reactionSet);
 		}catch (ConcurrentModificationException e2) {
-			//LOG.warn("Exception thrown. ignoring this reaction");
+			LOG.warn("Exception thrown. ignoring this reaction: " + e2.getMessage());
 			e2.printStackTrace();
+			return t;
 		} catch (ArrayIndexOutOfBoundsException e1) {
-			//LOG.warn("Exception thrown. ignoring this reaction");
+			LOG.warn("Exception thrown. ignoring this reaction: " + e1.getMessage());
 			e1.printStackTrace();
+			return t;
 		}catch (Exception e) {
 			e.printStackTrace();
 		}

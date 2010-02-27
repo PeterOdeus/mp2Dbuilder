@@ -48,7 +48,7 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 	IReactionSet currentReactionSet;
 	public List<IReaction> reactionList;
 	protected JCheckBox chkShouldDrawNumbers;
-	protected JCheckBox chkShouldShowMCSS;
+	protected JCheckBox chkShouldShowHydrogens;
 
 	JTextArea riregNoText;
 	private IAtomContainer mcss;
@@ -95,9 +95,9 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 	protected void addOptions(JToolBar optionsBar) {
 		chkShouldDrawNumbers = new JCheckBox("Show Atom Numbers");
 		optionsBar.add(chkShouldDrawNumbers);
-		chkShouldShowMCSS = new JCheckBox("Show MCSS");
-		chkShouldShowMCSS.setSelected(true);
-		optionsBar.add(chkShouldShowMCSS);
+		chkShouldShowHydrogens = new JCheckBox("Show Hydrogens");
+		chkShouldShowHydrogens.setSelected(true);
+		optionsBar.add(chkShouldShowHydrogens);
 	}
 
 	@Override
@@ -135,11 +135,15 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 	         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(product);
 */
 	         
-			i1 = getImage(reactant, null, true, product, 2, false);
-			i2 = getImage(product, null, true, null, 2, false);
+			i1 = getImage(reactant, null, true, product, 2
+					, chkShouldDrawNumbers.isSelected()
+					, chkShouldShowHydrogens.isSelected());
+			i2 = getImage(product, null, true, null, 2
+					, chkShouldDrawNumbers.isSelected()
+					, chkShouldShowHydrogens.isSelected());
 		} catch(ReaccsFileEndedException e){
-			i1 = getImage(null,null,false,null, 2, false);
-			i2 = getImage(null,null,false,null, 2, false);
+			i1 = getImage(null,null,false,null, 2, false, false);
+			i2 = getImage(null,null,false,null, 2, false, false);
 		}
 		imagePanel.setImages(i1, i2, i3);
 	}
@@ -212,9 +216,9 @@ public class ReactSmartsMoleculeViewer extends MoleculeViewer {
 
 	@Override
 	protected void initImagePanel() throws CDKException {
-		Image i1 = getImage(null, null, false, null, 3, false);
-		Image i2 = getImage(null, null, false, null, 3, false);
-		Image i3 = getImage(null, null, false, null, 3, false);
+		Image i1 = getImage(null, null, false, null, 3, false, false);
+		Image i2 = getImage(null, null, false, null, 3, false, false);
+		Image i3 = getImage(null, null, false, null, 3, false, false);
 		imagePanel = new ImagePanel(i1, i2, i3);
 	}
 
