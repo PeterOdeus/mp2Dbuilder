@@ -1,4 +1,7 @@
-.settings
+.classpath
+.project
+.settings/
+target/
 bin
 output
-target
+src/main/java/metaprint2d/data/Metab_exp_2009-08-06_All.rdf.gz
