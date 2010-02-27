@@ -1,7 +1,13 @@
 Setup instructions (hints):
 
 Hints: if Eclipse doesn't work the way you expect, here's the usual suspects of Eclipse: 
-	clean, close&open project, restart using -clean flag... 
+	From the command prompt:
+	   mvn eclipse:clean (if there are already eclipse specific files)
+	   mvn eclipse:eclipse
+	   restart eclipse using -clean flag...
+	From inside Eclipse
+	   clean, 
+	   close&open project	 
 	
 	When eclipse is complaining about maven dependency jars: Please make sure that the given dependency 
 	jar file is "visible" inside the eclipse project ("Maven Dependencies").
@@ -37,6 +43,11 @@ Add jchempaint jars to local Maven repo
 	ant clean (as a precaution)
 	ant dist-all
 	../mp2Dbuilder/installCDKIntoMaven (TODO: make Maven install script fail early if any jar installation fails)
+	
+	-Generate Eclipse project file by using the following Maven commands:
+	mvn eclipse:clean (if there are already eclipse specific files)
+	mvn eclipse:eclipse
+	
 	In Eclipse, do a refresh and "project clean" on mp2Dbuilder.
 	In Eclipse, right-click mp2Dbuilder project and do a "Maven -> Update Dependencies", 
 	 followed by "Run As -> Maven Clean" and "Run As -> Maven Install" 
@@ -60,11 +71,10 @@ Generating bin file
 	run from inside the target directory:
 	java -cp ./mp2Dbuilder-0.0.1-SNAPSHOT-jar-with-dependencies.jar \
 	metaprint2d.builder.DataBuilderApp -i test-classes/data/mdl/First50DB2005AllFields.rdf \
-	-o out.bin -rfile test-classes/data/mdl/ReactionSMARTSFilter.two
+	-o out.bin -t 1 -rfile test-classes/data/mdl/ReactionSMARTSFilter.two
 	
 Testing resulting bin file
 	run from inside the target directory (if you have metaprint2d-exe in your possession):
-	java -jar ../../metaprint2d-exe-0.1-SNAPSHOT-jar-with-dependencies.jar \
-	-d out.bin -c LOOSE "O=C(NC(=O)C)NC(=O)C(CC)(CC)Br" 
+	java -jar ../../metaprint2d-exe-0.1-SNAPSHOT-jar-with-dependencies.jar -d out.bin -c LOOSE "O=C(NC(=O)C)NC(=O)C(CC)(CC)Br" 
 	
 	

@@ -66,14 +66,14 @@ public class DataBuilderAppTest {
 	@Test
 	public void testDataBuilderAppTwoSmirksMultipleRiregs() throws Exception {
 		URL url = this.getClass().getClassLoader().getResource(
-				"data/mdl/First50DB2005AllFields.rdf");
+				"data/mdl/First5DB2005AllFields.rdf");
 		String inFile = url.getPath();
 		url = this.getClass().getClassLoader().getResource("data/mdl");
-		String outFile = url.getPath() + "/twoSMIRKSMultipleRiregsOut.bin";
+		String outFile = url.getPath() + "/twoSMIRKSMultipleRiregs1ThreadOut.bin";
 		url = this.getClass().getClassLoader().getResource(
 				"data/mdl/ReactionSMARTSFilter.two");
 		String reactionSmartsFilterFile = url.getPath();
-		String[] args = { "-i", inFile, "-o", outFile, "-rfile",
+		String[] args = { "-i", inFile, "-o", outFile, "-t", "1", "-rfile",
 				reactionSmartsFilterFile };
 		DataBuilderApp.main(args);
 	}
@@ -81,10 +81,10 @@ public class DataBuilderAppTest {
 	@Test
 	public void testDataBuilderAppTwoSmirksMultipleRiregs4Threads() throws Exception {
 		URL url = this.getClass().getClassLoader().getResource(
-				"data/mdl/First50DB2005AllFields.rdf");
+				"data/mdl/First20DB2005AllFields.rdf");
 		String inFile = url.getPath();
 		url = this.getClass().getClassLoader().getResource("data/mdl");
-		String outFile = url.getPath() + "/twoSMIRKSMultipleRiregsOut.bin";
+		String outFile = url.getPath() + "/twoSMIRKSMultipleRiregs4ThreadsOut.bin";
 		url = this.getClass().getClassLoader().getResource(
 				"data/mdl/ReactionSMARTSFilter.two");
 		String reactionSmartsFilterFile = url.getPath();

@@ -57,7 +57,7 @@ List<Future> futureList;
        while (true) {
          
          if (this.LOG != null) {
-           this.LOG.info("Reading #" + Integer.valueOf(this.nn));
+           System.out.println("Reading #" + Integer.valueOf(this.nn));
          }
          
  			try {
@@ -74,17 +74,25 @@ List<Future> futureList;
  				break;
  			}
          
- 			IReactionSet tempReactionSet = currentReactionSet;
- 			Future future = pool.submit(new Handler(tempReactionSet, this, new Transformation()));
- 			
- 			if(numberOfRunsSinceLastRun%100 == 99){
- 				numberOfRunsSinceLastRun = 1;
- 				for(int i = 0; i < futureList.size(); i++){
+ 			while(futureList.size() > poolSize){
+ 	    	   for(int i = 0; i < futureList.size(); i++){
  					if(futureList.get(i).isDone()){
  						futureList.remove(i);
  					}
  				}
- 			}
+ 	    	   if(futureList.size() <= poolSize){
+ 	    		   break;
+ 	    	   }
+ 	    	   try{
+ 	    		   Thread.currentThread().sleep(3000);
+ 	    	   }catch(Exception e){
+ 	    		   this.LOG.warn(e);
+ 	    	   }
+ 	    	   System.out.println("Waiting for threads to be queued.");
+ 	       }
+ 			
+ 			IReactionSet tempReactionSet = currentReactionSet;
+ 			Future future = pool.submit(new Handler(tempReactionSet, this, new Transformation()));
  			
  			futureList.add(future);
          
@@ -101,13 +109,13 @@ List<Future> futureList;
     		   break;
     	   }
     	   try{
-    		   Thread.currentThread().sleep(1000);
+    		   Thread.currentThread().sleep(5000);
     	   }catch(Exception e){
     		   this.LOG.warn(e);
     	   }
-    	   this.LOG.info("Waiting for threads to complete.");
+    	   System.out.println("Waiting for threads to complete.");
        }
-        
+       System.out.println("Ready to flush.");
        this.out.flush();
      } finally {
        this.done = true;

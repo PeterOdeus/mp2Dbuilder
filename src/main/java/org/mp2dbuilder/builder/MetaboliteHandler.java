@@ -1,6 +1,7 @@
 package org.mp2dbuilder.builder;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,32 +36,38 @@ public class MetaboliteHandler {
 	public Transformation getTransformation(IReactionSet reactionSet)
 			throws Exception {
 		Transformation t = null;
+		List<AtomData> atomDataList = null;
+		Map<String,? extends Object> preparedMap = null;
 		try {
-			// if (reaction.getReactantCount() != 1) {
-			// throw new
-			// IllegalArgumentException("Reactant count expected: 1, found: " +
-			// reaction.getReactantCount());
-			// }
-			// if (reaction.getProductCount() != 1) {
-			// throw new
-			// IllegalArgumentException("Product count expected: 1, found: " +
-			// reaction.getProductCount());
-			// }
 
-			LOG.info("preparing for transformation");
-			Map<String,? extends Object> preparedMap = prepareForTransformation(reactionSet);
-
-			List<AtomData> atomDataList = (List<AtomData>) preparedMap.get("atomDataList");
-
+			//LOG.info("preparing for transformation");
+			preparedMap = prepareForTransformation(reactionSet);
+		}catch (ConcurrentModificationException e2) {
+			//LOG.warn("Exception thrown. ignoring this reaction");
+			e2.printStackTrace();
+		} catch (ArrayIndexOutOfBoundsException e1) {
+			//LOG.warn("Exception thrown. ignoring this reaction");
+			e1.printStackTrace();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		try{
+			atomDataList = (List<AtomData>) preparedMap.get("atomDataList");
+		} catch (Exception e) {
+			//LOG.warn("Exception thrown. ignoring this reaction");
+			e.printStackTrace();
+		}
+		try{
 			t = new Transformation();
 			t.setAtomData(atomDataList);
-
+		} catch (Exception e) {
+			//LOG.warn("Exception thrown. ignoring this reaction");
+			e.printStackTrace();
+		}
 			// ????????? what about this one?
 			// t.setMappings(analysis.getMappings());
-		} catch (Exception e) {
-			LOG.warn("Exception thrown. ignoring this reaction");
-		}
-		LOG.info("returning transformation");
+		
+		//LOG.info("returning transformation");
 		return t;
 	}
 
