@@ -335,7 +335,7 @@ public class ReactionSmartsQueryTool {
         	return false;
         }
         
-        // This computes an MCS mapping stored as a COMMON_ID.
+       // This computes an MCS mapping stored as a COMMON_ID.
 		generateCommonIDUsingSMSD(reactant, product);
 		System.out.println("-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:");
 		doAT(reactant);
@@ -1403,7 +1403,7 @@ public class ReactionSmartsQueryTool {
 		boolean fragmentMinimization = false;
 		boolean energyMinimization = false;
 
-		SMSD comparison = new SMSD(Algorithm.DEFAULT, bondSensitive);
+		SMSD comparison = new SMSD(Algorithm.CDKMCS, bondSensitive); //There seems to be a bug in Algortihm.DEFAULT. The MCS is sometimes incorrect. 
 		comparison.init(reactant, product, removeHydrogen);
 		comparison.setChemFilters(stereoMatch, fragmentMinimization, energyMinimization);
 
@@ -1417,7 +1417,6 @@ public class ReactionSmartsQueryTool {
 		for (Map.Entry<Integer, Integer> mappings : comparison.getFirstMapping().entrySet()) {
 			int reactantMappingNumber = mappings.getKey();
 			int productMappingNumber = mappings.getValue();
-
 			reactant.getAtom(reactantMappingNumber).setProperty(COMMON_ID_FIELD_NAME, Integer.toString(enumerator));
 			product.getAtom(productMappingNumber).setProperty(COMMON_ID_FIELD_NAME, Integer.toString(enumerator));
 			enumerator++;
