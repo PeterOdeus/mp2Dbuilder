@@ -1,9 +1,7 @@
 package org.mp2dbuilder.smiles.smarts;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -15,8 +13,6 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.mp2dbuilder.mcss.AtomMapperUtil;
-import org.omegahat.Environment.DataStructures.Addable;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.atomtype.CDKAtomTypeMatcher;
 import org.openscience.cdk.exception.CDKException;
@@ -25,7 +21,6 @@ import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomType;
 import org.openscience.cdk.interfaces.IBond;
-import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IMoleculeSet;
 import org.openscience.cdk.interfaces.IReaction;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
@@ -40,23 +35,8 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.AtomTypeManipulator;
 
 
-import org.openscience.cdk.Molecule;
-import org.openscience.cdk.Reaction;
-import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
-import org.openscience.cdk.exception.CDKException;
-import org.openscience.cdk.interfaces.IAtom;
-import org.openscience.cdk.interfaces.IAtomContainer;
-import org.openscience.cdk.interfaces.IChemObject;
-import org.openscience.cdk.interfaces.IMolecule;
-import org.openscience.cdk.interfaces.IReaction;
-import org.openscience.cdk.interfaces.IReactionSet;
-import org.openscience.cdk.nonotify.NNChemObject;
-import org.openscience.cdk.nonotify.NNReactionSet;
-import org.openscience.cdk.nonotify.NoNotificationChemObjectBuilder;
-import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.smsd.SMSD;
 import org.openscience.cdk.smsd.interfaces.IMCS.Algorithm;
-import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 /**
  * ReactionSmartsQueryTool can be used to query a reaction for conserved matches in reactant and product.
@@ -245,9 +225,7 @@ public class ReactionSmartsQueryTool {
 			
 			System.out.println("#####################################");
 			System.out.println("Results from multiple SMIRKS matching:");
-			System.out.println("#####################################");
 			System.out.print(buf.toString());
-			System.out.println("#####################################");
 			System.out.println("Conclusion for matches: '" + ret + "' with all RCs: " + concatIndices(reactantAtomNumbers));
 			System.out.println("#####################################");
 		}else{
@@ -315,7 +293,7 @@ public class ReactionSmartsQueryTool {
 		assert(reactant!=null);
 		assert(product!=null);
 		
-		System.out.println("Add explicit hydrogens, calculate atom type, and aromaticity. ============================================");
+//		System.out.println("Add explicit hydrogens, calculate atom type, and aromaticity. ============================================");
         // Detect aromaticity
         CDKHueckelAromaticityDetector.detectAromaticity(reactant);
         AtomContainerManipulator.convertImplicitToExplicitHydrogens(reactant);
@@ -328,9 +306,9 @@ public class ReactionSmartsQueryTool {
         // Percieve atom types again to assign hydrogens atom types
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(product);
         
-		System.out.println("-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:");
-        debugMol(reactant);
-        debugMol(product);
+//		System.out.println("-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:");
+//        debugMol(reactant);
+//        debugMol(product);
 
         // Check the smarts hits here and fail before MCS if possible.
         IAtomContainer reactantCopy = (IAtomContainer) reactant.clone();
