@@ -79,3 +79,7 @@ Testing resulting bin file
 	java -jar ../../metaprint2d-exe-0.1-SNAPSHOT-jar-with-dependencies.jar -d out.bin -c LOOSE "O=C(NC(=O)C)NC(=O)C(CC)(CC)Br" 
 	
 	
+Concat & Diff of bin files
+	Run the following for further instructions
+	java -Dcdk.debugging=true -cp ./mp2Dbuilder-0.0.1-SNAPSHOT-jar-with-dependencies.jar \
+	org.mp2dbuilder.binfile.BinFileConcatenator 

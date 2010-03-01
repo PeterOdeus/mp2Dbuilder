@@ -9,7 +9,7 @@ import metaprint2d.data.BinFile;
  
  public class BinFileBuilder extends DataListBuilder
  {
-   private File file;
+   protected File file;
  
    public BinFileBuilder(File file)
    {

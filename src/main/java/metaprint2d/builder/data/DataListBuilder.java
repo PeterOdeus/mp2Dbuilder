@@ -1,17 +1,15 @@
  package metaprint2d.builder.data;
  
  import java.io.IOException;
- import java.util.ArrayList;
- import java.util.HashMap;
- import java.util.List;
- import java.util.Map;
- import java.util.Map.Entry;
- import java.util.Set;
- import metaprint2d.Fingerprint;
- import metaprint2d.FingerprintData;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import metaprint2d.Fingerprint;
+import metaprint2d.FingerprintData;
 import metaprint2d.analyzer.data.AtomData;
- import metaprint2d.analyzer.data.Transformation;
-/*     import metaprint2d.analyzer.data.Transformation.AtomData;*/
+import metaprint2d.analyzer.data.Transformation;
 import metaprint2d.analyzer.data.processor.DataSink;
  
  public abstract class DataListBuilder
@@ -40,6 +38,34 @@ import metaprint2d.analyzer.data.processor.DataSink;
 //       if ((rts != null) && (!(rts.isEmpty())))
 //         fpd.rcCount += 1;
      }
+   }
+   
+   public void put(List<FingerprintData> fingerprintDataList) throws Exception{
+	   FPData fpd = null;
+	   for(FingerprintData fpData: fingerprintDataList){
+		   fpd = (FPData)this.data.get(fpData);
+		   if (fpd == null) {
+	         fpd = new FPData();
+	         this.data.put(fpData, fpd);
+	       }
+		   fpd.sCount += fpData.getSubstrateCount();
+		   fpd.rcCount += fpData.getRcCount();
+	   }
+   }
+   
+   public int diff(FingerprintData fpData){
+	   FPData fpd = null;
+	   fpd = (FPData)this.data.get(fpData);
+	   if (fpd == null) {
+         return -1;
+       }
+	   if(fpd.sCount != fpData.getSubstrateCount()){
+		   return -1;
+	   }
+	   if(fpd.rcCount != fpData.getRcCount()){
+		   return -1;
+	   }
+	   return 0;
    }
  
    protected List<FingerprintData> getData() throws IOException
