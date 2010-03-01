@@ -77,6 +77,8 @@ public class ReactionSmartsQueryTool {
 
 	private String reactantQueryNoDollar;
 	private String productQueryNoDollar;
+	
+	private String reactantQueryNoDollarWithClasses;
 
 	private Map<Integer, String> reactClasses;
 	private Map<Integer, String> prodClasses;
@@ -284,6 +286,8 @@ public class ReactionSmartsQueryTool {
 
 		//remove the [$( partof reactant
 		reactantQueryNoDollar=removeDollarPart(reactantQuery);
+		
+		reactantQueryNoDollarWithClasses = reactantQueryNoDollar;
 
 		//product query must not have [$(
 		productQueryNoDollar=productQuery;
@@ -393,20 +397,22 @@ public class ReactionSmartsQueryTool {
 		boolean addedToMCSClasses = false; //If no class gets added to mcsClasses we can break early and return false. Behovs inte om saker lyckas sa breakar vi innan rc loopen ar slut.
 		int rcno=0; //0-based index is easiest
 		for (List<Integer> putativeRC : putativeRC_Atomlist){
-			System.out.println(" %% Current possible RC: " + rcno + " with atom nr: " + putativeRC.get(0));
+			System.out.println(" %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Current possible RC: " + rcno + " with atom nr: " + putativeRC.get(0));
 			// The possible rc must be part of at least one of the reactant sets. Pick the first one that contains the prc.
 			// fullReactantHit_AtomList has to have the same length as putativeRC_Atomlist.
 			List<Integer> curReactantSet = new ArrayList<Integer>();
 			curReactantSet = extractCurrentReactantSet(reactant,
-					fullReactantHit_AtomList, putativeRC, curReactantSet);
-			// Check that all non-class atomic expressions have matches outside the MCS.
+					fullReactantHit_AtomList, putativeRC);
+			// Set up a list to check that all non-class atomic expressions have matches outside the MCS.
 			List<List<Integer>> reactantComplementToMCS = removeIndicesWithCommonIdReactant(curReactantSet,reactant);
+			//Remove the indices not in the MCS.
+			curReactantSet = removeIndicesSimpleListWithoutCommonId(curReactantSet, reactant);
 			
-			//Loop over all non-class atom expressions
-			if (assertNoClassesHits(reactantComplementToMCS, reactant, reactantQueryTool)){
+			// Check that all non-class atomic expressions have matches outside the MCS.
+			if (assertNonClassesHits(reactantComplementToMCS, reactant, reactantQueryTool, "reactant")){
 
 
-				// Setup the structure that holds the reactant class labels. Do this here so that it is cleared for each new putative RC.
+				// Setup the structure that holds the reactant class labels. Do this here so that it is cleared for each new possible RC.
 				List<List<Integer>> reactantClasses = new ArrayList<List<Integer>>();
 				for (IAtom atom : reactant.atoms()){
 					reactantClasses.add(new ArrayList<Integer>());
@@ -422,7 +428,7 @@ public class ReactionSmartsQueryTool {
 					List<List<Integer>> complementToMCS = removeIndicesWithCommonId(currentProductHit_AtomList,product);
 
 					//Loop over all non-class atom expressions
-					if (assertNoClassesHits(complementToMCS, product, productQueryTool)){
+					if (assertNonClassesHits(complementToMCS, product, productQueryTool, "product")){
 
 						// Setup the structure that holds the overlapping class labels. Do this here so that it is cleared for each new product SMARTS hits.
 						List<List<Integer>> mcsClasses = new ArrayList<List<Integer>>();
@@ -521,26 +527,33 @@ public class ReactionSmartsQueryTool {
 		return false;
 	}
 
-	private boolean assertNoClassesHits(List<List<Integer>> complementToMCS, IAtomContainer product,
-			SMARTSQueryTool prodQueryTool) throws CDKException{
+	private boolean assertNonClassesHits(List<List<Integer>> complementToMCS, IAtomContainer structure,
+			SMARTSQueryTool structureQueryTool, String type) throws CDKException{
 
-		List<String>  prodNonClasses = getNonClasses(productQueryNoDollar);
-		if (complementToMCS.size()==0 && prodNonClasses.size()>0){
-			System.out.println("   We have product with non-classes but complementToMCS is empty.");
+		List<String>  structureNonClasses = null;
+		if (type.equals("product")){
+			structureNonClasses = getNonClasses(productQueryNoDollar);
+		}
+		else{
+			structureNonClasses = getNonClasses(reactantQueryNoDollarWithClasses);
+		}
+		
+		if (complementToMCS.size()==0 && structureNonClasses.size()>0){
+			System.out.println("   We have " + type + " with non-classes but complementToMCS is empty.");
 			return false;
 		}
 		System.out.println("  We are comparing to list: " + complementToMCS);
-		for (String pclass : prodNonClasses){
+		for (String pclass : structureNonClasses){
 			String pclass_noclass=removeAllClasses(pclass);
-			System.out.println("\n## Product non-class: " + pclass + "=" + pclass_noclass);
+			System.out.println("\n## " + type + "non-class: " + pclass + "=" + pclass_noclass);
 			Set<Integer> prodHitsconcat=null;
-				prodQueryTool.setSmarts(pclass_noclass);
-				if (!prodQueryTool.matches(product)){
+				structureQueryTool.setSmarts(pclass_noclass);
+				if (!structureQueryTool.matches(structure)){
 					System.out.println("   Produced no hits.");
 				}else{
-					List<List<Integer>> hits = prodQueryTool.getUniqueMatchingAtoms();
+					List<List<Integer>> hits = structureQueryTool.getUniqueMatchingAtoms();
 					prodHitsconcat=concatIndices(hits);
-					System.out.println("   Product hits: " + debugHits(prodHitsconcat));
+					System.out.println("   " + type + " hits: " + debugHits(prodHitsconcat));
 					boolean haveHit=false;
 					for (Integer h : prodHitsconcat){
 						for (List<Integer> plist : complementToMCS){
@@ -560,7 +573,8 @@ public class ReactionSmartsQueryTool {
 
 	private List<Integer> extractCurrentReactantSet(IAtomContainer reactant,
 			List<List<Integer>> fullReactantHit_AtomList,
-			List<Integer> putativeRC, List<Integer> curReactantSet) {
+			List<Integer> putativeRC) {
+		List<Integer> curReactantSet = new ArrayList<Integer>();
 		List<Integer> reactToRemove = new ArrayList<Integer>();
 		boolean breaking = false;
 		for (List<Integer> list : fullReactantHit_AtomList){
@@ -578,8 +592,6 @@ public class ReactionSmartsQueryTool {
 		}
 		// Remove the set from the list of sets.
 		fullReactantHit_AtomList.removeAll(reactToRemove);
-		//Remove the indices not in the MCS.
-		curReactantSet = removeIndicesSimpleListWithoutCommonId(curReactantSet, reactant);
 
 		return curReactantSet;
 	}
