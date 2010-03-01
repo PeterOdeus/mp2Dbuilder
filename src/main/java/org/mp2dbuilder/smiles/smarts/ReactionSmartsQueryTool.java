@@ -318,19 +318,23 @@ public class ReactionSmartsQueryTool {
         }
         
        // This computes an MCS mapping stored as a COMMON_ID.
-		generateCommonIDUsingSMSD(reactant, product);
-		System.out.println("-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:");
-		doAT(reactant);
+
+        if (generateCommonIDUsingSMSD(reactant, product)==false){
+        	//For now we just quit
+        	System.out.println("No CommonID from SMSD, skipping this reaction.");
+        	return false;
+        }
+
+        doAT(reactant);
 		doAT(product);
         AtomContainerManipulator.convertImplicitToExplicitHydrogens(reactant);
         AtomContainerManipulator.convertImplicitToExplicitHydrogens(product);
-        debugMol(reactant);
-        debugMol(product);
-		System.out.println("-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:");
+//		System.out.println("-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:");
+//        debugMol(reactant);
+//        debugMol(product);
+//		System.out.println("-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:");
 
-		System.out.println("Computing matches. ============================================");
-
-		reactantAtomNumbers=new ArrayList<List<Integer>>();
+        reactantAtomNumbers=new ArrayList<List<Integer>>();
 		productAtomNumbers=new ArrayList<List<Integer>>();
 
 		//Count number of classes in reactant and product and require identical
@@ -1385,7 +1389,7 @@ public class ReactionSmartsQueryTool {
 	}
 
 
-	public static void generateCommonIDUsingSMSD(IAtomContainer reactant, IAtomContainer product) throws CDKException{
+	public static boolean generateCommonIDUsingSMSD(IAtomContainer reactant, IAtomContainer product) throws CDKException{
 
 		boolean bondSensitive = false;
 		boolean removeHydrogen = false;
@@ -1404,12 +1408,23 @@ public class ReactionSmartsQueryTool {
 		product = comparison.getProductMolecule();
 
 		int enumerator = 0;
-		for (Map.Entry<Integer, Integer> mappings : comparison.getFirstMapping().entrySet()) {
-			int reactantMappingNumber = mappings.getKey();
-			int productMappingNumber = mappings.getValue();
-			reactant.getAtom(reactantMappingNumber).setProperty(COMMON_ID_FIELD_NAME, Integer.toString(enumerator));
-			product.getAtom(productMappingNumber).setProperty(COMMON_ID_FIELD_NAME, Integer.toString(enumerator));
-			enumerator++;
+		if (comparison!=null){
+			if (comparison.getFirstMapping()!=null){
+				for (Map.Entry<Integer, Integer> mappings : comparison.getFirstMapping().entrySet()) {
+					int reactantMappingNumber = mappings.getKey();
+					int productMappingNumber = mappings.getValue();
+					reactant.getAtom(reactantMappingNumber).setProperty(COMMON_ID_FIELD_NAME, Integer.toString(enumerator));
+					product.getAtom(productMappingNumber).setProperty(COMMON_ID_FIELD_NAME, Integer.toString(enumerator));
+					enumerator++;
+				}
+			}else{
+				System.out.println("   FirstMapping is null in generateCommonIDUsingSMSD.");
+				return false;
+			}
+		}else{
+			System.out.println("   Comparison was NULL in generateCommonIDUsingSMSD.");
+			return false;
 		}
+		return true;
 	}
 }
