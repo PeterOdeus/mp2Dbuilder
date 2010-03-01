@@ -20,7 +20,6 @@ public class DataBuilderAppTest {
 		logger = LoggingToolFactory.createLoggingTool(DataBuilderAppTest.class);
 	}
 
-	@Test
 	public void testDataBuilderAppSimpleIO() throws Exception {
 		logger.debug("Running testDataBuilderAppSimpleIO");
 		URL url = this.getClass().getClassLoader().getResource(
@@ -32,7 +31,6 @@ public class DataBuilderAppTest {
 		DataBuilderApp.main(args);
 	}
 
-	@Test
 	public void testDataBuilderAppSimpleSmirks() throws Exception {
 		URL url = this.getClass().getClassLoader().getResource(
 				"data/mdl/firstRiReg.rdf");
@@ -47,7 +45,6 @@ public class DataBuilderAppTest {
 		DataBuilderApp.main(args);
 	}
 
-	@Test
 	public void testDataBuilderAppTwoSmirks() throws Exception {
 		logger.debug("Running testDataBuilderAppTwoSmirks");
 		URL url = this.getClass().getClassLoader().getResource(
@@ -63,7 +60,6 @@ public class DataBuilderAppTest {
 		DataBuilderApp.main(args);
 	}
 	
-	@Test
 	public void testDataBuilderAppTwoSmirksMultipleRiregs() throws Exception {
 		URL url = this.getClass().getClassLoader().getResource(
 				"data/mdl/First5DB2005AllFields.rdf");
@@ -78,7 +74,6 @@ public class DataBuilderAppTest {
 		DataBuilderApp.main(args);
 	}
 	
-	@Test
 	public void testDataBuilderAppTwoSmirksMultipleRiregs4Threads() throws Exception {
 		URL url = this.getClass().getClassLoader().getResource(
 				"data/mdl/First20DB2005AllFields.rdf");
@@ -92,4 +87,57 @@ public class DataBuilderAppTest {
 				reactionSmartsFilterFile };
 		DataBuilderApp.main(args);
 	}
+	
+	@Test
+	public void testDataBuilderApp50FirstRiregs1Thread() throws Exception {
+		URL url = this.getClass().getClassLoader().getResource(
+				"data/mdl/First50DB2005AllFields.rdf");
+		String inFile = url.getPath();
+		url = this.getClass().getClassLoader().getResource("data/mdl");
+		String outFile = url.getPath() + "/First50DB2005AllFieldsFromSingle.bin";
+		url = this.getClass().getClassLoader().getResource(
+				"data/mdl/ReactionSMARTSFilter.hydroxylation");
+		String reactionSmartsFilterFile = url.getPath();
+		String[] args = { "-i", inFile, "-o", outFile, "-t", "1", "-rfile",
+				reactionSmartsFilterFile };
+		DataBuilderApp app = new DataBuilderApp();
+		try {
+			app.parseArgs(args);
+			app.run();
+		} catch (Exception e) {
+			logger.fatal(e);
+			throw e;
+		}
+	}
+	
+	@Test
+	public void testGenerateMultipleBinFilesFromMultipleRiregFiles() throws Exception {
+		String fileName = "data/mdl/First50DB2005AllFields.rdf.";
+		URL url = null;
+		String inFile = null;
+		String outFile = null;
+		String reactionSmartsFilterFile = null;
+		String[] args = null;
+		
+		for(int counter = 0; counter < 5; counter++){
+			url = this.getClass().getClassLoader().getResource(fileName + (counter + 1));
+			inFile = url.getPath();
+			
+			url = this.getClass().getClassLoader().getResource("data/mdl");
+			outFile = url.getPath() + "/First50DB2005AllFields.bin" + counter;
+			url = this.getClass().getClassLoader().getResource(
+					"data/mdl/ReactionSMARTSFilter.hydroxylation");
+			reactionSmartsFilterFile = url.getPath();
+			args = new String[]{ "-i", inFile, "-o", outFile, "-t", "1", "-rfile",reactionSmartsFilterFile };
+			DataBuilderApp app = new DataBuilderApp();
+			try {
+				app.parseArgs(args);
+				app.run();
+			} catch (Exception e) {
+				logger.fatal(e);
+				throw e;
+			}
+		}
+	}
+	
 }

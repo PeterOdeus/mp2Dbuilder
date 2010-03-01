@@ -17,13 +17,13 @@ import org.openscience.cdk.nonotify.NNReactionSet;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 
-public class McssTester {
+public class McssTest {
 
 	private static ILoggingTool logger = null;
 
 	@BeforeClass
 	public static void setup() {
-		logger = LoggingToolFactory.createLoggingTool(McssTester.class);
+		logger = LoggingToolFactory.createLoggingTool(McssTest.class);
 	}
 	
 	@Test

@@ -41,7 +41,7 @@ public class DataBuilderApp {
 	private Boolean includeNoRc;
 	private int initialReactionIndex = -1;
 
-	private void parseArgs(String[] args) throws Exception {
+	public void parseArgs(String[] args) throws Exception {
 		if (args.length == 0) {
 			printUsage();
 			System.exit(1);
@@ -309,7 +309,7 @@ public class DataBuilderApp {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void run() throws Exception {
+	public void run() throws Exception {
 		DataSource in = null;
 		DataSink out = null;
 		boolean datain;

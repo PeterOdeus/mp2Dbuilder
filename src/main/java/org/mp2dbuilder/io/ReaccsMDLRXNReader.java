@@ -90,12 +90,19 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 				}
 				logger.debug(line);
 				if (line.indexOf("$RFMT $RIREG ") >= 0) {
+					int foundRiregNo = Integer.valueOf(line.substring("$RFMT $RIREG ".length()));
+					int soughtRiregNo = 0;
+					if(this.riregNo.trim().length() > 0){
+						soughtRiregNo = Integer.valueOf(this.riregNo.substring(1));
+						if(foundRiregNo > soughtRiregNo){
+							setInitialRiregNo(foundRiregNo);
+						}
+					}
 					if (this.swingWorker != null) {
 						if (this.swingWorker.isCancelled()) {
 							throw new CancelledException();
 						}
-						this.swingWorkerCounter = Integer.valueOf(line
-								.substring("$RFMT $RIREG ".length()));
+						this.swingWorkerCounter = foundRiregNo;
 						this.swingWorker.publishToSwingWorker(""
 								+ this.swingWorkerCounter);
 						System.out.println("" + this.swingWorkerCounter);

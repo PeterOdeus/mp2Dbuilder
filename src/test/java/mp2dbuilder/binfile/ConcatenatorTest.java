@@ -6,20 +6,20 @@ import org.apache.log4j.Logger;
 
 import junit.framework.Assert;
 
-import mp2dbuilder.SmartsTester;
+import mp2dbuilder.SmartsTest;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mp2dbuilder.binfile.BinFileConcatenator;
 import org.openscience.cdk.tools.LoggingToolFactory;
 
-public class ConcatenatorTester {
+public class ConcatenatorTest {
 	
 	private static Logger logger = null;
 	
 	@BeforeClass
 	public static void setup() {
-		logger = Logger.getLogger(ConcatenatorTester.class.getName());
+		logger = Logger.getLogger(ConcatenatorTest.class.getName());
 	}
 	
 	
@@ -38,7 +38,6 @@ public class ConcatenatorTester {
 		concatenator.concat();
 	}
 	
-	@Test
 	public void testBinFileConcatenatorMain() throws Exception {
 		String filename = "data/mdl/concat.bin";
 		URL url = this.getClass().getClassLoader().getResource(filename + 0);
@@ -57,7 +56,6 @@ public class ConcatenatorTester {
 		Assert.assertEquals(0, concatenator.diff(file1));
 	}
 	
-	@Test
 	public void testBinFilesMainAppEqual() throws Exception {
 		String filename = "data/mdl/concat.bin";
 		URL url0 = this.getClass().getClassLoader().getResource(filename + 0);
@@ -67,7 +65,6 @@ public class ConcatenatorTester {
 		BinFileConcatenator.main(new String[]{file0.getAbsolutePath(),file1.getAbsolutePath()});
 	}
 	
-	@Test
 	public void testBinFilesMainAppNotEqual() throws Exception {
 		String filename = "data/mdl/concat.bin0";
 		String failedFilename = "data/mdl/concatDiffFail.bin";
@@ -90,7 +87,6 @@ public class ConcatenatorTester {
 		Assert.assertEquals(-1, concatenator.diff(failedFile));
 	}
 	
-	@Test
 	public void testBinFileAppHelp() throws Exception {
 		BinFileConcatenator.main(new String[0]);
 	}

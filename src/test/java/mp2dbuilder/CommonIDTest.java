@@ -21,13 +21,13 @@ import org.openscience.cdk.tools.LoggingToolFactory;
 
 import prototyping.InitialTest;
 
-public class CommonIDTester {
+public class CommonIDTest {
 
 	private static ILoggingTool logger = null;
 
 	@BeforeClass
 	public static void setup() {
-		logger = LoggingToolFactory.createLoggingTool(CommonIDTester.class);
+		logger = LoggingToolFactory.createLoggingTool(CommonIDTest.class);
 	}
 	
 	@Test

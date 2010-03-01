@@ -18,13 +18,13 @@ import org.openscience.cdk.smiles.smarts.parser.SMARTSParser;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 
-public class SmartsTester {
+public class SmartsTest {
 	
 	private static ILoggingTool logger = null;
 
 	@BeforeClass
 	public static void setup() {
-		logger = LoggingToolFactory.createLoggingTool(SmartsTester.class);
+		logger = LoggingToolFactory.createLoggingTool(SmartsTest.class);
 	}
 	
 	@Test
