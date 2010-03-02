@@ -250,14 +250,14 @@ public class ReactionSmartsQueryTool {
 		String reactantQuery = tokenizer.nextToken(">>");
 		String productQuery = tokenizer.nextToken(">>");
 
-		System.out.println("====================");
+		System.out.println("==========================");
 		System.out.println("= Now processing smirk: " + SMIRKS);
 		System.out.println("= Reactant SMARTS: " + reactantQuery);
 		System.out.println("= Product SMARTS: " + productQuery);
-		System.out.println("====================");
+		System.out.println("==========================");
 		
 		if (reactantQuery==null || productQuery==null || reactantQuery.equals("") || productQuery.equals("") ){
-			System.out.println("Empty reaction or product query. Cannot continue matching.");
+			System.out.println("Empty reaction or product query. Cannot continue matching, returning false.");
 			return false;
 		}
 		
