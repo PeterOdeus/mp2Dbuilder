@@ -28,7 +28,7 @@ import org.openscience.cdk.tools.ILoggingTool;
    private boolean started = false;
    private boolean done = false;
    private ExecutorService pool;
-   int poolSize = 2;
+   int poolSize = 1;
    
 List<Future> futureList;
  

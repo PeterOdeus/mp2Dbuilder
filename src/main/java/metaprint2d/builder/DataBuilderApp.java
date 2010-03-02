@@ -461,6 +461,6 @@ public class DataBuilderApp {
 			LOG.fatal(e);
 			throw e;
 		}
-		System.exit(0);
+		System.out.println("Execution Finished. Please <ctrl+c> (at least on linux) to get back the prompt if absent.");
 	}
 }
