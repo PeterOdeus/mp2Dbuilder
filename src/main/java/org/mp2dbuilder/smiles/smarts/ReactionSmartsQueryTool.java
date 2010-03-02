@@ -681,6 +681,7 @@ public class ReactionSmartsQueryTool {
 			while (true){
 				curIndex[indexToIncrease] = 0; //Reset
 				indexToIncrease++;
+				//FIXME: the line below throws java.lang.ArrayIndexOutOfBoundsException on some occasions.
 				if ( (curIndex[indexToIncrease] < mcsClasses.get(indexToIncrease).size()) && (mcsClasses.get(indexToIncrease).size() > 1) ){
 					curIndex[indexToIncrease]++;
 					break;
