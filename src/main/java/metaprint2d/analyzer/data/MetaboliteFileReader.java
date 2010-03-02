@@ -51,10 +51,10 @@ public class MetaboliteFileReader implements DataSource<Transformation> {
 		this.reader.setInitialRiregNo(i);
 	}
 
-	public Transformation getNext(IReactionSet currentReactionSet) throws Exception {
+	public Transformation getNext(int reactionId, IReactionSet currentReactionSet) throws Exception {
 		Transformation t;
 		//ensureOpen();
-		return this.handler.getTransformation(currentReactionSet);
+		return this.handler.getTransformation(reactionId, currentReactionSet);
 	}
 
 	private void ensureOpen() throws IOException {

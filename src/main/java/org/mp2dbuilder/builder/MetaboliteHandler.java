@@ -1,7 +1,8 @@
 package org.mp2dbuilder.builder;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +14,7 @@ import metaprint2d.analyzer.FingerprintGenerator;
 import metaprint2d.analyzer.data.AtomData;
 import metaprint2d.analyzer.data.Transformation;
 
+import org.apache.log4j.Logger;
 import org.mp2dbuilder.mcss.AtomMapperUtil;
 import org.openscience.cdk.atomtype.SybylAtomTypeMatcher;
 import org.openscience.cdk.interfaces.IAtom;
@@ -20,56 +22,42 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomType;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
-import org.openscience.cdk.tools.ILoggingTool;
-import org.openscience.cdk.tools.LoggingToolFactory;
 
 @SuppressWarnings("unused")
 public class MetaboliteHandler {
-
-	private static ILoggingTool LOG = LoggingToolFactory
-			.createLoggingTool(MetaboliteHandler.class);
+	
+	private static Logger LOG = Logger.getLogger(MetaboliteHandler.class.getName());
 	public static final String COMMON_ID_FIELD_NAME = "mcsCommonId";
 	public static final String REACTION_CENTRE_FIELD_NAME = "reactionCentre";
 	public static final String SMART_HIT_FIELD_NAME = "isSmartsHit";
 
 	@SuppressWarnings("unchecked")
-	public Transformation getTransformation(IReactionSet reactionSet)
+	public Transformation getTransformation(int reactionId, IReactionSet reactionSet)
 			throws Exception {
 		Transformation t = null;
 		List<AtomData> atomDataList = null;
 		Map<String,? extends Object> preparedMap = null;
 		try {
 
-			//LOG.info("preparing for transformation");
+			LOG.debug("preparing for transformation");
 			preparedMap = prepareForTransformation(reactionSet);
-		}catch (ConcurrentModificationException e2) {
-			LOG.warn("Exception thrown. ignoring this reaction: " + e2.getMessage());
-			e2.printStackTrace();
-			return t;
-		} catch (ArrayIndexOutOfBoundsException e1) {
-			LOG.warn("Exception thrown. ignoring this reaction: " + e1.getMessage());
-			e1.printStackTrace();
-			return t;
-		}catch (Exception e) {
-			e.printStackTrace();
-		}
-		try{
+		
 			atomDataList = (List<AtomData>) preparedMap.get("atomDataList");
-		} catch (Exception e) {
-			//LOG.warn("Exception thrown. ignoring this reaction");
-			e.printStackTrace();
-		}
-		try{
+			
 			t = new Transformation();
+			
 			t.setAtomData(atomDataList);
-		} catch (Exception e) {
-			//LOG.warn("Exception thrown. ignoring this reaction");
-			e.printStackTrace();
-		}
 			// ????????? what about this one?
 			// t.setMappings(analysis.getMappings());
-		
-		//LOG.info("returning transformation");
+		}catch (Exception e) {
+			StringWriter sw = new StringWriter();
+			PrintWriter ps = new PrintWriter(sw);
+			e.printStackTrace(ps);
+			ps.close();
+			LOG.warn("Exception thrown. ignoring this reaction (#" + reactionId + "): " 
+					+ e.getMessage() 
+					+ "\n\n" + sw.getBuffer().toString());
+		}
 		return t;
 	}
 

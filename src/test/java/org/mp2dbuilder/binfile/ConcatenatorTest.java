@@ -1,4 +1,4 @@
-package mp2dbuilder.binfile;
+package org.mp2dbuilder.binfile;
 
 import java.io.File;
 import java.net.URL;
@@ -6,10 +6,10 @@ import org.apache.log4j.Logger;
 
 import junit.framework.Assert;
 
-import mp2dbuilder.SmartsTest;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mp2dbuilder.SmartsTest;
 import org.mp2dbuilder.binfile.BinFileConcatenator;
 import org.openscience.cdk.tools.LoggingToolFactory;
 

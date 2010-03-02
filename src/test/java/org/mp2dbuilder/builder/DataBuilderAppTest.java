@@ -1,13 +1,13 @@
-package mp2dbuilder.builder;
+package org.mp2dbuilder.builder;
 
 import java.net.URL;
 
 import metaprint2d.builder.DataBuilderApp;
-import mp2dbuilder.binfile.ConcatenatorTest;
 
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mp2dbuilder.binfile.ConcatenatorTest;
 
 public class DataBuilderAppTest {
 
@@ -15,12 +15,11 @@ public class DataBuilderAppTest {
 
 	@BeforeClass
 	public static void setup() {
-		logger = Logger.getLogger(ConcatenatorTest.class.getName());
+		logger = Logger.getLogger(DataBuilderAppTest.class.getName());
 	}
 
 	@Test
 	public void testDataBuilderAppSimpleIO() throws Exception {
-		logger.debug("Running testDataBuilderAppSimpleIO");
 		URL url = this.getClass().getClassLoader().getResource(
 				"data/mdl/firstRiReg.rdf");
 		String inFile = url.getPath();

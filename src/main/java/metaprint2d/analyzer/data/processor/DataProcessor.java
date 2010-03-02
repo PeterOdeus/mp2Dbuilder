@@ -9,19 +9,19 @@ import java.util.concurrent.Future;
 import metaprint2d.analyzer.data.MetaboliteFileReader;
 import metaprint2d.analyzer.data.Transformation;
 
+import org.apache.log4j.Logger;
 import org.mp2dbuilder.io.ReaccsFileEndedException;
 import org.mp2dbuilder.io.ReaccsMDLRXNReader;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IReactionSet;
 import org.openscience.cdk.nonotify.NNReactionSet;
-import org.openscience.cdk.tools.ILoggingTool;
 
 
  
  public class DataProcessor<T>
    implements MonitorableProcess
  {
-   ILoggingTool LOG;
+	 private static Logger LOG = null;
    DataSource<T> in;
    DataSink<T> out;
    private int nn;
@@ -57,7 +57,7 @@ List<Future> futureList;
        while (true) {
          
          if (this.LOG != null) {
-           System.out.println("Reading #" + Integer.valueOf(this.nn));
+           this.LOG.debug("Reading #" + Integer.valueOf(this.nn));
          }
          
  			try {
@@ -92,7 +92,7 @@ List<Future> futureList;
  	       }
  			
  			IReactionSet tempReactionSet = currentReactionSet;
- 			Future future = pool.submit(new Handler(tempReactionSet, this, new Transformation()));
+ 			Future future = pool.submit(new Handler(reader.getFoundRiregNo(),tempReactionSet, this, new Transformation()));
  			
  			futureList.add(future);
          
@@ -140,8 +140,8 @@ List<Future> futureList;
      return o;
    }
  
-   protected void setLogger(ILoggingTool log) {
-     this.LOG = log;
+   protected void setLogger(Logger log) {
+     LOG = log;
    }
  
    public int getProgress() {
@@ -153,29 +153,4 @@ List<Future> futureList;
    }
  }
  
- class Handler implements Runnable {
-	 private IReactionSet reactionSet;
-	 private DataProcessor dataProcessor;
-	 private Transformation t;
-	   Handler(IReactionSet reactionSet, DataProcessor dataProcessor, Transformation t) { 
-		   this.reactionSet = reactionSet; 
-		   this.dataProcessor = dataProcessor;
-		   this.t = t;
-		  }
-	   public void run() {
-		   try {
-		   this.t = (Transformation)this.dataProcessor.in.getNext(this.reactionSet);
-	         if (this.t == null) {
-	           return;
-	         }        
-	         if (this.dataProcessor.acceptPreProcess(this.t)){
-	        	 this.t = (Transformation)this.dataProcessor.process(this.t);
-	         }
-	         
-				this.dataProcessor.out.put(this.t);
-			} catch (Exception e) {
-				this.dataProcessor.LOG.fatal("Thread failed: " + e.getMessage());
-				e.printStackTrace();
-			}
-	   }
-	 }
+ 

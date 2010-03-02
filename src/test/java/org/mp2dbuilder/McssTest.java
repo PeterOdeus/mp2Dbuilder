@@ -1,4 +1,4 @@
-package mp2dbuilder;
+package org.mp2dbuilder;
 
 import java.io.File;
 import java.io.InputStream;

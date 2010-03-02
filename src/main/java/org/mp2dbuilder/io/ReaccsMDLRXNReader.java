@@ -20,7 +20,8 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 
 	private ILoggingTool logger = null;
 	private String riregNo = "";
-	private long fileLengthLong;
+	private int foundRiregNo;
+	private long fileLengthLong;	
 	private ReactSmartsMoleculeViewerWorker swingWorker;
 	public int swingWorkerCounter;
 
@@ -38,6 +39,10 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 		this.riregNo = " " + riregNo;
 	}
 
+	public int getFoundRiregNo() {
+		return foundRiregNo;
+	}
+	
 	public IChemObject read(IChemObject object,
 			ReactSmartsMoleculeViewerWorker swingWorker, int swingWorkerCounter)
 			throws ReaccsFileEndedException, CDKException {
@@ -90,7 +95,7 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 				}
 				logger.debug(line);
 				if (line.indexOf("$RFMT $RIREG ") >= 0) {
-					int foundRiregNo = Integer.valueOf(line.substring("$RFMT $RIREG ".length()));
+					foundRiregNo = Integer.valueOf(line.substring("$RFMT $RIREG ".length()));
 					int soughtRiregNo = 0;
 					if(this.riregNo.trim().length() > 0){
 						soughtRiregNo = Integer.valueOf(this.riregNo.substring(1));
@@ -115,7 +120,7 @@ public class ReaccsMDLRXNReader extends MDLRXNReader {
 		} catch (CancelledException e) {
 			throw new ReadingReaccsFileCancelledException("");
 		} catch (Exception exception) {
-			logger.debug(exception);
+			logger.warn(exception);
 			throw new CDKException("Error while reading header (or sub-header)"
 					+ " of Reaccs .rdf RXN file", exception);
 		}

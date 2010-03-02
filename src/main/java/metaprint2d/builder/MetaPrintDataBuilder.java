@@ -4,13 +4,15 @@
 import metaprint2d.analyzer.data.processor.DataProcessor;
 import metaprint2d.analyzer.data.processor.DataSink;
 import metaprint2d.analyzer.data.processor.DataSource;
+import metaprint2d.analyzer.data.processor.Handler;
 
+import org.apache.log4j.Logger;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
  
  public class MetaPrintDataBuilder extends DataProcessor<Transformation>
  {
-   private static ILoggingTool LOG = LoggingToolFactory.createLoggingTool(MetaPrintDataBuilder.class);
+	 private static Logger logger = Logger.getLogger(MetaPrintDataBuilder.class.getName());
  
    private boolean skipMultistep = true;
    private boolean skipNoRc = true;
@@ -20,7 +22,7 @@ import org.openscience.cdk.tools.LoggingToolFactory;
    public MetaPrintDataBuilder(DataSource<Transformation> in, DataSink<Transformation> out, int nn)
    {
      super(in, out, nn);
-     setLogger(LOG);
+     setLogger(logger);
    }
  
    protected boolean acceptPreProcess(Transformation o)

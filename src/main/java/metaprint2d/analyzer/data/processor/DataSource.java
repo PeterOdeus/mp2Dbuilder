@@ -6,7 +6,7 @@ import org.openscience.cdk.interfaces.IReactionSet;
 
 public abstract interface DataSource<T>
 {
-  public abstract T getNext(IReactionSet currentReactionSet)
+  public abstract T getNext(int reactionId, IReactionSet currentReactionSet)
     throws Exception;
 
   public abstract void close()
